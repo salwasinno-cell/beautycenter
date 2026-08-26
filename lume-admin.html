@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMÉ — House Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#F5F0E6; --paper:#FAF7EF; --espresso:#2B2117; --espresso-70:rgba(43,33,23,.7);
+    --espresso-45:rgba(43,33,23,.45); --espresso-15:rgba(43,33,23,.13);
+    --olive:#6B6E4C; --olive-deep:#4E5138; --champagne:#C3A05F; --champagne-soft:#D8C08A;
+    --line:rgba(43,33,23,.14); --ease:cubic-bezier(.22,1,.36,1);
+    --ok:#5C7A52; --warn:#B98A3E; --err:#A3503F;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ivory);color:var(--espresso);font-family:'Inter',sans-serif;font-size:14px;}
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;font-weight:400;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;background:none;border:none;cursor:pointer;color:inherit;}
+  .eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--olive-deep);font-weight:600;}
+
+  .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+  @media (max-width:900px){.shell{grid-template-columns:1fr;} .sidebar{display:none;}}
+
+  .sidebar{border-right:1px solid var(--line);padding:30px 22px;display:flex;flex-direction:column;background:var(--paper);}
+  .sidebar .logo{font-size:19px;letter-spacing:.22em;margin-bottom:44px;}
+  .side-link{display:flex;align-items:center;gap:12px;padding:11px 12px;font-size:13px;color:var(--espresso-70);border-radius:2px;margin-bottom:2px;transition:all .25s;border-left:2px solid transparent;}
+  .side-link .dot{width:5px;height:5px;border-radius:50%;background:var(--espresso-15);}
+  .side-link:hover{color:var(--espresso);}
+  .side-link.active{color:var(--espresso);border-left-color:var(--champagne);background:var(--ivory);font-weight:500;}
+  .side-link.active .dot{background:var(--champagne);}
+  .side-section{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--espresso-45);margin:26px 0 10px 12px;}
+  .side-section:first-of-type{margin-top:0;}
+
+  .main{padding:34px 42px 80px;max-width:1400px;}
+  @media (max-width:700px){.main{padding:24px 20px 80px;}}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px;}
+  .topbar h1{font-size:28px;}
+  .topbar .date{color:var(--espresso-45);font-size:13px;margin-top:6px;}
+  .owner-chip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);padding:8px 16px;font-size:12px;}
+  .owner-chip .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(150deg,#E4D9BE,#B9A26A);}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:44px;}
+  @media (max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--paper);padding:26px 24px;}
+  .stat .n{font-family:'Fraunces',serif;font-size:34px;}
+  .stat .l{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--espresso-45);margin-top:8px;}
+  .stat.accent .n{color:var(--olive-deep);}
+
+  .panel{border:1px solid var(--line);background:var(--paper);margin-bottom:34px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-bottom:1px solid var(--line);}
+  .panel-head h2{font-size:17px;}
+  .panel-body{padding:26px;}
+  .view-toggle{display:flex;gap:2px;border:1px solid var(--line);}
+  .view-toggle button{padding:7px 16px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+  .view-toggle button.active{background:var(--espresso);color:var(--ivory);}
+
+  .cols2{display:grid;grid-template-columns:1.6fr 1fr;gap:24px;}
+  @media (max-width:1100px){.cols2{grid-template-columns:1fr;}}
+
+  /* Calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .cal-dow{background:var(--ivory);padding:8px;text-align:center;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--espresso-45);}
+  .cal-day{background:var(--paper);min-height:82px;padding:8px;font-size:12px;position:relative;}
+  .cal-day .dnum{color:var(--espresso-45);}
+  .cal-day.today .dnum{color:var(--champagne);font-weight:600;}
+  .cal-evt{margin-top:6px;font-size:10px;padding:3px 6px;background:var(--ivory-deep,#EDE5D3);border-left:2px solid var(--olive);color:var(--espresso-70);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cal-evt.confirmed{border-color:var(--ok);}
+  .cal-evt.pending{border-color:var(--warn);}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--espresso-45);padding:10px 14px;border-bottom:1px solid var(--line);}
+  td{padding:14px;border-bottom:1px solid var(--line);font-size:13px;}
+  tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;padding:4px 10px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-radius:2px;}
+  .badge.confirmed{background:rgba(92,122,82,.14);color:var(--ok);}
+  .badge.pending{background:rgba(185,138,62,.14);color:var(--warn);}
+  .badge.cancelled{background:rgba(163,80,63,.14);color:var(--err);}
+  .row-name{font-family:'Fraunces',serif;font-size:14px;}
+
+  .quick-list{display:flex;flex-direction:column;}
+  .quick-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+  .quick-item:last-child{border-bottom:none;}
+  .quick-item .time{font-family:'Fraunces',serif;font-size:15px;min-width:60px;}
+  .quick-item .who{font-size:12px;color:var(--espresso-70);}
+  .quick-item .svc{font-size:11px;color:var(--espresso-45);}
+
+  .btn{border:1px solid var(--espresso-15);padding:9px 18px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:all .25s;}
+  .btn:hover{border-color:var(--espresso);}
+  .btn.dark{background:var(--espresso);color:var(--ivory);border-color:var(--espresso);}
+
+  .nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  @media (max-width:900px){.nav-grid{grid-template-columns:repeat(2,1fr);}}
+  .nav-tile{background:var(--paper);padding:22px;transition:background .25s;cursor:default;}
+  .nav-tile h3{font-size:14px;font-weight:500;font-family:'Inter';margin-bottom:6px;}
+  .btn.small{padding:5px 12px;font-size:10px;}
+  .nav-tile span{font-size:11px;color:var(--espresso-45);}
+  .cust-empty,.notif-empty{color:var(--espresso-45);font-size:13px;padding:20px 26px;}
+  .notif-item{padding:12px 0;border-bottom:1px solid var(--line);font-size:12px;}
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item .type{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--olive-deep);}
+  .notif-item .msg{color:var(--espresso-70);margin-top:3px;}
+  .notif-item .meta{color:var(--espresso-45);font-size:10px;margin-top:3px;}
+  .field-grid-admin{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:22px 26px;}
+  @media (max-width:900px){.field-grid-admin{grid-template-columns:repeat(2,1fr);}}
+  .field-a{display:flex;flex-direction:column;gap:6px;}
+  .field-a label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--espresso-45);}
+  .field-a input,.field-a select{border:1px solid var(--espresso-15);background:var(--ivory);padding:9px 10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--espresso);}
+  .analytic-tile .big{font-family:'Fraunces',serif;font-size:22px;margin-top:4px;}
+  .flag-noshow{color:#A3503F;font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;}
+  .badge.active{background:rgba(92,122,82,.14);color:var(--ok);}
+  .badge.blocked{background:rgba(163,80,63,.14);color:var(--err);}
+  .role-pill{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--olive-deep);border:1px solid rgba(107,110,76,.3);padding:2px 8px;border-radius:2px;}
+  .page-hidden{display:none!important;}
+  .side-link.disabled{opacity:.4;cursor:default;}
+  .side-link.disabled:hover{color:var(--espresso-70);}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN GATE ============
+     PROTOTYPE ONLY — see the big comment in the script below: this is a
+     client-side simulation of access control, not real authentication. -->
+<div id="loginScreen" style="position:fixed;inset:0;z-index:5000;background:var(--ivory);display:flex;align-items:center;justify-content:center;">
+  <div style="width:340px;max-width:88vw;">
+    <div class="logo" style="text-align:center;margin-bottom:8px;">LUMÉ</div>
+    <div style="text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--espresso-45);margin-bottom:34px;">House Dashboard</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="field-a"><label>Username or Email</label><input type="text" id="loginUser" placeholder="e.g. owner"></div>
+      <div class="field-a"><label>Password</label><input type="password" id="loginPass"></div>
+      <button class="btn dark" style="margin-top:8px;" onclick="attemptLogin()">Sign In</button>
+      <div id="loginError" style="font-size:12px;color:#A3503F;display:none;"></div>
+      <div style="font-size:11px;color:var(--espresso-45);margin-top:10px;line-height:1.6;">First time here? Default owner login: <b>owner</b> / <b>owner123</b> — change this password immediately from Team Management.</div>
+    </div>
+  </div>
+</div>
+
+<div class="shell" id="dashboardShell" style="display:none;">
+  <aside class="sidebar">
+    <div class="logo">LUMÉ</div>
+    <div class="side-section">Overview</div>
+    <a class="side-link active" data-nav="today" onclick="showAdminPage('today');return false;"><span class="dot"></span>Today</a>
+    <a class="side-link" data-nav="calendar" onclick="showAdminPage('calendar');return false;"><span class="dot"></span>Calendar</a>
+    <a class="side-link disabled" id="navReports" title="Not built yet in this prototype"><span class="dot"></span>Reports</a>
+    <div class="side-section">Business</div>
+    <a class="side-link" data-nav="clients" onclick="showAdminPage('clients');return false;"><span class="dot"></span>Clients</a>
+    <a class="side-link" data-nav="services" onclick="showAdminPage('services');return false;"><span class="dot"></span>Services</a>
+    <a class="side-link" data-nav="staff" onclick="showAdminPage('staff');return false;"><span class="dot"></span>Staff</a>
+    <a class="side-link" data-nav="team" id="navTeam" onclick="showAdminPage('team');return false;" style="cursor:pointer;"><span class="dot"></span>Team Management</a>
+    <a class="side-link disabled" title="Not built yet in this prototype"><span class="dot"></span>Promotions</a>
+    <a class="side-link disabled" title="Not built yet in this prototype"><span class="dot"></span>Packages</a>
+    <div class="side-section">Settings</div>
+    <a class="side-link disabled" title="Not built yet in this prototype"><span class="dot"></span>Working Hours</a>
+    <a class="side-link disabled" title="Not built yet in this prototype"><span class="dot"></span>Time Off</a>
+    <a class="side-link disabled" title="Not built yet in this prototype"><span class="dot"></span>Booking Settings</a>
+    <a class="side-link" data-nav="notifications" onclick="showAdminPage('notifications');return false;"><span class="dot"></span>Notifications</a>
+    <a class="side-link disabled" title="Not built yet in this prototype"><span class="dot"></span>Website Content</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="greeting">Good morning</h1>
+        <div class="date" id="todayDate"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="owner-chip" id="whoAmI"><div class="av"></div> Account</div>
+        <button class="btn" onclick="logout()">Sign Out</button>
+      </div>
+    </div>
+
+    <div id="pageToday">
+    <div class="stat-grid">
+      <div class="stat"><div class="n">24</div><div class="l">Appointments Today</div></div>
+
+      <div class="stat accent"><div class="n">18</div><div class="l">Confirmed</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Pending</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Cancelled</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Live Activity</h2><span class="eyebrow">Updates automatically</span></div>
+      <div class="panel-body">
+        <div class="quick-list" id="activityFeed"></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="cols2" id="pageCalendar">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Calendar</h2>
+          <div class="view-toggle">
+            <button class="active">Day</button><button>Week</button><button>Month</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Next Up</h2><span class="eyebrow">Today</span></div>
+        <div class="panel-body">
+          <div class="quick-list" id="quickList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pageUpcomingBlockAnalytics">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Upcoming Appointments</h2>
+        <button class="btn dark" onclick="toggleManualBooking()">+ New Appointment</button>
+      </div>
+      <div class="panel-body" id="manualBookingPanel" style="display:none;border-bottom:1px solid var(--line);">
+        <div class="field-grid-admin">
+          <div class="field-a"><label>Service</label><select id="mbService"></select></div>
+          <div class="field-a"><label>Treatment</label><select id="mbTreatment"></select></div>
+          <div class="field-a"><label>Specialist</label><select id="mbSpecialist"></select></div>
+          <div class="field-a"><label>Date</label><input type="date" id="mbDate"></div>
+          <div class="field-a"><label>Time</label><select id="mbTime"></select></div>
+          <div class="field-a"><label>Client Name</label><input type="text" id="mbName" placeholder="Full name"></div>
+          <div class="field-a"><label>Phone</label><input type="tel" id="mbPhone" placeholder="+000 ..."></div>
+          <div class="field-a"><label>DOB (optional)</label><input type="date" id="mbBday"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitManualBooking()">Create Appointment</button>
+          <span id="mbStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table id="bookingTable"></table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Block Time</h2>
+        <span class="eyebrow">Breaks · Meetings · Maintenance</span>
+      </div>
+      <div class="panel-body">
+        <div class="field-grid-admin">
+          <div class="field-a"><label>Date</label><input type="date" id="blkDate"></div>
+          <div class="field-a"><label>Start</label><select id="blkStart"></select></div>
+          <div class="field-a"><label>End</label><select id="blkEnd"></select></div>
+          <div class="field-a"><label>Reason</label><input type="text" id="blkReason" placeholder="e.g. Staff meeting"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitBlockTime()">Block This Time</button>
+          <span id="blkStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Analytics</h2><span class="eyebrow" id="analyticsRange">Last 30 days</span></div>
+      <div class="panel-body" style="padding:0;">
+        <div class="nav-grid" id="analyticsGrid"></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="cols2" id="clientsNotifsRow">
+      <div class="panel" id="pageClients">
+        <div class="panel-head">
+          <h2>Customers</h2>
+          <input type="text" id="customerSearch" placeholder="Search name or phone" style="border:1px solid var(--espresso-15);padding:7px 12px;font-size:12px;background:var(--ivory);width:180px;">
+        </div>
+        <div class="panel-body" style="padding:0;">
+          <table id="customerTable"></table>
+        </div>
+      </div>
+
+      <div class="panel" id="pageNotifications">
+        <div class="panel-head"><h2>Notifications</h2><span class="eyebrow">Confirmations · Reminders · Cancellations</span></div>
+        <div class="panel-body">
+          <div class="quick-list" id="notifList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="teamPanel" style="display:none;">
+      <div class="panel-head">
+        <h2>Team Management</h2>
+        <button class="btn dark" onclick="toggleTeamForm()" id="newTeamBtn">+ New Team Member</button>
+      </div>
+      <div class="panel-body" id="teamFormPanel" style="display:none;border-bottom:1px solid var(--line);">
+        <div class="field-grid-admin">
+          <div class="field-a"><label>Full Name</label><input type="text" id="tmName"></div>
+          <div class="field-a"><label>Email / Username</label><input type="text" id="tmUsername"></div>
+          <div class="field-a"><label>Phone (optional)</label><input type="tel" id="tmPhone"></div>
+          <div class="field-a"><label>Role</label>
+            <select id="tmRole">
+              <option value="manager">Manager</option>
+              <option value="receptionist">Receptionist</option>
+              <option value="staff">Staff / Specialist</option>
+            </select>
+          </div>
+          <div class="field-a" id="tmSpecialistWrap"><label>Assigned Specialist Profile</label>
+            <select id="tmSpecialist"></select>
+          </div>
+          <div class="field-a" id="tmSpecialtyWrap"><label>Specialty / Services</label>
+            <select id="tmSpecialty"></select>
+          </div>
+        </div>
+        <div style="padding:0 26px 22px;font-size:11px;color:var(--espresso-45);">Staff accounts start locked to their specialty only — the Owner can grant access to additional specialties any time from Permissions below.</div>
+        <div style="padding:0 26px 22px;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitTeamMember()">Create Account</button>
+          <span id="tmStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+        <div style="padding:0 26px 22px;font-size:11px;color:var(--espresso-45);">A temporary password is generated automatically and shown once — share it with the employee and ask them to note it down.</div>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table id="teamTable"></table>
+      </div>
+      <div class="panel-body" id="permFormPanel" style="display:none;border-top:1px solid var(--line);">
+        <div style="padding:22px 26px 0;">
+          <span class="eyebrow" id="permForName"></span>
+          <h3 style="font-family:'Fraunces',serif;font-weight:400;font-size:17px;margin:8px 0 18px;">Individual Permissions</h3>
+        </div>
+        <div style="padding:0 26px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--espresso-45);margin-bottom:10px;">Additional Specialties</div>
+            <div id="permCategories" style="display:flex;flex-direction:column;gap:8px;font-size:13px;"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--espresso-45);margin-bottom:10px;">Additional Operational Access</div>
+            <div id="permFlags" style="display:flex;flex-direction:column;gap:8px;font-size:13px;"></div>
+          </div>
+        </div>
+        <div style="padding:20px 26px;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="savePermissions()">Save Permissions</button>
+          <button class="btn" onclick="closePermissions()">Close</button>
+          <span id="permStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="servicesPanel">
+      <div class="panel-head">
+        <h2>Service Management</h2>
+        <button class="btn dark" onclick="toggleServiceForm()">+ New Service</button>
+      </div>
+      <div class="panel-body" id="serviceFormPanel" style="display:none;border-bottom:1px solid var(--line);">
+        <div class="field-grid-admin">
+          <div class="field-a"><label>Category</label>
+            <select id="svcCategorySelect"></select>
+          </div>
+          <div class="field-a"><label>Or New Category Name</label><input type="text" id="svcNewCategoryName" placeholder="Leave blank to use selection above"></div>
+          <div class="field-a"><label>Service Name</label><input type="text" id="svcName"></div>
+          <div class="field-a"><label>Price ($)</label><input type="number" id="svcPrice" min="0"></div>
+          <div class="field-a"><label>Duration (minutes)</label><input type="number" id="svcDuration" min="5" step="5"></div>
+          <div class="field-a"><label>Prep Time (minutes)</label><input type="number" id="svcPrep" min="0" step="5" value="0"></div>
+          <div class="field-a"><label>Buffer/Cleanup Override (minutes)</label><input type="number" id="svcBuffer" min="0" step="5" placeholder="Leave blank for the default (15 min)"></div>
+          <div class="field-a"><label>Image URL (optional)</label><input type="text" id="svcImg" placeholder="https://..."></div>
+          <div class="field-a"><label>Bookable Online?</label>
+            <select id="svcOnlineBookable"><option value="true">Yes</option><option value="false">No — phone/in-person only</option></select>
+          </div>
+          <div class="field-a"><label>Deposit Required?</label>
+            <select id="svcDeposit"><option value="false">No</option><option value="true">Yes</option></select>
+          </div>
+          <div class="field-a" style="grid-column:1/-1;"><label>Description</label><input type="text" id="svcDesc"></div>
+        </div>
+        <div style="padding:0 26px 22px;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitService()">Save Service</button>
+          <span id="svcStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table id="servicesTable"></table>
+      </div>
+    </div>
+
+    <div class="panel" id="specialistsPanel">
+      <div class="panel-head">
+        <h2>Specialist Management</h2>
+        <button class="btn dark" onclick="toggleSpecialistForm()">+ New Specialist</button>
+      </div>
+      <div class="panel-body" id="specialistFormPanel" style="display:none;border-bottom:1px solid var(--line);">
+        <div class="field-grid-admin">
+          <div class="field-a"><label>Name</label><input type="text" id="spName"></div>
+          <div class="field-a"><label>Specialty (display text)</label><input type="text" id="spTitle" placeholder="e.g. Hair & Colour"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Capable Categories</label>
+            <div id="spCategories" style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px;"></div>
+          </div>
+          <div class="field-a" style="grid-column:span 2;"><label>Working Days</label>
+            <div id="spWorkingDays" style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px;"></div>
+          </div>
+          <div class="field-a"><label>Add Vacation Date</label><input type="date" id="spVacationInput"></div>
+          <div class="field-a"><label>&nbsp;</label><button class="btn" onclick="addVacationDate()">Add Date</button></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>Vacation Dates</label>
+            <div id="spVacationList" style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;"></div>
+          </div>
+        </div>
+        <div style="padding:0 26px 22px;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitSpecialist()">Save Specialist</button>
+          <span id="spStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <table id="specialistsTable"></table>
+      </div>
+    </div>
+
+    <div class="panel" id="holidaysPanel">
+      <div class="panel-head"><h2>Holidays &amp; Special Days</h2></div>
+      <div class="panel-body">
+        <div class="field-grid-admin" style="padding:0 0 18px;">
+          <div class="field-a"><label>Date</label><input type="date" id="holDate"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Label</label><input type="text" id="holLabel" placeholder="e.g. Eid Al-Fitr, Center Closure"></div>
+          <div class="field-a"><label>&nbsp;</label><button class="btn dark" onclick="submitHoliday()">Add</button></div>
+        </div>
+        <div id="holidaysList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="houseManagementPanel">
+      <div class="panel-head"><h2>House Management</h2></div>
+      <div class="panel-body" style="padding:0;">
+        <div class="nav-grid">
+          <div class="nav-tile"><h3>Working Hours</h3><span>Tue–Sun · 10:00–20:00</span></div>
+          <div class="nav-tile"><h3>Promotions</h3><span>1 active — First Visit Ritual</span></div>
+          <div class="nav-tile"><h3>Packages</h3><span>3 bundled offerings</span></div>
+          <div class="nav-tile"><h3>Booking Settings</h3><span>Deposits, buffers, cancellation window</span></div>
+          <div class="nav-tile"><h3>Website Content</h3><span>Homepage copy &amp; imagery</span></div>
+          <div class="nav-tile"><h3>Reports</h3><span>Monthly revenue &amp; retention</span></div>
+        </div>
+        <div style="padding:14px 26px;font-size:11px;color:var(--espresso-45);">These tiles are not yet built — Services, Staff, and Holidays above are the real, working management panels.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     LIVE BACKEND SHIM — must be IDENTICAL to the one in lume-website.html
+     so both pages read/write the same Supabase table. Fill in the same
+     SUPABASE_URL / SUPABASE_ANON_KEY as the other file.
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const SUPABASE_URL = "https://possqyvufrubfixipwlm.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_7tLqOI1xA_Tq4lxOpbjs2w_PFuNiJZ_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  window.storage = {
+    async get(key, shared){
+      if(!shared){
+        const v = localStorage.getItem(key);
+        return v===null ? null : {key, value:v, shared:false};
+      }
+      const { data, error } = await sb.from('kv_store').select('value').eq('key', key).maybeSingle();
+      if(error || !data) return null;
+      return {key, value:data.value, shared:true};
+    },
+    async set(key, value, shared){
+      if(!shared){
+        localStorage.setItem(key, value);
+        return {key, value, shared:false};
+      }
+      const { error } = await sb.from('kv_store').upsert({key, value, updated_at:new Date().toISOString()});
+      if(error){ console.error("storage.set failed:", error); return null; }
+      return {key, value, shared:true};
+    },
+    async delete(key, shared){
+      if(!shared){
+        localStorage.removeItem(key);
+        return {key, deleted:true, shared:false};
+      }
+      const { error } = await sb.from('kv_store').delete().eq('key', key);
+      if(error) return null;
+      return {key, deleted:true, shared:true};
+    },
+    async list(prefix, shared){
+      prefix = prefix || "";
+      if(!shared){
+        const keys=[];
+        for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k.startsWith(prefix)) keys.push(k); }
+        return {keys, prefix, shared:false};
+      }
+      const { data, error } = await sb.from('kv_store').select('key').like('key', prefix+'%');
+      if(error) return null;
+      return {keys:(data||[]).map(r=>r.key), prefix, shared:true};
+    }
+  };
+})();
+</script>
+
+<script>
+document.getElementById("todayDate").textContent = new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+/* ---------- Catalog (services, categories, specialists, holidays) ----------
+   Loaded from the same shared storage keys the customer site reads/writes,
+   so editing a price or specialist here is instantly the same data
+   everywhere — no separate "admin copy" of the catalog. */
+const CATALOG_SERVICES_KEY="lume:catalog:services";
+const CATALOG_SPECIALISTS_KEY="lume:catalog:specialists";
+const CATALOG_HOLIDAYS_KEY="lume:catalog:holidays";
+
+const DEFAULT_CATEGORIES = [
+  {id:"hair",name:"Hair"},{id:"skin",name:"Skin"},{id:"nails",name:"Nails"},
+  {id:"brows",name:"Brows & Lashes"},{id:"bridal",name:"Bridal"}
+];
+const DEFAULT_TREATMENTS = {
+  hair:[
+    {id:"svc-blowout", n:"Signature Blowout",d:"45 min",p:35,desc:"Wash, blow-dry, and finish.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-hairtreat", n:"Hair Treatment Ritual",d:"70 min",p:60,desc:"Deep nourishing treatment for damaged hair.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-colour", n:"Colour & Gloss",d:"120 min",p:110,desc:"Full colour with a glossing finish.",img:"",onlineBookable:true,depositRequired:true,prepMinutes:5,bufferMinutes:null},
+  ],
+  skin:[
+    {id:"svc-facial", n:"Signature Facial",d:"60 min",p:70,desc:"Deep cleanse, exfoliation, and mask.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-hammam", n:"Moroccan Bath",d:"90 min",p:65,desc:"Traditional hammam exfoliation and steam ritual.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+  ],
+  nails:[
+    {id:"svc-gel", n:"Manicure — Gel",d:"50 min",p:30,desc:"Long-lasting gel finish.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-normalmani", n:"Manicure — Normal",d:"40 min",p:20,desc:"Classic polish manicure.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-henna", n:"Henna Art",d:"45 min",p:25,desc:"Traditional or bridal henna design.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+  ],
+  brows:[
+    {id:"svc-brows", n:"Brow Shaping",d:"30 min",p:20,desc:"Threading and tint.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-lashlift", n:"Lash Lift",d:"50 min",p:45,desc:"Lift and tint for a natural curl.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
+  ],
+  bridal:[
+    {id:"svc-bridaltrial", n:"Bridal Trial",d:"120 min",p:150,desc:"Full hair and makeup trial run.",img:"",onlineBookable:true,depositRequired:true,prepMinutes:0,bufferMinutes:null},
+    {id:"svc-bridalday", n:"Bridal Day-Of",d:"180 min",p:350,desc:"Complete bridal styling on the day.",img:"",onlineBookable:false,depositRequired:true,prepMinutes:15,bufferMinutes:30},
+  ]
+};
+const DEFAULT_SPECIALISTS = [
+  {n:"Maya", s:"Hair & Colour", capableCategories:["hair","bridal"], workingDays:[1,2,3,4,5,6], vacationDates:[]},
+  {n:"Sarah", s:"Skin & Facials", capableCategories:["skin","brows"], workingDays:[1,2,3,4,5,6], vacationDates:[]},
+  {n:"Rana", s:"Nails & Henna", capableCategories:["nails"], workingDays:[2,3,4,5,6,0], vacationDates:[]},
+];
+const NO_PREFERENCE={n:"No Preference", s:"Any available specialist"};
+
+let categories=DEFAULT_CATEGORIES, treatments=DEFAULT_TREATMENTS, specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS], holidays=[];
+
+async function loadCatalog(){
+  try{
+    const res=await window.storage.get(CATALOG_SERVICES_KEY, true);
+    if(res && res.value){ const parsed=JSON.parse(res.value); categories=parsed.categories; treatments=parsed.treatments; }
+    else{ categories=DEFAULT_CATEGORIES; treatments=DEFAULT_TREATMENTS; await window.storage.set(CATALOG_SERVICES_KEY, JSON.stringify({categories, treatments}), true); }
+  }catch(e){ categories=DEFAULT_CATEGORIES; treatments=DEFAULT_TREATMENTS; }
+  try{
+    const res=await window.storage.get(CATALOG_SPECIALISTS_KEY, true);
+    if(res && res.value){ specialists=[NO_PREFERENCE, ...JSON.parse(res.value)]; }
+    else{ await window.storage.set(CATALOG_SPECIALISTS_KEY, JSON.stringify(DEFAULT_SPECIALISTS), true); specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS]; }
+  }catch(e){ specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS]; }
+  try{
+    const res=await window.storage.get(CATALOG_HOLIDAYS_KEY, true);
+    holidays = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ holidays=[]; }
+}
+async function saveServicesCatalog(){ await window.storage.set(CATALOG_SERVICES_KEY, JSON.stringify({categories, treatments}), true); }
+async function saveSpecialistsCatalog(){ await window.storage.set(CATALOG_SPECIALISTS_KEY, JSON.stringify(specialists.filter(s=>s.n!=="No Preference")), true); }
+async function saveHolidaysCatalog(){ await window.storage.set(CATALOG_HOLIDAYS_KEY, JSON.stringify(holidays), true); }
+function isHoliday(dateStr){ return holidays.some(h=>h.date===dateStr); }
+function holidayLabel(dateStr){ const h=holidays.find(x=>x.date===dateStr); return h?h.label:null; }
+function specialistWorks(specialistName, dateStr){
+  if(specialistName==="No Preference" || !specialistName) return true;
+  const sp=specialists.find(s=>s.n===specialistName);
+  if(!sp) return true;
+  const dow=new Date(dateStr+"T00:00:00").getDay();
+  if(sp.workingDays && !sp.workingDays.includes(dow)) return false;
+  if((sp.vacationDates||[]).includes(dateStr)) return false;
+  return true;
+}
+
+const ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:30","17:00","17:30"];
+const BUFFER_MINUTES=15;
+const BOOKING_LEAD_HOURS=2;
+
+function dateKeyStr(d){ return d.toISOString().slice(0,10); }
+function phoneKey(phone){ return (phone||"").replace(/\D/g,""); }
+function customerKey(phone){ return "lume:customers:"+phoneKey(phone); }
+function specialistLane(s){ return s || "No Preference"; }
+function slotIndex(t){ return ALL_SLOTS.indexOf(t); }
+function durationMinutes(label){ const m=/(\d+)/.exec(label||""); return m?parseInt(m[1],10):30; }
+function requiredSlotsFor(time, durationLabel, bufferOverride){
+  const startIdx=slotIndex(time);
+  if(startIdx===-1) return null;
+  const buffer=(bufferOverride===null||bufferOverride===undefined) ? BUFFER_MINUTES : bufferOverride;
+  const count=Math.ceil((durationMinutes(durationLabel)+buffer)/30);
+  const out=[];
+  for(let i=0;i<count;i++){
+    const idx=startIdx+i;
+    if(idx>=ALL_SLOTS.length) return null;
+    if(i>0){
+      const [ph,pm]=ALL_SLOTS[idx-1].split(":").map(Number);
+      const [ch,cm]=ALL_SLOTS[idx].split(":").map(Number);
+      if((ch*60+cm)-(ph*60+pm)!==30) return null;
+    }
+    out.push(ALL_SLOTS[idx]);
+  }
+  return out;
+}
+function isWithinLeadTime(dateStr, time){
+  return (new Date(dateStr+"T"+time+":00")-new Date())/3600000 < BOOKING_LEAD_HOURS;
+}
+function slotsFree(dayList, specialist, slots, excludeId){
+  const now=Date.now();
+  return !dayList.some(b=>{
+    if(b.id===excludeId) return false;
+    if(b.status==="held" && new Date(b.expiresAt).getTime()<now) return false; // expired, ignore
+    if(b.status!=="confirmed" && b.status!=="blocked" && b.status!=="held") return false;
+    if((b.status==="confirmed"||b.status==="held") && specialistLane(b.specialist)!==specialistLane(specialist)) return false;
+    return (b.slots||[]).some(s=>slots.includes(s));
+  });
+}
+function specialistsFor(categoryId){
+  const capable = specialists.filter(s=> s.n==="No Preference" || (s.capableCategories||[]).includes(categoryId));
+  return capable.length ? capable : specialists;
+}
+
+/* ==========================================================================
+   SERVICE MANAGEMENT
+   ========================================================================== */
+function slugify(str){ return "svc-"+str.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")+"-"+Date.now().toString(36).slice(-4); }
+
+function toggleServiceForm(){
+  const panel=document.getElementById("serviceFormPanel");
+  const open=panel.style.display==="block";
+  panel.style.display= open?"none":"block";
+  if(!open){
+    document.getElementById("svcCategorySelect").innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+    document.getElementById("svcNewCategoryName").value="";
+    document.getElementById("svcName").value=""; document.getElementById("svcPrice").value="";
+    document.getElementById("svcDuration").value=""; document.getElementById("svcPrep").value="0";
+    document.getElementById("svcBuffer").value=""; document.getElementById("svcImg").value=""; document.getElementById("svcDesc").value="";
+    document.getElementById("svcStatus").textContent="";
+  }
+}
+async function submitService(){
+  const status=document.getElementById("svcStatus");
+  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to manage services."; return; }
+  const newCatName=document.getElementById("svcNewCategoryName").value.trim();
+  let categoryId=document.getElementById("svcCategorySelect").value;
+  const name=document.getElementById("svcName").value.trim();
+  const price=parseFloat(document.getElementById("svcPrice").value);
+  const duration=parseInt(document.getElementById("svcDuration").value,10);
+  if(!name || isNaN(price) || isNaN(duration)){ status.textContent="Name, price, and duration are required."; return; }
+
+  if(newCatName){
+    categoryId = newCatName.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"") || ("cat-"+Date.now());
+    if(!categories.some(c=>c.id===categoryId)){
+      categories = categories.concat([{id:categoryId, name:newCatName}]);
+      treatments[categoryId]=[];
+    }
+  }
+  const prep=parseInt(document.getElementById("svcPrep").value,10)||0;
+  const bufferRaw=document.getElementById("svcBuffer").value;
+  const buffer = bufferRaw==="" ? null : parseInt(bufferRaw,10);
+  const img=document.getElementById("svcImg").value.trim();
+  const desc=document.getElementById("svcDesc").value.trim();
+  const onlineBookable=document.getElementById("svcOnlineBookable").value==="true";
+  const depositRequired=document.getElementById("svcDeposit").value==="true";
+
+  if(!treatments[categoryId]) treatments[categoryId]=[];
+  treatments[categoryId].push({id:slugify(name), n:name, d:duration+" min", p:price, desc, img, onlineBookable, depositRequired, prepMinutes:prep, bufferMinutes:buffer});
+  await saveServicesCatalog();
+  status.textContent="Service saved.";
+  refreshServicesTable();
+}
+function deleteService(categoryId, serviceId){
+  if(!confirm("Delete this service? Existing appointments keep their historical service name; only future bookability is affected.")) return;
+  treatments[categoryId] = (treatments[categoryId]||[]).filter(t=>t.id!==serviceId);
+  saveServicesCatalog().then(refreshServicesTable);
+}
+function refreshServicesTable(){
+  const table=document.getElementById("servicesTable");
+  const rows=[];
+  categories.forEach(c=>{
+    (treatments[c.id]||[]).forEach(t=>{
+      rows.push({cat:c.name, catId:c.id, t});
+    });
+  });
+  if(!rows.length){ table.innerHTML=`<tbody><tr><td class="cust-empty">No services yet.</td></tr></tbody>`; return; }
+  table.innerHTML=`<thead><tr><th>Category</th><th>Service</th><th>Price</th><th>Duration</th><th>Online</th><th>Deposit</th><th></th></tr></thead>
+  <tbody>${rows.map(r=>`<tr>
+    <td>${r.cat}</td>
+    <td class="row-name">${r.t.n}</td>
+    <td>$${r.t.p}</td>
+    <td>${r.t.d}${r.t.bufferMinutes!=null?` (+${r.t.bufferMinutes}m buffer)`:""}</td>
+    <td>${r.t.onlineBookable? "Yes":"No"}</td>
+    <td>${r.t.depositRequired? "Yes":"No"}</td>
+    <td><button class="btn small" data-cat="${r.catId}" data-id="${r.t.id}">Delete</button></td>
+  </tr>`).join("")}</tbody>`;
+  table.querySelectorAll("button[data-id]").forEach(btn=>{
+    btn.addEventListener("click", ()=>deleteService(btn.dataset.cat, btn.dataset.id));
+  });
+}
+
+/* ==========================================================================
+   SPECIALIST MANAGEMENT
+   ========================================================================== */
+const DOW_LABELS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+let editingSpecialistName=null;
+function toggleSpecialistForm(){
+  const panel=document.getElementById("specialistFormPanel");
+  const open=panel.style.display==="block";
+  panel.style.display= open?"none":"block";
+  if(!open) openSpecialistForm(null);
+}
+function openSpecialistForm(existing){
+  editingSpecialistName = existing ? existing.n : null;
+  document.getElementById("spName").value = existing ? existing.n : "";
+  document.getElementById("spName").disabled = !!existing;
+  document.getElementById("spTitle").value = existing ? existing.s : "";
+  document.getElementById("spCategories").innerHTML = categories.map(c=>
+    `<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="${c.id}" ${existing&&(existing.capableCategories||[]).includes(c.id)?"checked":""}> ${c.name}</label>`).join("");
+  document.getElementById("spWorkingDays").innerHTML = DOW_LABELS.map((d,i)=>
+    `<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="${i}" ${!existing || (existing.workingDays||[]).includes(i)?"checked":""}> ${d}</label>`).join("");
+  renderVacationList(existing ? (existing.vacationDates||[]) : []);
+  document.getElementById("spStatus").textContent="";
+  document.getElementById("specialistFormPanel").style.display="block";
+}
+let currentVacationDates=[];
+function renderVacationList(dates){
+  currentVacationDates=dates.slice();
+  document.getElementById("spVacationList").innerHTML = currentVacationDates.length
+    ? currentVacationDates.map(d=>`<span class="badge active" style="cursor:pointer;" onclick="removeVacationDate('${d}')">${d} ✕</span>`).join("")
+    : `<span style="color:var(--espresso-45);">None</span>`;
+}
+function addVacationDate(){
+  const val=document.getElementById("spVacationInput").value;
+  if(!val || currentVacationDates.includes(val)) return;
+  currentVacationDates.push(val);
+  renderVacationList(currentVacationDates);
+}
+function removeVacationDate(d){ renderVacationList(currentVacationDates.filter(x=>x!==d)); }
+async function submitSpecialist(){
+  const status=document.getElementById("spStatus");
+  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to manage specialists."; return; }
+  const name=document.getElementById("spName").value.trim();
+  const title=document.getElementById("spTitle").value.trim();
+  if(!name){ status.textContent="Name is required."; return; }
+  const capableCategories=[...document.querySelectorAll('#spCategories input:checked')].map(el=>el.value);
+  const workingDays=[...document.querySelectorAll('#spWorkingDays input:checked')].map(el=>parseInt(el.value,10));
+  const record={n:name, s:title, capableCategories, workingDays, vacationDates:currentVacationDates.slice()};
+
+  const real=specialists.filter(s=>s.n!=="No Preference");
+  const idx=real.findIndex(s=>s.n===(editingSpecialistName||name));
+  if(idx>=0) real[idx]=record; else real.push(record);
+  specialists=[NO_PREFERENCE, ...real];
+  await saveSpecialistsCatalog();
+  status.textContent="Specialist saved.";
+  document.getElementById("spName").disabled=false;
+  refreshSpecialistsTable();
+}
+function deleteSpecialist(name){
+  if(!confirm(`Remove ${name} as a specialist? Their historical appointments are kept, but they'll no longer be offered for new bookings.`)) return;
+  specialists = [NO_PREFERENCE, ...specialists.filter(s=>s.n!=="No Preference" && s.n!==name)];
+  saveSpecialistsCatalog().then(refreshSpecialistsTable);
+}
+function refreshSpecialistsTable(){
+  const table=document.getElementById("specialistsTable");
+  const real=specialists.filter(s=>s.n!=="No Preference");
+  if(!real.length){ table.innerHTML=`<tbody><tr><td class="cust-empty">No specialists yet.</td></tr></tbody>`; return; }
+  table.innerHTML=`<thead><tr><th>Name</th><th>Specialty</th><th>Categories</th><th>Working Days</th><th>Vacation</th><th></th></tr></thead>
+  <tbody>${real.map(s=>`<tr>
+    <td class="row-name">${s.n}</td>
+    <td>${s.s||"—"}</td>
+    <td>${(s.capableCategories||[]).map(id=>(categories.find(c=>c.id===id)||{}).name||id).join(", ")||"—"}</td>
+    <td>${(s.workingDays||[]).map(d=>DOW_LABELS[d]).join(", ")||"—"}</td>
+    <td>${(s.vacationDates||[]).length}</td>
+    <td>
+      <button class="btn small" data-edit="${s.n}">Edit</button>
+      <button class="btn small" data-del="${s.n}">Remove</button>
+    </td>
+  </tr>`).join("")}</tbody>`;
+  table.querySelectorAll("button[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const s=real.find(x=>x.n===btn.dataset.edit);
+      document.getElementById("specialistFormPanel").style.display="block";
+      openSpecialistForm(s);
+      document.getElementById("specialistFormPanel").scrollIntoView({behavior:"smooth"});
+    });
+  });
+  table.querySelectorAll("button[data-del]").forEach(btn=>{
+    btn.addEventListener("click", ()=>deleteSpecialist(btn.dataset.del));
+  });
+}
+
+/* ==========================================================================
+   HOLIDAYS & SPECIAL DAYS
+   ========================================================================== */
+async function submitHoliday(){
+  if(!hasPermission("manageSettings")) return;
+  const date=document.getElementById("holDate").value;
+  const label=document.getElementById("holLabel").value.trim();
+  if(!date || !label) return;
+  if(holidays.some(h=>h.date===date)){ alert("A holiday is already set for that date."); return; }
+  holidays.push({date, label});
+  await saveHolidaysCatalog();
+  document.getElementById("holLabel").value="";
+  refreshHolidaysList();
+}
+function deleteHoliday(date){
+  holidays = holidays.filter(h=>h.date!==date);
+  saveHolidaysCatalog().then(refreshHolidaysList);
+}
+function refreshHolidaysList(){
+  const wrap=document.getElementById("holidaysList");
+  const upcoming=holidays.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  wrap.innerHTML = upcoming.length ? upcoming.map(h=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid var(--line);font-size:13px;">
+      <span>${h.date} — ${h.label}</span>
+      <button class="btn small" data-del="${h.date}">Remove</button>
+    </div>`).join("") : `<div style="color:var(--espresso-45);font-size:13px;">No holidays set — the calendar is open every business day.</div>`;
+  wrap.querySelectorAll("button[data-del]").forEach(btn=>btn.addEventListener("click", ()=>deleteHoliday(btn.dataset.del)));
+}
+
+/* ==========================================================================
+   ACCESS CONTROL — PROTOTYPE ONLY, NOT REAL SECURITY
+   ==========================================================================
+   This whole system runs as client-side JavaScript against a shared,
+   unauthenticated storage bucket (window.storage). There is no real server
+   here to enforce anything: every "permission check" below is a JS
+   function that a browser's devtools can bypass entirely, and every
+   "password" is stored in the same shared bucket any visitor's browser can
+   read. This is a faithful, fully-wired PROTOTYPE of the intended
+   four-role permission model — useful for validating the workflow and as
+   a spec for a real implementation — but it must never be treated as
+   protecting real credentials or real customer data. A real launch needs
+   an actual backend (e.g. Supabase/Firebase Auth or a custom server) doing
+   real hashed-password auth and real server-side authorization on every
+   request.
+   ========================================================================== */
+
+const ROLES=["owner","manager","receptionist","staff"];
+const PERMISSIONS={
+  owner:      ["viewAll","manageAppointmentsAll","manageAppointmentsOwn","manageCustomers","manageServices","manageTeamAll","manageTeamStaffOnly","resetAnyPassword","viewAnalytics","manageSettings"],
+  manager:    ["viewAll","manageAppointmentsAll","manageAppointmentsOwn","manageCustomers","manageServices","manageTeamStaffOnly","viewAnalytics","manageSettings"],
+  receptionist:["viewAll","manageAppointmentsAll","manageAppointmentsOwn","manageCustomers"],
+  staff:      ["viewOwnScheduleAndCalendar","manageAppointmentsOwn"],
+};
+function roleHas(role, perm){ return (PERMISSIONS[role]||[]).includes(perm); }
+// Checks the CURRENT_USER's effective permissions: their role's defaults,
+// plus any individual overrides the Owner has granted them.
+function hasPermission(perm){
+  if(!CURRENT_USER) return false;
+  if(roleHas(CURRENT_USER.role, perm)) return true;
+  return ((CURRENT_USER.permissionOverrides&&CURRENT_USER.permissionOverrides.flags)||[]).includes(perm);
+}
+// A staff/receptionist/manager's authorized service categories: their
+// assigned specialty by default, plus any categories the Owner has
+// individually granted them (e.g. Emma — Hair, also granted Makeup).
+function authorizedCategories(member){
+  const base = member.specialty ? [member.specialty] : [];
+  const extra = (member.permissionOverrides&&member.permissionOverrides.categories)||[];
+  return Array.from(new Set([...base, ...extra]));
+}
+
+// NOT cryptographic — just avoids storing raw plaintext in the shared bucket.
+// See the banner comment above: do not treat this as secure hashing.
+function insecureHash(str){
+  let h=0;
+  for(let i=0;i<str.length;i++){ h=(h*31 + str.charCodeAt(i))|0; }
+  return "h"+Math.abs(h).toString(36);
+}
+function genTempPassword(){
+  return Math.random().toString(36).slice(2,6)+"-"+Math.random().toString(36).slice(2,6);
+}
+
+let CURRENT_USER=null; // {username, name, role, assignedSpecialist}
+
+function teamKey(username){ return "lume:team:"+(username||"").toLowerCase().trim(); }
+
+async function getTeamMember(username){
+  try{
+    const res=await window.storage.get(teamKey(username), true);
+    return res && res.value ? JSON.parse(res.value) : null;
+  }catch(e){ return null; }
+}
+async function saveTeamMember(member){
+  try{ return !!(await window.storage.set(teamKey(member.username), JSON.stringify(member), true)); }
+  catch(e){ return false; }
+}
+async function listTeam(){
+  let keys=[];
+  try{ const res=await window.storage.list("lume:team:", true); keys=res&&res.keys?res.keys:[]; }catch(e){ return []; }
+  const out=[];
+  for(const k of keys){
+    try{ const res=await window.storage.get(k, true); if(res&&res.value) out.push(JSON.parse(res.value)); }catch(e){}
+  }
+  return out.sort((a,b)=> (a.role==="owner"?-1:1) - (b.role==="owner"?-1:1) || (a.name||"").localeCompare(b.name||""));
+}
+
+// Bootstraps a default Owner account the very first time the dashboard is opened.
+async function ensureOwnerSeed(){
+  const team=await listTeam();
+  if(team.some(t=>t.role==="owner")) return;
+  await saveTeamMember({
+    name:"Owner", username:"owner", role:"owner", status:"active",
+    passwordHash:insecureHash("owner123"), assignedSpecialist:null,
+    createdAt:new Date().toISOString(), lastLogin:null
+  });
+}
+
+async function attemptLogin(){
+  const username=document.getElementById("loginUser").value.trim();
+  const password=document.getElementById("loginPass").value;
+  const err=document.getElementById("loginError");
+  err.style.display="none";
+  await ensureOwnerSeed();
+  const member=await getTeamMember(username);
+  if(!member || member.passwordHash!==insecureHash(password)){
+    err.textContent="Incorrect username or password."; err.style.display="block"; return;
+  }
+  if(member.status==="blocked"){
+    err.textContent="This account has been blocked by the Owner. Contact management for access."; err.style.display="block"; return;
+  }
+  member.lastLogin=new Date().toISOString();
+  await saveTeamMember(member);
+  try{ await window.storage.set("lume:session", JSON.stringify({username:member.username}), false); }catch(e){}
+  enterDashboard(member);
+}
+
+async function tryResumeSession(){
+  await ensureOwnerSeed();
+  try{
+    const res=await window.storage.get("lume:session", false);
+    if(!res || !res.value) return false;
+    const {username}=JSON.parse(res.value);
+    const member=await getTeamMember(username);
+    if(!member || member.status==="blocked") return false;
+    enterDashboard(member);
+    return true;
+  }catch(e){ return false; }
+}
+
+function enterDashboard(member){
+  CURRENT_USER={
+    username:member.username, name:member.name, role:member.role,
+    assignedSpecialist:member.assignedSpecialist, specialty:member.specialty,
+    permissionOverrides:member.permissionOverrides||{categories:[],flags:[]}
+  };
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("dashboardShell").style.display="grid";
+  document.getElementById("greeting").textContent = "Good day, "+(member.name||member.username);
+  document.getElementById("whoAmI").innerHTML = `<div class="av"></div> ${member.name||member.username} <span class="role-pill" style="margin-left:8px;">${member.role}</span>`;
+  applyRoleUI();
+  refreshAll();
+}
+
+// Re-pulls the logged-in user's own record so permission grants the Owner
+// makes elsewhere take effect on the next refresh cycle without needing to log out.
+async function resyncCurrentUser(){
+  if(!CURRENT_USER) return;
+  const fresh=await getTeamMember(CURRENT_USER.username);
+  if(!fresh || fresh.status==="blocked"){ logout(); return; }
+  CURRENT_USER={
+    username:fresh.username, name:fresh.name, role:fresh.role,
+    assignedSpecialist:fresh.assignedSpecialist, specialty:fresh.specialty,
+    permissionOverrides:fresh.permissionOverrides||{categories:[],flags:[]}
+  };
+  applyRoleUI();
+}
+
+function logout(){
+  try{ window.storage.set("lume:session", JSON.stringify({}), false); }catch(e){}
+  CURRENT_USER=null;
+  document.getElementById("dashboardShell").style.display="none";
+  document.getElementById("loginScreen").style.display="flex";
+  document.getElementById("loginUser").value=""; document.getElementById("loginPass").value="";
+}
+
+function applyRoleUI(){
+  const role=CURRENT_USER.role;
+  document.getElementById("teamPanel").style.display = hasPermission("manageTeamAll")||hasPermission("manageTeamStaffOnly") ? "block" : "none";
+  document.getElementById("newTeamBtn").style.display = role==="owner" ? "inline-block" : "none"; // manager can edit existing staff, only owner creates new manager-level too — kept simple
+  document.getElementById("houseManagementPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
+  document.getElementById("analyticsGrid").closest(".panel").style.display = hasPermission("viewAnalytics") ? "block" : "none";
+  document.getElementById("manualBookingPanel").closest(".panel").querySelector(".btn.dark").style.display =
+    (role==="staff") ? "none" : "inline-block";
+  document.querySelector('[onclick="submitBlockTime()"]').closest(".panel").style.display = hasPermission("manageSettings") ? "block" : "none";
+  document.getElementById("customerTable").closest(".panel").style.display = hasPermission("manageCustomers") ? "block" : "none";
+  document.getElementById("servicesPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
+  document.getElementById("specialistsPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
+  document.getElementById("holidaysPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
+}
+/* ---------- Sidebar page navigation ----------
+   Each entry maps a sidebar destination to the element id(s) that make up
+   that "page". Everything not in the active page's list gets .page-hidden
+   (display:none!important) — permission-based visibility (e.g. Services/
+   Staff/Team being hidden from roles without access) still applies on top
+   of this via each panel's own inline style, untouched by this router. */
+const ADMIN_PAGE_MAP = {
+  today:         ["pageToday","pageUpcomingBlockAnalytics"],
+  calendar:      ["pageCalendar"],
+  clients:       ["clientsNotifsRow","pageClients"],
+  notifications: ["clientsNotifsRow","pageNotifications"],
+  team:          ["teamPanel"],
+  services:      ["servicesPanel"],
+  staff:         ["specialistsPanel"]
+};
+const ADMIN_PAGE_ELEMENT_IDS = ["pageToday","pageUpcomingBlockAnalytics","pageCalendar","clientsNotifsRow","pageClients","pageNotifications","teamPanel","servicesPanel","specialistsPanel"];
+let currentAdminPage="today";
+function showAdminPage(page){
+  if(!ADMIN_PAGE_MAP[page]) page="today";
+  currentAdminPage=page;
+  ADMIN_PAGE_ELEMENT_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.classList.toggle("page-hidden", !ADMIN_PAGE_MAP[page].includes(id));
+  });
+  document.querySelectorAll(".side-link[data-nav]").forEach(a=>{
+    a.classList.toggle("active", a.dataset.nav===page);
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+showAdminPage("today"); // set initial state before first login/render
+
+/* ---------- Team Management ---------- */
+function toggleTeamForm(){
+  const panel=document.getElementById("teamFormPanel");
+  const open=panel.style.display==="block";
+  panel.style.display= open?"none":"block";
+  if(!open){
+    document.getElementById("tmSpecialist").innerHTML = specialists.filter(s=>s.n!=="No Preference").map(s=>`<option value="${s.n}">${s.n}</option>`).join("");
+    document.getElementById("tmSpecialty").innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+    document.getElementById("tmRole").onchange=()=>{
+      const isStaff = document.getElementById("tmRole").value==="staff";
+      document.getElementById("tmSpecialistWrap").style.display = isStaff ? "flex" : "none";
+      document.getElementById("tmSpecialtyWrap").style.display = isStaff ? "flex" : "none";
+    };
+    document.getElementById("tmSpecialistWrap").style.display="none";
+    document.getElementById("tmSpecialtyWrap").style.display="none";
+  }
+}
+async function submitTeamMember(){
+  const status=document.getElementById("tmStatus");
+  if(CURRENT_USER.role!=="owner" && CURRENT_USER.role!=="manager"){ status.textContent="You don't have permission to create accounts."; return; }
+  const name=document.getElementById("tmName").value.trim();
+  const username=document.getElementById("tmUsername").value.trim();
+  const phone=document.getElementById("tmPhone").value.trim();
+  const role=document.getElementById("tmRole").value; // dropdown never offers "owner" — matches the spec
+  const isStaff = role==="staff";
+  const assignedSpecialist = isStaff ? document.getElementById("tmSpecialist").value : null;
+  const specialty = isStaff ? document.getElementById("tmSpecialty").value : null;
+  if(!name||!username){ status.textContent="Name and email/username are required."; return; }
+  if(CURRENT_USER.role==="manager" && role==="manager"){ status.textContent="Managers can create Receptionist and Staff accounts, not other Managers."; return; }
+  const existing=await getTeamMember(username);
+  if(existing){ status.textContent="That username is already taken."; return; }
+
+  const tempPassword=genTempPassword();
+  await saveTeamMember({
+    name, username, phone, role, status:"active", assignedSpecialist, specialty,
+    permissionOverrides:{categories:[], flags:[]}, // locked to default role + specialty until the Owner grants more
+    passwordHash:insecureHash(tempPassword),
+    createdAt:new Date().toISOString(), lastLogin:null, createdBy:CURRENT_USER.username
+  });
+  status.textContent = `Account created. Temporary password: ${tempPassword} (share this once — it will not be shown again).`;
+  document.getElementById("tmName").value=""; document.getElementById("tmUsername").value=""; document.getElementById("tmPhone").value="";
+  refreshTeam();
+}
+
+function canManageMember(m){
+  const isOwnerRow = m.role==="owner";
+  if(CURRENT_USER.role==="owner") return !isOwnerRow || m.username===CURRENT_USER.username;
+  if(CURRENT_USER.role==="manager") return !isOwnerRow && m.role!=="manager";
+  return false;
+}
+
+async function refreshTeam(){
+  if(!hasPermission("manageTeamAll") && !hasPermission("manageTeamStaffOnly")) return;
+  const team=await listTeam();
+  const table=document.getElementById("teamTable");
+  table.innerHTML=`<thead><tr><th>Name</th><th>Role</th><th>Assigned Specialist</th><th>Specialty</th><th>Status</th><th>Permissions</th><th>Last Login</th><th></th></tr></thead>
+  <tbody>${team.map(m=>{
+    const canManageThis = canManageMember(m);
+    const extraCount = ((m.permissionOverrides&&m.permissionOverrides.categories)||[]).length + ((m.permissionOverrides&&m.permissionOverrides.flags)||[]).length;
+    const permSummary = m.role==="owner" ? "All" : (extraCount ? `Default +${extraCount}` : "Default");
+    const actions = !canManageThis ? "" : `
+      <button class="btn small" data-action="reset" data-u="${m.username}">Reset Password</button>
+      ${m.role!=="owner" ? `<button class="btn small" data-action="perms" data-u="${m.username}">Permissions</button>` : ""}
+      ${m.status==="active"
+        ? `<button class="btn small" data-action="block" data-u="${m.username}">Block</button>`
+        : `<button class="btn small" data-action="unblock" data-u="${m.username}">Unblock</button>`}`;
+    return `<tr>
+      <td class="row-name">${m.name}${m.username===CURRENT_USER.username?" (you)":""}<div style="font-size:11px;color:var(--espresso-45);font-weight:400;">${m.username}</div></td>
+      <td><span class="role-pill">${m.role}</span></td>
+      <td>${m.assignedSpecialist||"—"}</td>
+      <td>${m.specialty ? (categories.find(c=>c.id===m.specialty)||{}).name||m.specialty : "—"}</td>
+      <td><span class="badge ${m.status}">${m.status}</span></td>
+      <td>${permSummary}</td>
+      <td>${m.lastLogin?new Date(m.lastLogin).toLocaleString():"never"}</td>
+      <td style="white-space:nowrap;">${actions}</td>
+    </tr>`;
+  }).join("")}</tbody>`;
+  table.querySelectorAll("button[data-action]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const {action,u}=btn.dataset;
+      const member=await getTeamMember(u);
+      if(!member) return;
+      if(member.role==="owner" && member.username!==CURRENT_USER.username){ alert("The Owner account cannot be modified by another team member."); return; }
+      if(action==="reset"){
+        if(!confirm(`Reset the password for ${member.name}? Their current password will stop working immediately.`)) return;
+        const temp=genTempPassword();
+        member.passwordHash=insecureHash(temp);
+        await saveTeamMember(member);
+        alert(`New temporary password for ${member.name}: ${temp}\n(Share this once — it is not stored anywhere retrievable.)`);
+      } else if(action==="block"){
+        if(!confirm(`Block ${member.name}'s dashboard access? Their appointment history and records are kept — this only disables login.`)) return;
+        member.status="blocked"; await saveTeamMember(member);
+      } else if(action==="unblock"){
+        member.status="active"; await saveTeamMember(member);
+      } else if(action==="perms"){
+        openPermissions(member);
+        return;
+      }
+      refreshTeam();
+    });
+  });
+}
+
+/* ---------- Individual Permissions Management (Owner/Manager only) ---------- */
+let PERMS_EDITING_USER=null;
+const GRANTABLE_FLAGS=[
+  {id:"manageAppointmentsAll", label:"Manage ALL specialists' appointments (not just their own)"},
+  {id:"manageCustomers", label:"Manage customer records"},
+  {id:"viewAnalytics", label:"View analytics & reports"},
+  {id:"manageSettings", label:"Manage settings & block time"},
+  {id:"manageTeamStaffOnly", label:"Manage Staff/Receptionist team accounts"},
+];
+function openPermissions(member){
+  PERMS_EDITING_USER=member;
+  document.getElementById("permForName").textContent = `${member.name} — ${member.role}`;
+  const catWrap=document.getElementById("permCategories");
+  const grantedCats = (member.permissionOverrides&&member.permissionOverrides.categories)||[];
+  catWrap.innerHTML = categories.map(c=>`
+    <label style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" data-cat="${c.id}" ${grantedCats.includes(c.id)?"checked":""} ${member.specialty===c.id?"disabled":""}>
+      ${c.name}${member.specialty===c.id?" (default specialty)":""}
+    </label>`).join("");
+  const flagWrap=document.getElementById("permFlags");
+  const grantedFlags = (member.permissionOverrides&&member.permissionOverrides.flags)||[];
+  flagWrap.innerHTML = GRANTABLE_FLAGS.filter(f=>!roleHas(member.role, f.id)).map(f=>`
+    <label style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" data-flag="${f.id}" ${grantedFlags.includes(f.id)?"checked":""}>
+      ${f.label}
+    </label>`).join("") || "<div style='color:var(--espresso-45);'>This role already has full default access to these areas.</div>";
+  document.getElementById("permStatus").textContent="";
+  document.getElementById("permFormPanel").style.display="block";
+  document.getElementById("permFormPanel").scrollIntoView({behavior:"smooth"});
+}
+function closePermissions(){
+  document.getElementById("permFormPanel").style.display="none";
+  PERMS_EDITING_USER=null;
+}
+async function savePermissions(){
+  if(!PERMS_EDITING_USER) return;
+  const categoriesGranted=[...document.querySelectorAll('#permCategories input[data-cat]:checked')].map(el=>el.dataset.cat);
+  const flagsGranted=[...document.querySelectorAll('#permFlags input[data-flag]:checked')].map(el=>el.dataset.flag);
+  const member=await getTeamMember(PERMS_EDITING_USER.username);
+  if(!member) return;
+  member.permissionOverrides={categories:categoriesGranted, flags:flagsGranted};
+  await saveTeamMember(member);
+  document.getElementById("permStatus").textContent="Permissions updated.";
+  refreshTeam();
+}
+
+
+const calGrid=document.getElementById("calGrid");
+const dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+dows.forEach(d=>{ const el=document.createElement("div"); el.className="cal-dow"; el.textContent=d; calGrid.appendChild(el); });
+const today=new Date();
+const startOfWeek=new Date(today); startOfWeek.setDate(today.getDate()-today.getDay());
+
+/* ---------- Shared storage helpers (same schema the customer site writes) ----------
+   NOTE: "notifications" are a shared log entry, not a real SMS/WhatsApp send — this
+   prototype has no backend or messaging provider wired up. */
+async function loadDayBookings(dateStr){
+  try{
+    const res = await window.storage.get("lume:bookings:"+dateStr, true);
+    return res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ return []; }
+}
+async function saveDayBookings(dateStr, list){
+  try{ return !!(await window.storage.set("lume:bookings:"+dateStr, JSON.stringify(list), true)); }
+  catch(e){ return false; }
+}
+
+async function updateCustomerHistoryStatus(phone, id, status){
+  if(!phone) return;
+  try{
+    const res = await window.storage.get(customerKey(phone), true);
+    if(!res || !res.value) return;
+    const cust = JSON.parse(res.value);
+    const h = (cust.history||[]).find(x=>x.id===id);
+    if(h) h.status=status;
+    await window.storage.set(customerKey(phone), JSON.stringify(cust), true);
+  }catch(e){}
+}
+
+async function upsertCustomer(details, historyEntry){
+  if(!details.phone) return;
+  const key = customerKey(details.phone);
+  let cust = {name:details.name||"", phone:details.phone, email:details.email||"", bday:details.bday||"", history:[]};
+  try{
+    const res = await window.storage.get(key, true);
+    if(res && res.value){
+      const existing = JSON.parse(res.value);
+      cust = Object.assign(existing, {
+        name: details.name || existing.name,
+        bday: details.bday || existing.bday
+      });
+      if(!Array.isArray(cust.history)) cust.history=[];
+    }
+  }catch(e){}
+  cust.history.push(historyEntry);
+  cust.updatedAt = new Date().toISOString();
+  try{ await window.storage.set(key, JSON.stringify(cust), true); }catch(e){}
+}
+
+async function pushNotification(phone, type, message, appt){
+  const entry={phone, type, message, at:new Date().toISOString(), apptId: appt?appt.id:null, status:"sent"};
+  try{
+    const res = await window.storage.get("lume:notifications:log", true);
+    let log = res && res.value ? JSON.parse(res.value) : [];
+    log.unshift(entry);
+    log = log.slice(0,150);
+    await window.storage.set("lume:notifications:log", JSON.stringify(log), true);
+  }catch(e){
+    // the shared log write itself failed — best-effort record it as failed so
+    // the admin isn't told something was sent when it wasn't
+    try{
+      const res2 = await window.storage.get("lume:notifications:log", true);
+      let log2 = res2 && res2.value ? JSON.parse(res2.value) : [];
+      log2.unshift(Object.assign({}, entry, {status:"failed"}));
+      await window.storage.set("lume:notifications:log", JSON.stringify(log2.slice(0,150)), true);
+    }catch(e2){}
+  }
+}
+
+async function notifyWaitlist(dateStr, specialist){
+  const key="lume:waitlist:"+dateStr+":"+specialistLane(specialist).replace(/\s+/g,"-");
+  let list=[];
+  try{ const res=await window.storage.get(key, true); list = res && res.value ? JSON.parse(res.value) : []; }catch(e){ return; }
+  if(!list.length) return;
+  for(const entry of list){
+    await pushNotification(entry.phone, "waitlist",
+      `Good news — an opening just came up on ${dateStr} for ${entry.treatment||"your requested service"}. Book quickly, it's first come, first served.`, {id:null});
+  }
+  try{ await window.storage.set(key, JSON.stringify([]), true); }catch(e){}
+}
+
+// Admin-initiated cancellation — same shared record the customer site writes to.
+function canManageBooking(booking){
+  if(!CURRENT_USER) return false;
+  if(hasPermission("manageAppointmentsAll")) return true;
+  if(hasPermission("manageAppointmentsOwn")){
+    // Authorization is by service/specialty (Emma-Hair can also manage Makeup
+    // if the Owner has granted it), not just by matching specialist name.
+    return authorizedCategories(CURRENT_USER).includes(booking.service);
+  }
+  return false;
+}
+
+async function adminCancelBooking(dateStr, id){
+  const list = await loadDayBookings(dateStr);
+  const idx=list.findIndex(b=>b.id===id);
+  if(idx===-1 || list[idx].status==="cancelled") return false;
+  if(!canManageBooking(list[idx])){ alert("You don't have permission to change this appointment — it belongs to another specialist."); return false; }
+  list[idx].status="cancelled";
+  list[idx].cancelledBy="admin";
+  list[idx].cancelledAt=new Date().toISOString();
+  list[idx].auditLog=(list[idx].auditLog||[]).concat([{action:"cancelled",by:CURRENT_USER.username,at:new Date().toISOString()}]);
+  const booking=list[idx];
+  if(!(await saveDayBookings(dateStr, list))) return false;
+  await updateCustomerHistoryStatus(booking.phone, id, "cancelled");
+  await pushNotification(booking.phone, "cancellation",
+    `Your appointment for ${booking.treatment||booking.service||"your visit"} on ${dateStr} at ${booking.time} has been cancelled by the house.`, booking);
+  await notifyWaitlist(dateStr, booking.specialist);
+  return true;
+}
+
+// Mark a past confirmed appointment completed or a no-show.
+async function setBookingOutcome(dateStr, id, outcome){
+  const list = await loadDayBookings(dateStr);
+  const idx=list.findIndex(b=>b.id===id);
+  if(idx===-1 || list[idx].status!=="confirmed") return false;
+  if(!canManageBooking(list[idx])){ alert("You don't have permission to change this appointment — it belongs to another specialist."); return false; }
+  list[idx].status=outcome;
+  list[idx].auditLog=(list[idx].auditLog||[]).concat([{action:outcome,by:CURRENT_USER.username,at:new Date().toISOString()}]);
+  const booking=list[idx];
+  if(!(await saveDayBookings(dateStr, list))) return false;
+  await updateCustomerHistoryStatus(booking.phone, id, outcome);
+  return true;
+}
+
+const FALLBACK_QUICK=[
+  {time:"10:00",who:"Lea Karam",svc:"Signature Blowout"},
+  {time:"10:45",who:"Nour Assaf",svc:"Manicure — Gel"},
+  {time:"11:30",who:"Yasmine Haddad",svc:"Moroccan Bath"},
+  {time:"13:00",who:"Rana Fares",svc:"Bridal Trial"},
+];
+
+const quickList=document.getElementById("quickList");
+const table=document.getElementById("bookingTable");
+const customerTable=document.getElementById("customerTable");
+const notifList=document.getElementById("notifList");
+const analyticsGrid=document.getElementById("analyticsGrid");
+let allCustomersCache=[];
+
+// Pull the next 14 days of real bookings from the shared store.
+async function loadUpcomingBookings(){
+  const out=[];
+  const now=new Date();
+  for(let i=0;i<14;i++){
+    const d=new Date(now); d.setDate(now.getDate()+i);
+    const ds=dateKeyStr(d);
+    const list=await loadDayBookings(ds);
+    list.forEach(b=>out.push(Object.assign({date:ds, dayLabel: i===0?"Today":(i===1?"Tomorrow":ds)}, b)));
+  }
+  out.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  return out;
+}
+// Pull the last 30 days for analytics.
+async function loadPastBookings(){
+  const out=[];
+  const now=new Date();
+  for(let i=1;i<=30;i++){
+    const d=new Date(now); d.setDate(now.getDate()-i);
+    const ds=dateKeyStr(d);
+    const list=await loadDayBookings(ds);
+    list.forEach(b=>out.push(Object.assign({date:ds}, b)));
+  }
+  return out;
+}
+
+function statusActions(b){
+  if(b.status!=="confirmed") return "";
+  if(!canManageBooking(b)) return "";
+  const isPast = b.date < dateKeyStr(new Date());
+  let actions = `<button class="btn small" data-action="cancel" data-date="${b.date}" data-id="${b.id}">Cancel</button>`;
+  if(isPast){
+    actions += ` <button class="btn small" data-action="complete" data-date="${b.date}" data-id="${b.id}">Complete</button>`;
+    actions += ` <button class="btn small" data-action="noshow" data-date="${b.date}" data-id="${b.id}">No-show</button>`;
+  }
+  return actions;
+}
+
+async function refreshBookingsAndStats(){
+  const upcoming = await loadUpcomingBookings();
+  const todayStr = dateKeyStr(new Date());
+  const todayAll = upcoming.filter(b=>b.date===todayStr);
+  const todayReal = todayAll.filter(b=>b.status!=="cancelled" && b.status!=="blocked");
+
+  const quickSource = todayReal.length
+    ? todayReal.map(b=>({time:b.time, who:b.name||"Guest", svc:b.treatment||b.service||""}))
+    : FALLBACK_QUICK;
+  quickList.innerHTML="";
+  quickSource.forEach(q=>{
+    const el=document.createElement("div"); el.className="quick-item";
+    el.innerHTML=`<span class="time">${q.time}</span><div style="flex:1;text-align:left;margin-left:16px;"><div class="who">${q.who}</div><div class="svc">${q.svc}</div></div>`;
+    quickList.appendChild(el);
+  });
+
+  const visibleRows = upcoming.filter(b=>b.status!=="blocked" && b.status!=="held");
+  if(visibleRows.length){
+    table.innerHTML=`<thead><tr><th>Client</th><th>Ritual</th><th>Specialist</th><th>When</th><th>Status</th><th></th></tr></thead>
+    <tbody>${visibleRows.map(b=>`<tr>
+        <td class="row-name">${b.name||"Guest"}</td>
+        <td>${b.treatment||b.service||"—"}</td>
+        <td>${b.specialist||"—"}</td>
+        <td>${b.dayLabel} · ${b.time}</td>
+        <td><span class="badge ${b.status==='no-show'?'cancelled':b.status}">${b.status}</span></td>
+        <td>${statusActions(b)}</td>
+      </tr>`).join("")}</tbody>`;
+    table.querySelectorAll("button[data-action]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const {action, date, id} = btn.dataset;
+        if(action==="cancel" && !confirm("Cancel this appointment? The customer will be notified and the slot will become available again.")) return;
+        btn.disabled=true; btn.textContent="…";
+        let ok=false;
+        if(action==="cancel") ok=await adminCancelBooking(date, id);
+        else if(action==="complete") ok=await setBookingOutcome(date, id, "completed");
+        else if(action==="noshow") ok=await setBookingOutcome(date, id, "no-show");
+        if(ok) refreshAll(); else { btn.disabled=false; }
+      });
+    });
+  } else {
+    table.innerHTML=`<tbody><tr><td class="cust-empty">No upcoming appointments in the next 14 days yet.</td></tr></tbody>`;
+  }
+
+  // Calendar strip with real per-day counts
+  calGrid.querySelectorAll(".cal-day").forEach(el=>el.remove());
+  for(let i=0;i<7;i++){
+    const d=new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
+    const ds=dateKeyStr(d);
+    const dayEvts = upcoming.filter(b=>b.date===ds && b.status!=="cancelled" && b.status!=="blocked").slice(0,3);
+    const el=document.createElement("div");
+    el.className="cal-day"+(d.toDateString()===today.toDateString()?" today":"");
+    let html=`<div class="dnum">${d.getDate()}</div>`;
+    dayEvts.forEach(e=>{ html+=`<div class="cal-evt ${e.status}">${e.time} ${e.treatment||e.service||""}</div>`; });
+    el.innerHTML=html;
+    calGrid.appendChild(el);
+  }
+
+  if(todayAll.length){
+    document.querySelectorAll(".stat .n")[0].textContent = todayAll.filter(b=>b.status!=="blocked").length;
+    document.querySelectorAll(".stat .n")[1].textContent = todayAll.filter(b=>b.status==="confirmed").length;
+    document.querySelectorAll(".stat .n")[2].textContent = todayAll.filter(b=>b.status==="completed").length;
+    document.querySelectorAll(".stat .n")[3].textContent = todayAll.filter(b=>b.status==="cancelled"||b.status==="no-show").length;
+  }
+}
+
+// Customers panel — lists every customer profile in the shared store, with search + no-show flagging.
+async function refreshCustomers(){
+  let keys=[];
+  try{
+    const res = await window.storage.list("lume:customers:", true);
+    keys = res && res.keys ? res.keys : [];
+  }catch(e){ keys=[]; }
+
+  if(!keys.length){
+    customerTable.innerHTML=`<tbody><tr><td class="cust-empty">No customers yet — profiles are created automatically on first booking.</td></tr></tbody>`;
+    allCustomersCache=[];
+    return;
+  }
+  const customers=[];
+  for(const k of keys){
+    try{
+      const res = await window.storage.get(k, true);
+      if(res && res.value) customers.push(JSON.parse(res.value));
+    }catch(e){}
+  }
+  customers.sort((a,b)=> (b.updatedAt||"").localeCompare(a.updatedAt||""));
+  allCustomersCache = customers;
+  renderCustomerTable(customers);
+}
+function renderCustomerTable(customers){
+  customerTable.innerHTML = `<thead><tr><th>Name</th><th>Phone</th><th>DOB</th><th>Visits</th><th>Last Visit</th></tr></thead>
+  <tbody>${customers.map(c=>{
+    const hist=(c.history||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+    const last=hist[0];
+    const noShows=hist.filter(h=>h.status==="no-show").length;
+    return `<tr>
+      <td class="row-name">${c.name||"—"}${noShows>=2?`<span class="flag-noshow">⚑ ${noShows} no-shows</span>`:""}</td>
+      <td>${c.phone||"—"}</td>
+      <td>${c.bday||"—"}</td>
+      <td>${hist.length}</td>
+      <td>${last?last.date+" · "+last.time:"—"}</td>
+    </tr>`;
+  }).join("")}</tbody>`;
+}
+document.getElementById("customerSearch").addEventListener("input", (e)=>{
+  const q=e.target.value.trim().toLowerCase();
+  if(!q){ renderCustomerTable(allCustomersCache); return; }
+  renderCustomerTable(allCustomersCache.filter(c=>
+    (c.name||"").toLowerCase().includes(q) || (c.phone||"").includes(q)));
+});
+
+const ACTIVITY_DOTS={confirmation:"🟢",cancellation:"🔴",reschedule:"🟡",reminder:"🔵",waitlist:"🟣","admin-alert":"🔵"};
+async function refreshActivityFeed(){
+  let log=[];
+  try{
+    const res=await window.storage.get("lume:notifications:log", true);
+    log = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ log=[]; }
+  const feed=document.getElementById("activityFeed");
+  if(!log.length){ feed.innerHTML=`<div class="notif-empty">No activity yet today.</div>`; return; }
+  feed.innerHTML="";
+  log.slice(0,8).forEach(n=>{
+    const el=document.createElement("div"); el.className="quick-item";
+    const when=new Date(n.at);
+    el.innerHTML=`<span style="min-width:22px;">${ACTIVITY_DOTS[n.type]||"⚪"}</span><div style="flex:1;text-align:left;margin-left:8px;"><div class="who">${n.message}</div><div class="svc">${when.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div></div>`;
+    feed.appendChild(el);
+  });
+}
+
+async function refreshNotifications(){
+  let log=[];
+  try{
+    const res = await window.storage.get("lume:notifications:log", true);
+    log = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ log=[]; }
+  if(!log.length){
+    notifList.innerHTML=`<div class="notif-empty">No notifications sent yet.</div>`;
+    return;
+  }
+  notifList.innerHTML="";
+  log.slice(0,12).forEach(n=>{
+    const el=document.createElement("div"); el.className="notif-item";
+    const when=new Date(n.at);
+    const status=n.status||"sent";
+    const statusColor = status==="failed" ? "#A3503F" : "var(--ok)";
+    el.innerHTML=`<div class="type">${n.type} <span style="color:${statusColor};text-transform:none;letter-spacing:0;">· ${status}</span></div><div class="msg">${n.message}</div><div class="meta">${n.phone?"to "+n.phone:"house alert"} · ${when.toLocaleString()}</div>`;
+    notifList.appendChild(el);
+  });
+}
+
+// Analytics — computed from the last 30 days of real bookings.
+async function refreshAnalytics(){
+  const past = await loadPastBookings();
+  const real = past.filter(b=>b.status!=="blocked");
+  const total = real.length;
+  const completed = real.filter(b=>b.status==="completed");
+  const cancelled = real.filter(b=>b.status==="cancelled");
+  const noShow = real.filter(b=>b.status==="no-show");
+  const revenue = completed.reduce((sum,b)=>{
+    const cat = treatments[b.service]||[];
+    const match = cat.find(t=>t.n===b.treatment);
+    return sum + (match?match.p:0);
+  },0);
+  const countByTreatment={};
+  real.forEach(b=>{ const key=b.treatment||b.service||"—"; countByTreatment[key]=(countByTreatment[key]||0)+1; });
+  const topTreatment = Object.entries(countByTreatment).sort((a,b)=>b[1]-a[1])[0];
+  const countByDow=[0,0,0,0,0,0,0];
+  real.forEach(b=>{ countByDow[new Date(b.date+"T00:00:00").getDay()]++; });
+  const busiestDowIdx = countByDow.indexOf(Math.max(...countByDow));
+  const phones = real.map(b=>b.phone).filter(Boolean);
+  const returning = phones.length - new Set(phones).size;
+
+  analyticsGrid.innerHTML = `
+    <div class="nav-tile analytic-tile"><h3>Bookings</h3><div class="big">${total}</div></div>
+    <div class="nav-tile analytic-tile"><h3>Revenue (completed)</h3><div class="big">$${revenue}</div></div>
+    <div class="nav-tile analytic-tile"><h3>Most Booked</h3><div class="big" style="font-size:15px;">${topTreatment?topTreatment[0]:"—"}</div></div>
+    <div class="nav-tile analytic-tile"><h3>Cancellation Rate</h3><div class="big">${total?Math.round(cancelled.length/total*100):0}%</div></div>
+    <div class="nav-tile analytic-tile"><h3>No-show Rate</h3><div class="big">${total?Math.round(noShow.length/total*100):0}%</div></div>
+    <div class="nav-tile analytic-tile"><h3>Busiest Day</h3><div class="big" style="font-size:15px;">${dows[busiestDowIdx]}</div></div>
+    <div class="nav-tile analytic-tile"><h3>Returning Customers</h3><div class="big">${returning}</div></div>
+    <div class="nav-tile analytic-tile"><h3>Completed</h3><div class="big">${completed.length}</div></div>`;
+}
+
+async function refreshAll(){
+  if(!CURRENT_USER) return;
+  await resyncCurrentUser();
+  if(!CURRENT_USER) return; // resync may have logged out a now-blocked account
+  await loadCatalog();
+  await refreshBookingsAndStats();
+  if(hasPermission("manageCustomers")) await refreshCustomers();
+  await refreshNotifications();
+  await refreshActivityFeed();
+  if(hasPermission("viewAnalytics")) await refreshAnalytics();
+  if(hasPermission("manageTeamAll")||hasPermission("manageTeamStaffOnly")) await refreshTeam();
+  if(hasPermission("manageSettings")){
+    refreshServicesTable();
+    refreshSpecialistsTable();
+    refreshHolidaysList();
+  }
+}
+tryResumeSession();
+setInterval(refreshAll, 4000); // polling, not push — see the access-control banner comment for why
+
+/* ---------- Manual booking (walk-in / phone customers) ---------- */
+function toggleManualBooking(){
+  const panel=document.getElementById("manualBookingPanel");
+  const open = panel.style.display==="block";
+  panel.style.display = open ? "none" : "block";
+  if(!open) initManualBookingForm();
+}
+function initManualBookingForm(){
+  const svcSel=document.getElementById("mbService");
+  svcSel.innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+  document.getElementById("mbDate").value = dateKeyStr(new Date());
+  refreshManualSpecialistOptions();
+  refreshManualTreatmentOptions();
+  refreshManualTimeOptions();
+  svcSel.onchange = ()=>{ refreshManualSpecialistOptions(); refreshManualTreatmentOptions(); };
+  document.getElementById("mbDate").onchange = refreshManualTimeOptions;
+  document.getElementById("mbSpecialist").onchange = refreshManualTimeOptions;
+}
+function refreshManualSpecialistOptions(){
+  const svc=document.getElementById("mbService").value;
+  document.getElementById("mbSpecialist").innerHTML = specialistsFor(svc).map(s=>`<option value="${s.n}">${s.n}</option>`).join("");
+}
+function refreshManualTreatmentOptions(){
+  const svc=document.getElementById("mbService").value;
+  const sel=document.getElementById("mbTreatment");
+  sel.innerHTML = (treatments[svc]||[]).map(t=>`<option value="${t.n}">${t.n} (${t.d})</option>`).join("");
+  refreshManualTimeOptions();
+}
+async function refreshManualTimeOptions(){
+  const dateStr=document.getElementById("mbDate").value || dateKeyStr(new Date());
+  const specialist=document.getElementById("mbSpecialist").value;
+  const svc=document.getElementById("mbService").value;
+  const treatName=document.getElementById("mbTreatment").value;
+  const treat=(treatments[svc]||[]).find(t=>t.n===treatName);
+  const list=await loadDayBookings(dateStr);
+  const timeSel=document.getElementById("mbTime");
+  timeSel.innerHTML="";
+  ALL_SLOTS.forEach(t=>{
+    const required=requiredSlotsFor(t, treat?treat.d:"30 min");
+    const withinLead=isWithinLeadTime(dateStr, t);
+    const free = required && !withinLead && slotsFree(list, specialist, required, null);
+    const opt=document.createElement("option");
+    opt.value=t; opt.textContent = t + (free?"":" — unavailable");
+    opt.disabled = !free;
+    timeSel.appendChild(opt);
+  });
+}
+async function submitManualBooking(){
+  const status=document.getElementById("mbStatus");
+  if(!hasPermission("manageAppointmentsAll")){ status.textContent="You don't have permission to create manual appointments."; return; }
+  const svc=document.getElementById("mbService").value;
+  const treatName=document.getElementById("mbTreatment").value;
+  const treat=(treatments[svc]||[]).find(t=>t.n===treatName);
+  const specialist=document.getElementById("mbSpecialist").value;
+  const dateStr=document.getElementById("mbDate").value;
+  const time=document.getElementById("mbTime").value;
+  const name=document.getElementById("mbName").value.trim();
+  const phone=document.getElementById("mbPhone").value.trim();
+  const bday=document.getElementById("mbBday").value;
+  if(!name||!phone||!dateStr||!time){ status.textContent="Name, phone, date, and time are required."; return; }
+
+  status.textContent="Creating...";
+  const required=requiredSlotsFor(time, treat?treat.d:"30 min");
+  const list=await loadDayBookings(dateStr);
+  if(!required || !slotsFree(list, specialist, required, null)){ status.textContent="That time is no longer available — pick another."; refreshManualTimeOptions(); return; }
+
+  const id="LM-"+Math.floor(10000+Math.random()*89999);
+  list.push({id, time, slots:required, status:"confirmed", service:svc, treatment:treat?treat.n:null,
+    specialist, name, phone, bday, deposit:false, createdAt:new Date().toISOString(), createdBy:"admin", reminderSent:false, sameDayReminderSent:false});
+  await saveDayBookings(dateStr, list);
+
+  await upsertCustomer({name, phone, bday}, {id, date:dateStr, time, service:svc, treatment:treat?treat.n:null, specialist, status:"confirmed"});
+  await pushNotification(phone, "confirmation",
+    `Your appointment for ${treat?treat.n:svc} is confirmed for ${dateStr} at ${time}.`, {id});
+
+  status.textContent="Appointment created.";
+  document.getElementById("mbName").value=""; document.getElementById("mbPhone").value=""; document.getElementById("mbBday").value="";
+  refreshAll();
+}
+
+/* ---------- Block time (breaks, meetings, maintenance, private appointments) ---------- */
+(function initBlockTimeSelects(){
+  const s=document.getElementById("blkStart"), e=document.getElementById("blkEnd");
+  ALL_SLOTS.forEach(t=>{ s.innerHTML+=`<option value="${t}">${t}</option>`; e.innerHTML+=`<option value="${t}">${t}</option>`; });
+  e.selectedIndex = Math.min(1, ALL_SLOTS.length-1);
+  document.getElementById("blkDate").value = dateKeyStr(new Date());
+})();
+async function submitBlockTime(){
+  const status=document.getElementById("blkStatus");
+  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to block time."; return; }
+  const dateStr=document.getElementById("blkDate").value;
+  const startT=document.getElementById("blkStart").value;
+  const endT=document.getElementById("blkEnd").value;
+  const reason=document.getElementById("blkReason").value.trim()||"Blocked";
+  const startIdx=slotIndex(startT), endIdx=slotIndex(endT);
+  if(startIdx===-1 || endIdx===-1 || endIdx<startIdx){ status.textContent="Pick a valid start/end."; return; }
+  const slots=ALL_SLOTS.slice(startIdx, endIdx+1);
+
+  const list=await loadDayBookings(dateStr);
+  const conflict = list.some(b=> (b.status==="confirmed"||b.status==="blocked") && (b.slots||[]).some(s=>slots.includes(s)));
+  if(conflict){ status.textContent="That range overlaps an existing appointment or block."; return; }
+
+  list.push({id:"BLK-"+Date.now(), time:startT, slots, status:"blocked", specialist:null, treatment:reason, createdBy:"admin", createdAt:new Date().toISOString()});
+  await saveDayBookings(dateStr, list);
+  status.textContent="Time blocked.";
+  document.getElementById("blkReason").value="";
+  refreshAll();
+}
+</script>
+</body>
+</html>
