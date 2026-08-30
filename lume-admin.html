@@ -134,7 +134,7 @@
       <div class="field-a"><label>Password</label><input type="password" id="loginPass"></div>
       <button class="btn dark" style="margin-top:8px;" onclick="attemptLogin()">Sign In</button>
       <div id="loginError" style="font-size:12px;color:#A3503F;display:none;"></div>
-      <div style="font-size:11px;color:var(--espresso-45);margin-top:10px;line-height:1.6;">First time here? Default owner login: <b>owner</b> / <b>owner123</b> — change this password immediately from Team Management.</div>
+      <div style="font-size:11px;color:var(--espresso-45);margin-top:10px;line-height:1.6;">Sign in with your real email and password (set up in Supabase Authentication).</div>
     </div>
   </div>
 </div>
@@ -419,6 +419,33 @@
       </div>
     </div>
 
+    <div class="panel" id="businessSettingsPanel">
+      <div class="panel-head">
+        <h2>Business Settings</h2>
+        <button class="btn dark" onclick="openBusinessSettingsForm()">Edit</button>
+      </div>
+      <div class="panel-body">
+        <div class="field-grid-admin" style="padding:0;">
+          <div class="field-a"><label>Business Name</label><input type="text" id="bsName"></div>
+          <div class="field-a"><label>Tagline</label><input type="text" id="bsTagline"></div>
+          <div class="field-a"><label>Address</label><input type="text" id="bsAddress"></div>
+          <div class="field-a"><label>Phone</label><input type="text" id="bsPhone"></div>
+          <div class="field-a"><label>Email</label><input type="text" id="bsEmail"></div>
+          <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"></div>
+          <div class="field-a"><label>Hero Line 1</label><input type="text" id="bsHeroLine1"></div>
+          <div class="field-a"><label>Hero Line 2</label><input type="text" id="bsHeroLine2"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Hero Subtitle</label><input type="text" id="bsHeroSubtitle"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>About / House Title</label><input type="text" id="bsAboutTitle"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 1</label><input type="text" id="bsAboutBody1"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 2</label><input type="text" id="bsAboutBody2"></div>
+        </div>
+        <div style="padding:16px 26px 0;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitBusinessSettings()">Save</button>
+          <span id="bsStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="panel" id="houseManagementPanel">
       <div class="panel-head"><h2>House Management</h2></div>
       <div class="panel-body" style="padding:0;">
@@ -427,138 +454,93 @@
           <div class="nav-tile"><h3>Promotions</h3><span>1 active — First Visit Ritual</span></div>
           <div class="nav-tile"><h3>Packages</h3><span>3 bundled offerings</span></div>
           <div class="nav-tile"><h3>Booking Settings</h3><span>Deposits, buffers, cancellation window</span></div>
-          <div class="nav-tile"><h3>Website Content</h3><span>Homepage copy &amp; imagery</span></div>
           <div class="nav-tile"><h3>Reports</h3><span>Monthly revenue &amp; retention</span></div>
         </div>
-        <div style="padding:14px 26px;font-size:11px;color:var(--espresso-45);">These tiles are not yet built — Services, Staff, and Holidays above are the real, working management panels.</div>
+        <div style="padding:14px 26px;font-size:11px;color:var(--espresso-45);">These tiles are not yet built — Services, Staff, Holidays, and Business Settings above are the real, working management panels.</div>
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- ============================================================
-     LIVE BACKEND SHIM — must be IDENTICAL to the one in lume-website.html
-     so both pages read/write the same Supabase table. Fill in the same
-     SUPABASE_URL / SUPABASE_ANON_KEY as the other file.
-     ============================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-(function(){
-  const SUPABASE_URL = "https://possqyvufrubfixipwlm.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_7tLqOI1xA_Tq4lxOpbjs2w_PFuNiJZ_";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  window.storage = {
-    async get(key, shared){
-      if(!shared){
-        const v = localStorage.getItem(key);
-        return v===null ? null : {key, value:v, shared:false};
-      }
-      const { data, error } = await sb.from('kv_store').select('value').eq('key', key).maybeSingle();
-      if(error || !data) return null;
-      return {key, value:data.value, shared:true};
-    },
-    async set(key, value, shared){
-      if(!shared){
-        localStorage.setItem(key, value);
-        return {key, value, shared:false};
-      }
-      const { error } = await sb.from('kv_store').upsert({key, value, updated_at:new Date().toISOString()});
-      if(error){ console.error("storage.set failed:", error); return null; }
-      return {key, value, shared:true};
-    },
-    async delete(key, shared){
-      if(!shared){
-        localStorage.removeItem(key);
-        return {key, deleted:true, shared:false};
-      }
-      const { error } = await sb.from('kv_store').delete().eq('key', key);
-      if(error) return null;
-      return {key, deleted:true, shared:true};
-    },
-    async list(prefix, shared){
-      prefix = prefix || "";
-      if(!shared){
-        const keys=[];
-        for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k.startsWith(prefix)) keys.push(k); }
-        return {keys, prefix, shared:false};
-      }
-      const { data, error } = await sb.from('kv_store').select('key').like('key', prefix+'%');
-      if(error) return null;
-      return {keys:(data||[]).map(r=>r.key), prefix, shared:true};
-    }
-  };
-})();
-</script>
+/* ============================================================================
+   REAL BACKEND — Supabase client + data layer (admin)
+   ============================================================================
+   Replaces window.storage/kv_store entirely. Admin actions are protected by
+   the RLS policies from Phase 1 (via the signed-in staff member's own
+   session) — not by trusting anything the browser claims. Creating a team
+   account or resetting a password still goes through the "team-api" Edge
+   Function, since those specific actions need Supabase's admin-level API,
+   which must never run with a browser-exposed key.
+   ============================================================================ */
+const SUPABASE_URL = "https://possqyvufrubfixipwlm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_7tLqOI1xA_Tq4lxOpbjs2w_PFuNiJZ_";
+const TEAM_API_URL = SUPABASE_URL + "/functions/v1/team-api";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<script>
-document.getElementById("todayDate").textContent = new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+async function callTeamApi(action, payload){
+  try{
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session ? session.access_token : SUPABASE_ANON_KEY;
+    const res = await fetch(TEAM_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer "+token, "apikey": SUPABASE_ANON_KEY },
+      body: JSON.stringify(Object.assign({ action }, payload)),
+    });
+    return await res.json();
+  }catch(e){ return { ok:false, message:"Network error — please check your connection and try again." }; }
+}
 
-/* ---------- Catalog (services, categories, specialists, holidays) ----------
-   Loaded from the same shared storage keys the customer site reads/writes,
-   so editing a price or specialist here is instantly the same data
-   everywhere — no separate "admin copy" of the catalog. */
-const CATALOG_SERVICES_KEY="lume:catalog:services";
-const CATALOG_SPECIALISTS_KEY="lume:catalog:specialists";
-const CATALOG_HOLIDAYS_KEY="lume:catalog:holidays";
-
-const DEFAULT_CATEGORIES = [
-  {id:"hair",name:"Hair"},{id:"skin",name:"Skin"},{id:"nails",name:"Nails"},
-  {id:"brows",name:"Brows & Lashes"},{id:"bridal",name:"Bridal"}
-];
-const DEFAULT_TREATMENTS = {
-  hair:[
-    {id:"svc-blowout", n:"Signature Blowout",d:"45 min",p:35,desc:"Wash, blow-dry, and finish.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-hairtreat", n:"Hair Treatment Ritual",d:"70 min",p:60,desc:"Deep nourishing treatment for damaged hair.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-colour", n:"Colour & Gloss",d:"120 min",p:110,desc:"Full colour with a glossing finish.",img:"",onlineBookable:true,depositRequired:true,prepMinutes:5,bufferMinutes:null},
-  ],
-  skin:[
-    {id:"svc-facial", n:"Signature Facial",d:"60 min",p:70,desc:"Deep cleanse, exfoliation, and mask.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-hammam", n:"Moroccan Bath",d:"90 min",p:65,desc:"Traditional hammam exfoliation and steam ritual.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-  ],
-  nails:[
-    {id:"svc-gel", n:"Manicure — Gel",d:"50 min",p:30,desc:"Long-lasting gel finish.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-normalmani", n:"Manicure — Normal",d:"40 min",p:20,desc:"Classic polish manicure.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-henna", n:"Henna Art",d:"45 min",p:25,desc:"Traditional or bridal henna design.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-  ],
-  brows:[
-    {id:"svc-brows", n:"Brow Shaping",d:"30 min",p:20,desc:"Threading and tint.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-lashlift", n:"Lash Lift",d:"50 min",p:45,desc:"Lift and tint for a natural curl.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-  ],
-  bridal:[
-    {id:"svc-bridaltrial", n:"Bridal Trial",d:"120 min",p:150,desc:"Full hair and makeup trial run.",img:"",onlineBookable:true,depositRequired:true,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-bridalday", n:"Bridal Day-Of",d:"180 min",p:350,desc:"Complete bridal styling on the day.",img:"",onlineBookable:false,depositRequired:true,prepMinutes:15,bufferMinutes:30},
-  ]
+/* ---------- Business Settings ---------- */
+let BIZ = {
+  business_name:"MAISON", tagline:"", address:"", phone:"", email:"",
+  hours_display:"", default_language:"en", currency_symbol:"$",
+  booking_lead_hours:2, default_buffer_minutes:15, max_active_bookings_per_phone:3,
 };
-const DEFAULT_SPECIALISTS = [
-  {n:"Maya", s:"Hair & Colour", capableCategories:["hair","bridal"], workingDays:[1,2,3,4,5,6], vacationDates:[]},
-  {n:"Sarah", s:"Skin & Facials", capableCategories:["skin","brows"], workingDays:[1,2,3,4,5,6], vacationDates:[]},
-  {n:"Rana", s:"Nails & Henna", capableCategories:["nails"], workingDays:[2,3,4,5,6,0], vacationDates:[]},
-];
-const NO_PREFERENCE={n:"No Preference", s:"Any available specialist"};
+async function loadBusinessSettings(){
+  try{
+    const { data, error } = await sb.from("business_settings").select("*").eq("id",1).maybeSingle();
+    if(!error && data) BIZ = Object.assign({}, BIZ, data);
+  }catch(e){}
+  if(BIZ.booking_lead_hours) BOOKING_LEAD_HOURS = BIZ.booking_lead_hours;
+  if(BIZ.default_buffer_minutes) BUFFER_MINUTES = BIZ.default_buffer_minutes;
+}
 
-let categories=DEFAULT_CATEGORIES, treatments=DEFAULT_TREATMENTS, specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS], holidays=[];
+/* ---------- Catalog (categories, services, specialists, holidays) ---------- */
+let categories=[], treatments={}, specialists=[{n:"No Preference", s:"Any available specialist"}], holidays=[];
 
 async function loadCatalog(){
   try{
-    const res=await window.storage.get(CATALOG_SERVICES_KEY, true);
-    if(res && res.value){ const parsed=JSON.parse(res.value); categories=parsed.categories; treatments=parsed.treatments; }
-    else{ categories=DEFAULT_CATEGORIES; treatments=DEFAULT_TREATMENTS; await window.storage.set(CATALOG_SERVICES_KEY, JSON.stringify({categories, treatments}), true); }
-  }catch(e){ categories=DEFAULT_CATEGORIES; treatments=DEFAULT_TREATMENTS; }
+    const { data: cats } = await sb.from("categories").select("*");
+    const { data: svcs } = await sb.from("services").select("*");
+    categories = cats || [];
+    treatments = {};
+    categories.forEach(c=>treatments[c.id]=[]);
+    (svcs||[]).forEach(s=>{
+      if(!treatments[s.category_id]) treatments[s.category_id]=[];
+      treatments[s.category_id].push({
+        id:s.id, n:s.name, d:s.duration_minutes+" min", p:s.price, desc:s.description||"",
+        img:s.image_url||"", onlineBookable:s.online_bookable, depositRequired:s.deposit_required,
+        prepMinutes:s.prep_minutes, bufferMinutes:s.buffer_minutes,
+      });
+    });
+  }catch(e){ categories=[]; treatments={}; }
+
   try{
-    const res=await window.storage.get(CATALOG_SPECIALISTS_KEY, true);
-    if(res && res.value){ specialists=[NO_PREFERENCE, ...JSON.parse(res.value)]; }
-    else{ await window.storage.set(CATALOG_SPECIALISTS_KEY, JSON.stringify(DEFAULT_SPECIALISTS), true); specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS]; }
-  }catch(e){ specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS]; }
+    const { data: sps } = await sb.from("specialists").select("*");
+    specialists = [{n:"No Preference", s:"Any available specialist"}].concat(
+      (sps||[]).map(s=>({id:s.id, n:s.name, s:s.title||"", capableCategories:s.capable_categories||[], workingDays:s.working_days||[], vacationDates:s.vacation_dates||[]}))
+    );
+  }catch(e){ specialists=[{n:"No Preference", s:"Any available specialist"}]; }
+
   try{
-    const res=await window.storage.get(CATALOG_HOLIDAYS_KEY, true);
-    holidays = res && res.value ? JSON.parse(res.value) : [];
+    const { data: hols } = await sb.from("holidays").select("*");
+    holidays = (hols||[]).map(h=>({date:h.date, label:h.label}));
   }catch(e){ holidays=[]; }
 }
-async function saveServicesCatalog(){ await window.storage.set(CATALOG_SERVICES_KEY, JSON.stringify({categories, treatments}), true); }
-async function saveSpecialistsCatalog(){ await window.storage.set(CATALOG_SPECIALISTS_KEY, JSON.stringify(specialists.filter(s=>s.n!=="No Preference")), true); }
-async function saveHolidaysCatalog(){ await window.storage.set(CATALOG_HOLIDAYS_KEY, JSON.stringify(holidays), true); }
 function isHoliday(dateStr){ return holidays.some(h=>h.date===dateStr); }
 function holidayLabel(dateStr){ const h=holidays.find(x=>x.date===dateStr); return h?h.label:null; }
 function specialistWorks(specialistName, dateStr){
@@ -566,18 +548,22 @@ function specialistWorks(specialistName, dateStr){
   const sp=specialists.find(s=>s.n===specialistName);
   if(!sp) return true;
   const dow=new Date(dateStr+"T00:00:00").getDay();
-  if(sp.workingDays && !sp.workingDays.includes(dow)) return false;
+  if(sp.workingDays && sp.workingDays.length && !sp.workingDays.includes(dow)) return false;
   if((sp.vacationDates||[]).includes(dateStr)) return false;
   return true;
 }
+function specialistIdByName(name){ const sp=specialists.find(s=>s.n===name); return sp && sp.id ? sp.id : null; }
+function specialistNameById(id){ if(!id) return "No Preference"; const sp=specialists.find(s=>s.id===id); return sp?sp.n:"No Preference"; }
+function specialistsFor(categoryId){
+  const capable = specialists.filter(s=> s.n==="No Preference" || (s.capableCategories||[]).includes(categoryId));
+  return capable.length ? capable : specialists;
+}
 
 const ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:30","17:00","17:30"];
-const BUFFER_MINUTES=15;
-const BOOKING_LEAD_HOURS=2;
+let BUFFER_MINUTES=15;
+let BOOKING_LEAD_HOURS=2;
 
 function dateKeyStr(d){ return d.toISOString().slice(0,10); }
-function phoneKey(phone){ return (phone||"").replace(/\D/g,""); }
-function customerKey(phone){ return "lume:customers:"+phoneKey(phone); }
 function specialistLane(s){ return s || "No Preference"; }
 function slotIndex(t){ return ALL_SLOTS.indexOf(t); }
 function durationMinutes(label){ const m=/(\d+)/.exec(label||""); return m?parseInt(m[1],10):30; }
@@ -602,23 +588,18 @@ function requiredSlotsFor(time, durationLabel, bufferOverride){
 function isWithinLeadTime(dateStr, time){
   return (new Date(dateStr+"T"+time+":00")-new Date())/3600000 < BOOKING_LEAD_HOURS;
 }
+// Real availability check against actual booking rows already fetched for a date.
 function slotsFree(dayList, specialist, slots, excludeId){
-  const now=Date.now();
   return !dayList.some(b=>{
     if(b.id===excludeId) return false;
-    if(b.status==="held" && new Date(b.expiresAt).getTime()<now) return false; // expired, ignore
-    if(b.status!=="confirmed" && b.status!=="blocked" && b.status!=="held") return false;
-    if((b.status==="confirmed"||b.status==="held") && specialistLane(b.specialist)!==specialistLane(specialist)) return false;
+    if(b.status!=="confirmed" && b.status!=="blocked") return false;
+    if(b.status==="confirmed" && specialistLane(b.specialist)!==specialistLane(specialist)) return false;
     return (b.slots||[]).some(s=>slots.includes(s));
   });
 }
-function specialistsFor(categoryId){
-  const capable = specialists.filter(s=> s.n==="No Preference" || (s.capableCategories||[]).includes(categoryId));
-  return capable.length ? capable : specialists;
-}
 
 /* ==========================================================================
-   SERVICE MANAGEMENT
+   SERVICE MANAGEMENT — real "services" table
    ========================================================================== */
 function slugify(str){ return "svc-"+str.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")+"-"+Date.now().toString(36).slice(-4); }
 
@@ -648,8 +629,8 @@ async function submitService(){
   if(newCatName){
     categoryId = newCatName.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"") || ("cat-"+Date.now());
     if(!categories.some(c=>c.id===categoryId)){
-      categories = categories.concat([{id:categoryId, name:newCatName}]);
-      treatments[categoryId]=[];
+      const { error: catErr } = await sb.from("categories").insert({ id:categoryId, name:newCatName });
+      if(catErr){ status.textContent="Could not create category: "+catErr.message; return; }
     }
   }
   const prep=parseInt(document.getElementById("svcPrep").value,10)||0;
@@ -660,31 +641,35 @@ async function submitService(){
   const onlineBookable=document.getElementById("svcOnlineBookable").value==="true";
   const depositRequired=document.getElementById("svcDeposit").value==="true";
 
-  if(!treatments[categoryId]) treatments[categoryId]=[];
-  treatments[categoryId].push({id:slugify(name), n:name, d:duration+" min", p:price, desc, img, onlineBookable, depositRequired, prepMinutes:prep, bufferMinutes:buffer});
-  await saveServicesCatalog();
+  const { error } = await sb.from("services").insert({
+    id: slugify(name), category_id: categoryId, name, price, duration_minutes: duration,
+    description: desc, image_url: img, online_bookable: onlineBookable, deposit_required: depositRequired,
+    prep_minutes: prep, buffer_minutes: buffer,
+  });
+  if(error){ status.textContent="Could not save: "+error.message; return; }
   status.textContent="Service saved.";
+  await loadCatalog();
   refreshServicesTable();
 }
-function deleteService(categoryId, serviceId){
+async function deleteService(categoryId, serviceId){
   if(!confirm("Delete this service? Existing appointments keep their historical service name; only future bookability is affected.")) return;
-  treatments[categoryId] = (treatments[categoryId]||[]).filter(t=>t.id!==serviceId);
-  saveServicesCatalog().then(refreshServicesTable);
+  const { error } = await sb.from("services").delete().eq("id", serviceId);
+  if(error){ alert("Could not delete: "+error.message); return; }
+  await loadCatalog();
+  refreshServicesTable();
 }
 function refreshServicesTable(){
   const table=document.getElementById("servicesTable");
   const rows=[];
   categories.forEach(c=>{
-    (treatments[c.id]||[]).forEach(t=>{
-      rows.push({cat:c.name, catId:c.id, t});
-    });
+    (treatments[c.id]||[]).forEach(t=>{ rows.push({cat:c.name, catId:c.id, t}); });
   });
   if(!rows.length){ table.innerHTML=`<tbody><tr><td class="cust-empty">No services yet.</td></tr></tbody>`; return; }
   table.innerHTML=`<thead><tr><th>Category</th><th>Service</th><th>Price</th><th>Duration</th><th>Online</th><th>Deposit</th><th></th></tr></thead>
   <tbody>${rows.map(r=>`<tr>
     <td>${r.cat}</td>
     <td class="row-name">${r.t.n}</td>
-    <td>$${r.t.p}</td>
+    <td>${BIZ.currency_symbol||"$"}${r.t.p}</td>
     <td>${r.t.d}${r.t.bufferMinutes!=null?` (+${r.t.bufferMinutes}m buffer)`:""}</td>
     <td>${r.t.onlineBookable? "Yes":"No"}</td>
     <td>${r.t.depositRequired? "Yes":"No"}</td>
@@ -696,10 +681,10 @@ function refreshServicesTable(){
 }
 
 /* ==========================================================================
-   SPECIALIST MANAGEMENT
+   SPECIALIST MANAGEMENT — real "specialists" table
    ========================================================================== */
 const DOW_LABELS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-let editingSpecialistName=null;
+let editingSpecialistId=null;
 function toggleSpecialistForm(){
   const panel=document.getElementById("specialistFormPanel");
   const open=panel.style.display==="block";
@@ -707,9 +692,8 @@ function toggleSpecialistForm(){
   if(!open) openSpecialistForm(null);
 }
 function openSpecialistForm(existing){
-  editingSpecialistName = existing ? existing.n : null;
+  editingSpecialistId = existing ? existing.id : null;
   document.getElementById("spName").value = existing ? existing.n : "";
-  document.getElementById("spName").disabled = !!existing;
   document.getElementById("spTitle").value = existing ? existing.s : "";
   document.getElementById("spCategories").innerHTML = categories.map(c=>
     `<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="${c.id}" ${existing&&(existing.capableCategories||[]).includes(c.id)?"checked":""}> ${c.name}</label>`).join("");
@@ -741,21 +725,25 @@ async function submitSpecialist(){
   if(!name){ status.textContent="Name is required."; return; }
   const capableCategories=[...document.querySelectorAll('#spCategories input:checked')].map(el=>el.value);
   const workingDays=[...document.querySelectorAll('#spWorkingDays input:checked')].map(el=>parseInt(el.value,10));
-  const record={n:name, s:title, capableCategories, workingDays, vacationDates:currentVacationDates.slice()};
+  const record={ name, title, capable_categories:capableCategories, working_days:workingDays, vacation_dates:currentVacationDates.slice() };
 
-  const real=specialists.filter(s=>s.n!=="No Preference");
-  const idx=real.findIndex(s=>s.n===(editingSpecialistName||name));
-  if(idx>=0) real[idx]=record; else real.push(record);
-  specialists=[NO_PREFERENCE, ...real];
-  await saveSpecialistsCatalog();
+  let error;
+  if(editingSpecialistId){
+    ({ error } = await sb.from("specialists").update(record).eq("id", editingSpecialistId));
+  }else{
+    ({ error } = await sb.from("specialists").insert(record));
+  }
+  if(error){ status.textContent="Could not save: "+error.message; return; }
   status.textContent="Specialist saved.";
-  document.getElementById("spName").disabled=false;
+  await loadCatalog();
   refreshSpecialistsTable();
 }
-function deleteSpecialist(name){
+async function deleteSpecialist(id, name){
   if(!confirm(`Remove ${name} as a specialist? Their historical appointments are kept, but they'll no longer be offered for new bookings.`)) return;
-  specialists = [NO_PREFERENCE, ...specialists.filter(s=>s.n!=="No Preference" && s.n!==name)];
-  saveSpecialistsCatalog().then(refreshSpecialistsTable);
+  const { error } = await sb.from("specialists").delete().eq("id", id);
+  if(error){ alert("Could not delete: "+error.message); return; }
+  await loadCatalog();
+  refreshSpecialistsTable();
 }
 function refreshSpecialistsTable(){
   const table=document.getElementById("specialistsTable");
@@ -769,40 +757,42 @@ function refreshSpecialistsTable(){
     <td>${(s.workingDays||[]).map(d=>DOW_LABELS[d]).join(", ")||"—"}</td>
     <td>${(s.vacationDates||[]).length}</td>
     <td>
-      <button class="btn small" data-edit="${s.n}">Edit</button>
-      <button class="btn small" data-del="${s.n}">Remove</button>
+      <button class="btn small" data-edit="${s.id}">Edit</button>
+      <button class="btn small" data-del="${s.id}" data-name="${s.n}">Remove</button>
     </td>
   </tr>`).join("")}</tbody>`;
   table.querySelectorAll("button[data-edit]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
-      const s=real.find(x=>x.n===btn.dataset.edit);
+      const s=real.find(x=>x.id===btn.dataset.edit);
       document.getElementById("specialistFormPanel").style.display="block";
       openSpecialistForm(s);
       document.getElementById("specialistFormPanel").scrollIntoView({behavior:"smooth"});
     });
   });
   table.querySelectorAll("button[data-del]").forEach(btn=>{
-    btn.addEventListener("click", ()=>deleteSpecialist(btn.dataset.del));
+    btn.addEventListener("click", ()=>deleteSpecialist(btn.dataset.del, btn.dataset.name));
   });
 }
 
 /* ==========================================================================
-   HOLIDAYS & SPECIAL DAYS
+   HOLIDAYS & SPECIAL DAYS — real "holidays" table
    ========================================================================== */
 async function submitHoliday(){
   if(!hasPermission("manageSettings")) return;
   const date=document.getElementById("holDate").value;
   const label=document.getElementById("holLabel").value.trim();
   if(!date || !label) return;
-  if(holidays.some(h=>h.date===date)){ alert("A holiday is already set for that date."); return; }
-  holidays.push({date, label});
-  await saveHolidaysCatalog();
+  const { error } = await sb.from("holidays").insert({ date, label });
+  if(error){ alert(error.code==="23505" ? "A holiday is already set for that date." : "Could not save: "+error.message); return; }
   document.getElementById("holLabel").value="";
+  await loadCatalog();
   refreshHolidaysList();
 }
-function deleteHoliday(date){
-  holidays = holidays.filter(h=>h.date!==date);
-  saveHolidaysCatalog().then(refreshHolidaysList);
+async function deleteHoliday(date){
+  const { error } = await sb.from("holidays").delete().eq("date", date);
+  if(error){ alert("Could not delete: "+error.message); return; }
+  await loadCatalog();
+  refreshHolidaysList();
 }
 function refreshHolidaysList(){
   const wrap=document.getElementById("holidaysList");
@@ -816,22 +806,59 @@ function refreshHolidaysList(){
 }
 
 /* ==========================================================================
-   ACCESS CONTROL — PROTOTYPE ONLY, NOT REAL SECURITY
-   ==========================================================================
-   This whole system runs as client-side JavaScript against a shared,
-   unauthenticated storage bucket (window.storage). There is no real server
-   here to enforce anything: every "permission check" below is a JS
-   function that a browser's devtools can bypass entirely, and every
-   "password" is stored in the same shared bucket any visitor's browser can
-   read. This is a faithful, fully-wired PROTOTYPE of the intended
-   four-role permission model — useful for validating the workflow and as
-   a spec for a real implementation — but it must never be treated as
-   protecting real credentials or real customer data. A real launch needs
-   an actual backend (e.g. Supabase/Firebase Auth or a custom server) doing
-   real hashed-password auth and real server-side authorization on every
-   request.
+   BUSINESS SETTINGS — real "business_settings" table (single row, id=1)
    ========================================================================== */
+function openBusinessSettingsForm(){
+  if(!hasPermission("manageSettings")) return;
+  document.getElementById("bsName").value = BIZ.business_name||"";
+  document.getElementById("bsTagline").value = BIZ.tagline||"";
+  document.getElementById("bsAddress").value = BIZ.address||"";
+  document.getElementById("bsPhone").value = BIZ.phone||"";
+  document.getElementById("bsEmail").value = BIZ.email||"";
+  document.getElementById("bsHours").value = BIZ.hours_display||"";
+  document.getElementById("bsHeroLine1").value = BIZ.hero_line1||"";
+  document.getElementById("bsHeroLine2").value = BIZ.hero_line2||"";
+  document.getElementById("bsHeroSubtitle").value = BIZ.hero_subtitle||"";
+  document.getElementById("bsAboutTitle").value = BIZ.about_title||"";
+  document.getElementById("bsAboutBody1").value = BIZ.about_body_1||"";
+  document.getElementById("bsAboutBody2").value = BIZ.about_body_2||"";
+  document.getElementById("bsStatus").textContent="";
+  document.getElementById("businessSettingsPanel").style.display="block";
+}
+async function submitBusinessSettings(){
+  const status=document.getElementById("bsStatus");
+  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to edit business settings."; return; }
+  const update = {
+    business_name: document.getElementById("bsName").value.trim(),
+    tagline: document.getElementById("bsTagline").value.trim(),
+    address: document.getElementById("bsAddress").value.trim(),
+    phone: document.getElementById("bsPhone").value.trim(),
+    email: document.getElementById("bsEmail").value.trim(),
+    hours_display: document.getElementById("bsHours").value.trim(),
+    hero_line1: document.getElementById("bsHeroLine1").value.trim(),
+    hero_line2: document.getElementById("bsHeroLine2").value.trim(),
+    hero_subtitle: document.getElementById("bsHeroSubtitle").value.trim(),
+    about_title: document.getElementById("bsAboutTitle").value.trim(),
+    about_body_1: document.getElementById("bsAboutBody1").value.trim(),
+    about_body_2: document.getElementById("bsAboutBody2").value.trim(),
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await sb.from("business_settings").update(update).eq("id",1);
+  if(error){ status.textContent="Could not save: "+error.message; return; }
+  status.textContent="Saved — changes are live on the customer site within its next refresh.";
+  await loadBusinessSettings();
+}
 
+/* ==========================================================================
+   ACCESS CONTROL
+   ==========================================================================
+   Real Supabase Auth now backs every login — passwords are handled by
+   Supabase itself, never stored or compared in this file. Every admin
+   action below is protected server-side by the RLS policies from Phase 1
+   (checked against the signed-in user's row in team_accounts), not by
+   trusting anything this JavaScript claims — a devtools user could change
+   what this file does, but not what Postgres allows them to do.
+   ========================================================================== */
 const ROLES=["owner","manager","receptionist","staff"];
 const PERMISSIONS={
   owner:      ["viewAll","manageAppointmentsAll","manageAppointmentsOwn","manageCustomers","manageServices","manageTeamAll","manageTeamStaffOnly","resetAnyPassword","viewAnalytics","manageSettings"],
@@ -840,66 +867,38 @@ const PERMISSIONS={
   staff:      ["viewOwnScheduleAndCalendar","manageAppointmentsOwn"],
 };
 function roleHas(role, perm){ return (PERMISSIONS[role]||[]).includes(perm); }
-// Checks the CURRENT_USER's effective permissions: their role's defaults,
-// plus any individual overrides the Owner has granted them.
 function hasPermission(perm){
   if(!CURRENT_USER) return false;
   if(roleHas(CURRENT_USER.role, perm)) return true;
   return ((CURRENT_USER.permissionOverrides&&CURRENT_USER.permissionOverrides.flags)||[]).includes(perm);
 }
-// A staff/receptionist/manager's authorized service categories: their
-// assigned specialty by default, plus any categories the Owner has
-// individually granted them (e.g. Emma — Hair, also granted Makeup).
 function authorizedCategories(member){
   const base = member.specialty ? [member.specialty] : [];
   const extra = (member.permissionOverrides&&member.permissionOverrides.categories)||[];
   return Array.from(new Set([...base, ...extra]));
 }
-
-// NOT cryptographic — just avoids storing raw plaintext in the shared bucket.
-// See the banner comment above: do not treat this as secure hashing.
-function insecureHash(str){
-  let h=0;
-  for(let i=0;i<str.length;i++){ h=(h*31 + str.charCodeAt(i))|0; }
-  return "h"+Math.abs(h).toString(36);
-}
 function genTempPassword(){
   return Math.random().toString(36).slice(2,6)+"-"+Math.random().toString(36).slice(2,6);
 }
 
-let CURRENT_USER=null; // {username, name, role, assignedSpecialist}
+let CURRENT_USER=null; // {id, username, name, role, assignedSpecialist, specialty, permissionOverrides}
 
-function teamKey(username){ return "lume:team:"+(username||"").toLowerCase().trim(); }
-
-async function getTeamMember(username){
-  try{
-    const res=await window.storage.get(teamKey(username), true);
-    return res && res.value ? JSON.parse(res.value) : null;
-  }catch(e){ return null; }
+function memberFromRow(row){
+  return {
+    id: row.id, username: row.username, name: row.name, role: row.role, status: row.status,
+    assignedSpecialist: specialistNameById(row.assigned_specialist_id), assignedSpecialistId: row.assigned_specialist_id,
+    specialty: row.specialty, permissionOverrides: row.permission_overrides || {categories:[],flags:[]},
+    lastLogin: row.last_login, phone: row.phone,
+  };
 }
-async function saveTeamMember(member){
-  try{ return !!(await window.storage.set(teamKey(member.username), JSON.stringify(member), true)); }
-  catch(e){ return false; }
+async function getTeamMemberById(id){
+  const { data } = await sb.from("team_accounts").select("*").eq("id", id).maybeSingle();
+  return data ? memberFromRow(data) : null;
 }
 async function listTeam(){
-  let keys=[];
-  try{ const res=await window.storage.list("lume:team:", true); keys=res&&res.keys?res.keys:[]; }catch(e){ return []; }
-  const out=[];
-  for(const k of keys){
-    try{ const res=await window.storage.get(k, true); if(res&&res.value) out.push(JSON.parse(res.value)); }catch(e){}
-  }
-  return out.sort((a,b)=> (a.role==="owner"?-1:1) - (b.role==="owner"?-1:1) || (a.name||"").localeCompare(b.name||""));
-}
-
-// Bootstraps a default Owner account the very first time the dashboard is opened.
-async function ensureOwnerSeed(){
-  const team=await listTeam();
-  if(team.some(t=>t.role==="owner")) return;
-  await saveTeamMember({
-    name:"Owner", username:"owner", role:"owner", status:"active",
-    passwordHash:insecureHash("owner123"), assignedSpecialist:null,
-    createdAt:new Date().toISOString(), lastLogin:null
-  });
+  const { data, error } = await sb.from("team_accounts").select("*");
+  if(error || !data) return [];
+  return data.map(memberFromRow).sort((a,b)=> (a.role==="owner"?-1:1) - (b.role==="owner"?-1:1) || (a.name||"").localeCompare(b.name||""));
 }
 
 async function attemptLogin(){
@@ -907,39 +906,37 @@ async function attemptLogin(){
   const password=document.getElementById("loginPass").value;
   const err=document.getElementById("loginError");
   err.style.display="none";
-  await ensureOwnerSeed();
-  const member=await getTeamMember(username);
-  if(!member || member.passwordHash!==insecureHash(password)){
-    err.textContent="Incorrect username or password."; err.style.display="block"; return;
+
+  const { data, error } = await sb.auth.signInWithPassword({ email: username, password });
+  if(error || !data.user){
+    err.textContent="Incorrect username/email or password."; err.style.display="block"; return;
+  }
+  const member = await getTeamMemberById(data.user.id);
+  if(!member){
+    err.textContent="Signed in, but no team profile is linked to this account. Contact the Owner."; err.style.display="block";
+    await sb.auth.signOut();
+    return;
   }
   if(member.status==="blocked"){
-    err.textContent="This account has been blocked by the Owner. Contact management for access."; err.style.display="block"; return;
+    err.textContent="This account has been blocked by the Owner. Contact management for access."; err.style.display="block";
+    await sb.auth.signOut();
+    return;
   }
-  member.lastLogin=new Date().toISOString();
-  await saveTeamMember(member);
-  try{ await window.storage.set("lume:session", JSON.stringify({username:member.username}), false); }catch(e){}
+  await sb.from("team_accounts").update({ last_login: new Date().toISOString() }).eq("id", member.id);
   enterDashboard(member);
 }
 
 async function tryResumeSession(){
-  await ensureOwnerSeed();
-  try{
-    const res=await window.storage.get("lume:session", false);
-    if(!res || !res.value) return false;
-    const {username}=JSON.parse(res.value);
-    const member=await getTeamMember(username);
-    if(!member || member.status==="blocked") return false;
-    enterDashboard(member);
-    return true;
-  }catch(e){ return false; }
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session || !session.user) return false;
+  const member = await getTeamMemberById(session.user.id);
+  if(!member || member.status==="blocked") return false;
+  enterDashboard(member);
+  return true;
 }
 
 function enterDashboard(member){
-  CURRENT_USER={
-    username:member.username, name:member.name, role:member.role,
-    assignedSpecialist:member.assignedSpecialist, specialty:member.specialty,
-    permissionOverrides:member.permissionOverrides||{categories:[],flags:[]}
-  };
+  CURRENT_USER=member;
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("dashboardShell").style.display="grid";
   document.getElementById("greeting").textContent = "Good day, "+(member.name||member.username);
@@ -952,18 +949,14 @@ function enterDashboard(member){
 // makes elsewhere take effect on the next refresh cycle without needing to log out.
 async function resyncCurrentUser(){
   if(!CURRENT_USER) return;
-  const fresh=await getTeamMember(CURRENT_USER.username);
+  const fresh=await getTeamMemberById(CURRENT_USER.id);
   if(!fresh || fresh.status==="blocked"){ logout(); return; }
-  CURRENT_USER={
-    username:fresh.username, name:fresh.name, role:fresh.role,
-    assignedSpecialist:fresh.assignedSpecialist, specialty:fresh.specialty,
-    permissionOverrides:fresh.permissionOverrides||{categories:[],flags:[]}
-  };
+  CURRENT_USER=fresh;
   applyRoleUI();
 }
 
-function logout(){
-  try{ window.storage.set("lume:session", JSON.stringify({}), false); }catch(e){}
+async function logout(){
+  await sb.auth.signOut();
   CURRENT_USER=null;
   document.getElementById("dashboardShell").style.display="none";
   document.getElementById("loginScreen").style.display="flex";
@@ -973,7 +966,7 @@ function logout(){
 function applyRoleUI(){
   const role=CURRENT_USER.role;
   document.getElementById("teamPanel").style.display = hasPermission("manageTeamAll")||hasPermission("manageTeamStaffOnly") ? "block" : "none";
-  document.getElementById("newTeamBtn").style.display = role==="owner" ? "inline-block" : "none"; // manager can edit existing staff, only owner creates new manager-level too — kept simple
+  document.getElementById("newTeamBtn").style.display = (role==="owner"||role==="manager") ? "inline-block" : "none";
   document.getElementById("houseManagementPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
   document.getElementById("analyticsGrid").closest(".panel").style.display = hasPermission("viewAnalytics") ? "block" : "none";
   document.getElementById("manualBookingPanel").closest(".panel").querySelector(".btn.dark").style.display =
@@ -983,13 +976,10 @@ function applyRoleUI(){
   document.getElementById("servicesPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
   document.getElementById("specialistsPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
   document.getElementById("holidaysPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
+  const bsPanel=document.getElementById("businessSettingsPanel");
+  if(bsPanel) bsPanel.style.display = hasPermission("manageSettings") ? "block" : "none";
 }
-/* ---------- Sidebar page navigation ----------
-   Each entry maps a sidebar destination to the element id(s) that make up
-   that "page". Everything not in the active page's list gets .page-hidden
-   (display:none!important) — permission-based visibility (e.g. Services/
-   Staff/Team being hidden from roles without access) still applies on top
-   of this via each panel's own inline style, untouched by this router. */
+/* ---------- Sidebar page navigation ---------- */
 const ADMIN_PAGE_MAP = {
   today:         ["pageToday","pageUpcomingBlockAnalytics"],
   calendar:      ["pageCalendar"],
@@ -1016,7 +1006,8 @@ function showAdminPage(page){
 }
 showAdminPage("today"); // set initial state before first login/render
 
-/* ---------- Team Management ---------- */
+/* ---------- Team Management (create + reset-password go through team-api;
+   everything else is a direct RLS-protected update from this session) ---------- */
 function toggleTeamForm(){
   const panel=document.getElementById("teamFormPanel");
   const open=panel.style.display==="block";
@@ -1039,30 +1030,27 @@ async function submitTeamMember(){
   const name=document.getElementById("tmName").value.trim();
   const username=document.getElementById("tmUsername").value.trim();
   const phone=document.getElementById("tmPhone").value.trim();
-  const role=document.getElementById("tmRole").value; // dropdown never offers "owner" — matches the spec
+  const role=document.getElementById("tmRole").value;
   const isStaff = role==="staff";
-  const assignedSpecialist = isStaff ? document.getElementById("tmSpecialist").value : null;
+  const assignedSpecialistName = isStaff ? document.getElementById("tmSpecialist").value : null;
   const specialty = isStaff ? document.getElementById("tmSpecialty").value : null;
   if(!name||!username){ status.textContent="Name and email/username are required."; return; }
-  if(CURRENT_USER.role==="manager" && role==="manager"){ status.textContent="Managers can create Receptionist and Staff accounts, not other Managers."; return; }
-  const existing=await getTeamMember(username);
-  if(existing){ status.textContent="That username is already taken."; return; }
 
-  const tempPassword=genTempPassword();
-  await saveTeamMember({
-    name, username, phone, role, status:"active", assignedSpecialist, specialty,
-    permissionOverrides:{categories:[], flags:[]}, // locked to default role + specialty until the Owner grants more
-    passwordHash:insecureHash(tempPassword),
-    createdAt:new Date().toISOString(), lastLogin:null, createdBy:CURRENT_USER.username
+  status.textContent="Creating...";
+  const res = await callTeamApi("create_team_member", {
+    name, username, phone, role,
+    assigned_specialist_id: assignedSpecialistName ? specialistIdByName(assignedSpecialistName) : null,
+    specialty,
   });
-  status.textContent = `Account created. Temporary password: ${tempPassword} (share this once — it will not be shown again).`;
+  if(!res.ok){ status.textContent=res.message||"Could not create account."; return; }
+  status.textContent = `Account created. Temporary password: ${res.temp_password} (share this once — it will not be shown again).`;
   document.getElementById("tmName").value=""; document.getElementById("tmUsername").value=""; document.getElementById("tmPhone").value="";
   refreshTeam();
 }
 
 function canManageMember(m){
   const isOwnerRow = m.role==="owner";
-  if(CURRENT_USER.role==="owner") return !isOwnerRow || m.username===CURRENT_USER.username;
+  if(CURRENT_USER.role==="owner") return !isOwnerRow || m.id===CURRENT_USER.id;
   if(CURRENT_USER.role==="manager") return !isOwnerRow && m.role!=="manager";
   return false;
 }
@@ -1077,13 +1065,13 @@ async function refreshTeam(){
     const extraCount = ((m.permissionOverrides&&m.permissionOverrides.categories)||[]).length + ((m.permissionOverrides&&m.permissionOverrides.flags)||[]).length;
     const permSummary = m.role==="owner" ? "All" : (extraCount ? `Default +${extraCount}` : "Default");
     const actions = !canManageThis ? "" : `
-      <button class="btn small" data-action="reset" data-u="${m.username}">Reset Password</button>
-      ${m.role!=="owner" ? `<button class="btn small" data-action="perms" data-u="${m.username}">Permissions</button>` : ""}
+      <button class="btn small" data-action="reset" data-id="${m.id}" data-name="${m.name}">Reset Password</button>
+      ${m.role!=="owner" ? `<button class="btn small" data-action="perms" data-id="${m.id}">Permissions</button>` : ""}
       ${m.status==="active"
-        ? `<button class="btn small" data-action="block" data-u="${m.username}">Block</button>`
-        : `<button class="btn small" data-action="unblock" data-u="${m.username}">Unblock</button>`}`;
+        ? `<button class="btn small" data-action="block" data-id="${m.id}">Block</button>`
+        : `<button class="btn small" data-action="unblock" data-id="${m.id}">Unblock</button>`}`;
     return `<tr>
-      <td class="row-name">${m.name}${m.username===CURRENT_USER.username?" (you)":""}<div style="font-size:11px;color:var(--espresso-45);font-weight:400;">${m.username}</div></td>
+      <td class="row-name">${m.name}${m.id===CURRENT_USER.id?" (you)":""}<div style="font-size:11px;color:var(--espresso-45);font-weight:400;">${m.username}</div></td>
       <td><span class="role-pill">${m.role}</span></td>
       <td>${m.assignedSpecialist||"—"}</td>
       <td>${m.specialty ? (categories.find(c=>c.id===m.specialty)||{}).name||m.specialty : "—"}</td>
@@ -1095,23 +1083,20 @@ async function refreshTeam(){
   }).join("")}</tbody>`;
   table.querySelectorAll("button[data-action]").forEach(btn=>{
     btn.addEventListener("click", async ()=>{
-      const {action,u}=btn.dataset;
-      const member=await getTeamMember(u);
-      if(!member) return;
-      if(member.role==="owner" && member.username!==CURRENT_USER.username){ alert("The Owner account cannot be modified by another team member."); return; }
+      const {action,id,name}=btn.dataset;
       if(action==="reset"){
-        if(!confirm(`Reset the password for ${member.name}? Their current password will stop working immediately.`)) return;
-        const temp=genTempPassword();
-        member.passwordHash=insecureHash(temp);
-        await saveTeamMember(member);
-        alert(`New temporary password for ${member.name}: ${temp}\n(Share this once — it is not stored anywhere retrievable.)`);
+        if(!confirm(`Reset the password for ${name}? Their current password will stop working immediately.`)) return;
+        const res=await callTeamApi("reset_password", { target_id:id });
+        if(!res.ok){ alert(res.message||"Could not reset password."); return; }
+        alert(`New temporary password for ${name}: ${res.temp_password}\n(Share this once — it is not stored anywhere retrievable.)`);
       } else if(action==="block"){
-        if(!confirm(`Block ${member.name}'s dashboard access? Their appointment history and records are kept — this only disables login.`)) return;
-        member.status="blocked"; await saveTeamMember(member);
+        if(!confirm(`Block ${name}'s dashboard access? Their appointment history and records are kept — this only disables login.`)) return;
+        await sb.from("team_accounts").update({ status:"blocked" }).eq("id", id);
       } else if(action==="unblock"){
-        member.status="active"; await saveTeamMember(member);
+        await sb.from("team_accounts").update({ status:"active" }).eq("id", id);
       } else if(action==="perms"){
-        openPermissions(member);
+        const member=(await listTeam()).find(m=>m.id===id);
+        if(member) openPermissions(member);
         return;
       }
       refreshTeam();
@@ -1157,14 +1142,10 @@ async function savePermissions(){
   if(!PERMS_EDITING_USER) return;
   const categoriesGranted=[...document.querySelectorAll('#permCategories input[data-cat]:checked')].map(el=>el.dataset.cat);
   const flagsGranted=[...document.querySelectorAll('#permFlags input[data-flag]:checked')].map(el=>el.dataset.flag);
-  const member=await getTeamMember(PERMS_EDITING_USER.username);
-  if(!member) return;
-  member.permissionOverrides={categories:categoriesGranted, flags:flagsGranted};
-  await saveTeamMember(member);
-  document.getElementById("permStatus").textContent="Permissions updated.";
+  const { error } = await sb.from("team_accounts").update({ permission_overrides: { categories:categoriesGranted, flags:flagsGranted } }).eq("id", PERMS_EDITING_USER.id);
+  document.getElementById("permStatus").textContent = error ? ("Could not save: "+error.message) : "Permissions updated.";
   refreshTeam();
 }
-
 
 const calGrid=document.getElementById("calGrid");
 const dows=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -1172,126 +1153,54 @@ dows.forEach(d=>{ const el=document.createElement("div"); el.className="cal-dow"
 const today=new Date();
 const startOfWeek=new Date(today); startOfWeek.setDate(today.getDate()-today.getDay());
 
-/* ---------- Shared storage helpers (same schema the customer site writes) ----------
-   NOTE: "notifications" are a shared log entry, not a real SMS/WhatsApp send — this
-   prototype has no backend or messaging provider wired up. */
-async function loadDayBookings(dateStr){
-  try{
-    const res = await window.storage.get("lume:bookings:"+dateStr, true);
-    return res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ return []; }
-}
-async function saveDayBookings(dateStr, list){
-  try{ return !!(await window.storage.set("lume:bookings:"+dateStr, JSON.stringify(list), true)); }
-  catch(e){ return false; }
-}
-
-async function updateCustomerHistoryStatus(phone, id, status){
-  if(!phone) return;
-  try{
-    const res = await window.storage.get(customerKey(phone), true);
-    if(!res || !res.value) return;
-    const cust = JSON.parse(res.value);
-    const h = (cust.history||[]).find(x=>x.id===id);
-    if(h) h.status=status;
-    await window.storage.set(customerKey(phone), JSON.stringify(cust), true);
-  }catch(e){}
-}
-
-async function upsertCustomer(details, historyEntry){
-  if(!details.phone) return;
-  const key = customerKey(details.phone);
-  let cust = {name:details.name||"", phone:details.phone, email:details.email||"", bday:details.bday||"", history:[]};
-  try{
-    const res = await window.storage.get(key, true);
-    if(res && res.value){
-      const existing = JSON.parse(res.value);
-      cust = Object.assign(existing, {
-        name: details.name || existing.name,
-        bday: details.bday || existing.bday
-      });
-      if(!Array.isArray(cust.history)) cust.history=[];
-    }
-  }catch(e){}
-  cust.history.push(historyEntry);
-  cust.updatedAt = new Date().toISOString();
-  try{ await window.storage.set(key, JSON.stringify(cust), true); }catch(e){}
-}
-
-async function pushNotification(phone, type, message, appt){
-  const entry={phone, type, message, at:new Date().toISOString(), apptId: appt?appt.id:null, status:"sent"};
-  try{
-    const res = await window.storage.get("lume:notifications:log", true);
-    let log = res && res.value ? JSON.parse(res.value) : [];
-    log.unshift(entry);
-    log = log.slice(0,150);
-    await window.storage.set("lume:notifications:log", JSON.stringify(log), true);
-  }catch(e){
-    // the shared log write itself failed — best-effort record it as failed so
-    // the admin isn't told something was sent when it wasn't
-    try{
-      const res2 = await window.storage.get("lume:notifications:log", true);
-      let log2 = res2 && res2.value ? JSON.parse(res2.value) : [];
-      log2.unshift(Object.assign({}, entry, {status:"failed"}));
-      await window.storage.set("lume:notifications:log", JSON.stringify(log2.slice(0,150)), true);
-    }catch(e2){}
+/* ---------- Shared helpers ---------- */
+function categoryIdForService(serviceId){
+  for(const catId of Object.keys(treatments)){
+    if((treatments[catId]||[]).some(t=>t.id===serviceId)) return catId;
   }
+  return null;
+}
+async function pushNotification(phone, type, message, apptId){
+  const { error } = await sb.from("notifications").insert({ phone: phone||null, type, message, appt_id: apptId||null, status:"sent" });
+  if(error) console.error("notification insert failed:", error.message);
 }
 
-async function notifyWaitlist(dateStr, specialist){
-  const key="lume:waitlist:"+dateStr+":"+specialistLane(specialist).replace(/\s+/g,"-");
-  let list=[];
-  try{ const res=await window.storage.get(key, true); list = res && res.value ? JSON.parse(res.value) : []; }catch(e){ return; }
-  if(!list.length) return;
-  for(const entry of list){
-    await pushNotification(entry.phone, "waitlist",
-      `Good news — an opening just came up on ${dateStr} for ${entry.treatment||"your requested service"}. Book quickly, it's first come, first served.`, {id:null});
-  }
-  try{ await window.storage.set(key, JSON.stringify([]), true); }catch(e){}
+// Maps a raw bookings row into the shape the existing rendering code expects.
+function mapBookingRow(row){
+  return {
+    id: row.id, date: row.booking_date, time: row.start_time.slice(0,5),
+    slots: [], // not needed for admin's own list/cancel/complete actions
+    specialist: specialistNameById(row.specialist_id), specialistId: row.specialist_id,
+    service: categoryIdForService(row.service_id), serviceId: row.service_id, treatment: row.treatment_name,
+    name: row.customer_name, phone: row.customer_phone, email: row.customer_email, notes: row.notes,
+    status: row.status, auditLog: row.audit_log||[],
+  };
 }
-
-// Admin-initiated cancellation — same shared record the customer site writes to.
 function canManageBooking(booking){
   if(!CURRENT_USER) return false;
   if(hasPermission("manageAppointmentsAll")) return true;
-  if(hasPermission("manageAppointmentsOwn")){
-    // Authorization is by service/specialty (Emma-Hair can also manage Makeup
-    // if the Owner has granted it), not just by matching specialist name.
-    return authorizedCategories(CURRENT_USER).includes(booking.service);
-  }
+  if(hasPermission("manageAppointmentsOwn")) return authorizedCategories(CURRENT_USER).includes(booking.service);
   return false;
 }
-
 async function adminCancelBooking(dateStr, id){
-  const list = await loadDayBookings(dateStr);
-  const idx=list.findIndex(b=>b.id===id);
-  if(idx===-1 || list[idx].status==="cancelled") return false;
-  if(!canManageBooking(list[idx])){ alert("You don't have permission to change this appointment — it belongs to another specialist."); return false; }
-  list[idx].status="cancelled";
-  list[idx].cancelledBy="admin";
-  list[idx].cancelledAt=new Date().toISOString();
-  list[idx].auditLog=(list[idx].auditLog||[]).concat([{action:"cancelled",by:CURRENT_USER.username,at:new Date().toISOString()}]);
-  const booking=list[idx];
-  if(!(await saveDayBookings(dateStr, list))) return false;
-  await updateCustomerHistoryStatus(booking.phone, id, "cancelled");
-  await pushNotification(booking.phone, "cancellation",
-    `Your appointment for ${booking.treatment||booking.service||"your visit"} on ${dateStr} at ${booking.time} has been cancelled by the house.`, booking);
-  await notifyWaitlist(dateStr, booking.specialist);
+  const { data: row } = await sb.from("bookings").select("*").eq("id", id).maybeSingle();
+  if(!row || row.status==="cancelled") return false;
+  const booking = mapBookingRow(row);
+  if(!canManageBooking(booking)){ alert("You don't have permission to change this appointment — it belongs to another specialist."); return false; }
+  const auditLog=(row.audit_log||[]).concat([{action:"cancelled", by:CURRENT_USER.username, at:new Date().toISOString()}]);
+  const { error } = await sb.from("bookings").update({ status:"cancelled", cancelled_by:"admin", cancelled_at:new Date().toISOString(), audit_log:auditLog }).eq("id", id);
+  if(error) return false;
+  await pushNotification(booking.phone, "cancellation", `Your appointment for ${booking.treatment||"your visit"} on ${dateStr} at ${booking.time} has been cancelled by the house.`, id);
   return true;
 }
-
-// Mark a past confirmed appointment completed or a no-show.
 async function setBookingOutcome(dateStr, id, outcome){
-  const list = await loadDayBookings(dateStr);
-  const idx=list.findIndex(b=>b.id===id);
-  if(idx===-1 || list[idx].status!=="confirmed") return false;
-  if(!canManageBooking(list[idx])){ alert("You don't have permission to change this appointment — it belongs to another specialist."); return false; }
-  list[idx].status=outcome;
-  list[idx].auditLog=(list[idx].auditLog||[]).concat([{action:outcome,by:CURRENT_USER.username,at:new Date().toISOString()}]);
-  const booking=list[idx];
-  if(!(await saveDayBookings(dateStr, list))) return false;
-  await updateCustomerHistoryStatus(booking.phone, id, outcome);
-  return true;
+  const { data: row } = await sb.from("bookings").select("*").eq("id", id).maybeSingle();
+  if(!row || row.status!=="confirmed") return false;
+  const booking = mapBookingRow(row);
+  if(!canManageBooking(booking)){ alert("You don't have permission to change this appointment — it belongs to another specialist."); return false; }
+  const auditLog=(row.audit_log||[]).concat([{action:outcome, by:CURRENT_USER.username, at:new Date().toISOString()}]);
+  const { error } = await sb.from("bookings").update({ status:outcome, audit_log:auditLog }).eq("id", id);
+  return !error;
 }
 
 const FALLBACK_QUICK=[
@@ -1308,30 +1217,26 @@ const notifList=document.getElementById("notifList");
 const analyticsGrid=document.getElementById("analyticsGrid");
 let allCustomersCache=[];
 
-// Pull the next 14 days of real bookings from the shared store.
+// One real range query instead of looping 14 separate day-keys.
 async function loadUpcomingBookings(){
-  const out=[];
   const now=new Date();
-  for(let i=0;i<14;i++){
-    const d=new Date(now); d.setDate(now.getDate()+i);
-    const ds=dateKeyStr(d);
-    const list=await loadDayBookings(ds);
-    list.forEach(b=>out.push(Object.assign({date:ds, dayLabel: i===0?"Today":(i===1?"Tomorrow":ds)}, b)));
-  }
-  out.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  return out;
+  const start=dateKeyStr(now);
+  const end=new Date(now); end.setDate(now.getDate()+14);
+  const { data, error } = await sb.from("bookings").select("*").gte("booking_date", start).lte("booking_date", dateKeyStr(end)).order("booking_date").order("start_time");
+  if(error || !data) return [];
+  const todayStr=start, tomorrowStr=dateKeyStr(new Date(now.getTime()+86400000));
+  return data.map(row=>{
+    const b=mapBookingRow(row);
+    b.dayLabel = b.date===todayStr ? "Today" : (b.date===tomorrowStr ? "Tomorrow" : b.date);
+    return b;
+  });
 }
-// Pull the last 30 days for analytics.
 async function loadPastBookings(){
-  const out=[];
   const now=new Date();
-  for(let i=1;i<=30;i++){
-    const d=new Date(now); d.setDate(now.getDate()-i);
-    const ds=dateKeyStr(d);
-    const list=await loadDayBookings(ds);
-    list.forEach(b=>out.push(Object.assign({date:ds}, b)));
-  }
-  return out;
+  const start=new Date(now); start.setDate(now.getDate()-30);
+  const { data, error } = await sb.from("bookings").select("*").gte("booking_date", dateKeyStr(start)).lt("booking_date", dateKeyStr(now));
+  if(error || !data) return [];
+  return data.map(mapBookingRow);
 }
 
 function statusActions(b){
@@ -1362,7 +1267,7 @@ async function refreshBookingsAndStats(){
     quickList.appendChild(el);
   });
 
-  const visibleRows = upcoming.filter(b=>b.status!=="blocked" && b.status!=="held");
+  const visibleRows = upcoming.filter(b=>b.status!=="blocked");
   if(visibleRows.length){
     table.innerHTML=`<thead><tr><th>Client</th><th>Ritual</th><th>Specialist</th><th>When</th><th>Status</th><th></th></tr></thead>
     <tbody>${visibleRows.map(b=>`<tr>
@@ -1389,7 +1294,6 @@ async function refreshBookingsAndStats(){
     table.innerHTML=`<tbody><tr><td class="cust-empty">No upcoming appointments in the next 14 days yet.</td></tr></tbody>`;
   }
 
-  // Calendar strip with real per-day counts
   calGrid.querySelectorAll(".cal-day").forEach(el=>el.remove());
   for(let i=0;i<7;i++){
     const d=new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
@@ -1411,29 +1315,21 @@ async function refreshBookingsAndStats(){
   }
 }
 
-// Customers panel — lists every customer profile in the shared store, with search + no-show flagging.
+// Customers panel — real "customers" table, staff-only per RLS.
 async function refreshCustomers(){
-  let keys=[];
-  try{
-    const res = await window.storage.list("lume:customers:", true);
-    keys = res && res.keys ? res.keys : [];
-  }catch(e){ keys=[]; }
-
-  if(!keys.length){
+  const { data, error } = await sb.from("customers").select("*").order("updated_at", {ascending:false});
+  if(error || !data || !data.length){
     customerTable.innerHTML=`<tbody><tr><td class="cust-empty">No customers yet — profiles are created automatically on first booking.</td></tr></tbody>`;
     allCustomersCache=[];
     return;
   }
-  const customers=[];
-  for(const k of keys){
-    try{
-      const res = await window.storage.get(k, true);
-      if(res && res.value) customers.push(JSON.parse(res.value));
-    }catch(e){}
-  }
-  customers.sort((a,b)=> (b.updatedAt||"").localeCompare(a.updatedAt||""));
-  allCustomersCache = customers;
-  renderCustomerTable(customers);
+  // For visit counts/no-show flags, pull each customer's bookings in one query.
+  const { data: allBookings } = await sb.from("bookings").select("customer_phone, booking_date, start_time, status");
+  allCustomersCache = data.map(c=>{
+    const hist=(allBookings||[]).filter(b=>b.customer_phone===c.phone);
+    return { name:c.name, phone:c.phone, bday:c.dob, updatedAt:c.updated_at, history:hist.map(h=>({date:h.booking_date, time:h.start_time.slice(0,5), status:h.status})) };
+  });
+  renderCustomerTable(allCustomersCache);
 }
 function renderCustomerTable(customers){
   customerTable.innerHTML = `<thead><tr><th>Name</th><th>Phone</th><th>DOB</th><th>Visits</th><th>Last Visit</th></tr></thead>
@@ -1459,36 +1355,24 @@ document.getElementById("customerSearch").addEventListener("input", (e)=>{
 
 const ACTIVITY_DOTS={confirmation:"🟢",cancellation:"🔴",reschedule:"🟡",reminder:"🔵",waitlist:"🟣","admin-alert":"🔵"};
 async function refreshActivityFeed(){
-  let log=[];
-  try{
-    const res=await window.storage.get("lume:notifications:log", true);
-    log = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ log=[]; }
+  const { data, error } = await sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(8);
   const feed=document.getElementById("activityFeed");
-  if(!log.length){ feed.innerHTML=`<div class="notif-empty">No activity yet today.</div>`; return; }
+  if(error || !data || !data.length){ feed.innerHTML=`<div class="notif-empty">No activity yet today.</div>`; return; }
   feed.innerHTML="";
-  log.slice(0,8).forEach(n=>{
+  data.forEach(n=>{
     const el=document.createElement("div"); el.className="quick-item";
-    const when=new Date(n.at);
+    const when=new Date(n.created_at);
     el.innerHTML=`<span style="min-width:22px;">${ACTIVITY_DOTS[n.type]||"⚪"}</span><div style="flex:1;text-align:left;margin-left:8px;"><div class="who">${n.message}</div><div class="svc">${when.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div></div>`;
     feed.appendChild(el);
   });
 }
-
 async function refreshNotifications(){
-  let log=[];
-  try{
-    const res = await window.storage.get("lume:notifications:log", true);
-    log = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ log=[]; }
-  if(!log.length){
-    notifList.innerHTML=`<div class="notif-empty">No notifications sent yet.</div>`;
-    return;
-  }
+  const { data, error } = await sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(12);
+  if(error || !data || !data.length){ notifList.innerHTML=`<div class="notif-empty">No notifications sent yet.</div>`; return; }
   notifList.innerHTML="";
-  log.slice(0,12).forEach(n=>{
+  data.forEach(n=>{
     const el=document.createElement("div"); el.className="notif-item";
-    const when=new Date(n.at);
+    const when=new Date(n.created_at);
     const status=n.status||"sent";
     const statusColor = status==="failed" ? "#A3503F" : "var(--ok)";
     el.innerHTML=`<div class="type">${n.type} <span style="color:${statusColor};text-transform:none;letter-spacing:0;">· ${status}</span></div><div class="msg">${n.message}</div><div class="meta">${n.phone?"to "+n.phone:"house alert"} · ${when.toLocaleString()}</div>`;
@@ -1498,8 +1382,7 @@ async function refreshNotifications(){
 
 // Analytics — computed from the last 30 days of real bookings.
 async function refreshAnalytics(){
-  const past = await loadPastBookings();
-  const real = past.filter(b=>b.status!=="blocked");
+  const real = (await loadPastBookings()).filter(b=>b.status!=="blocked");
   const total = real.length;
   const completed = real.filter(b=>b.status==="completed");
   const cancelled = real.filter(b=>b.status==="cancelled");
@@ -1520,7 +1403,7 @@ async function refreshAnalytics(){
 
   analyticsGrid.innerHTML = `
     <div class="nav-tile analytic-tile"><h3>Bookings</h3><div class="big">${total}</div></div>
-    <div class="nav-tile analytic-tile"><h3>Revenue (completed)</h3><div class="big">$${revenue}</div></div>
+    <div class="nav-tile analytic-tile"><h3>Revenue (completed)</h3><div class="big">${BIZ.currency_symbol||"$"}${revenue}</div></div>
     <div class="nav-tile analytic-tile"><h3>Most Booked</h3><div class="big" style="font-size:15px;">${topTreatment?topTreatment[0]:"—"}</div></div>
     <div class="nav-tile analytic-tile"><h3>Cancellation Rate</h3><div class="big">${total?Math.round(cancelled.length/total*100):0}%</div></div>
     <div class="nav-tile analytic-tile"><h3>No-show Rate</h3><div class="big">${total?Math.round(noShow.length/total*100):0}%</div></div>
@@ -1532,7 +1415,8 @@ async function refreshAnalytics(){
 async function refreshAll(){
   if(!CURRENT_USER) return;
   await resyncCurrentUser();
-  if(!CURRENT_USER) return; // resync may have logged out a now-blocked account
+  if(!CURRENT_USER) return;
+  await loadBusinessSettings();
   await loadCatalog();
   await refreshBookingsAndStats();
   if(hasPermission("manageCustomers")) await refreshCustomers();
@@ -1547,9 +1431,12 @@ async function refreshAll(){
   }
 }
 tryResumeSession();
-setInterval(refreshAll, 4000); // polling, not push — see the access-control banner comment for why
+setInterval(refreshAll, 5000);
 
-/* ---------- Manual booking (walk-in / phone customers) ---------- */
+/* ---------- Manual booking (walk-in / phone customers) — direct insert,
+   protected by the "bookings staff update"-equivalent write policy. Since
+   there's no separate INSERT policy on bookings from Phase 1, this needs
+   one more tiny addition — see note after this script. ---------- */
 function toggleManualBooking(){
   const panel=document.getElementById("manualBookingPanel");
   const open = panel.style.display==="block";
@@ -1574,22 +1461,25 @@ function refreshManualSpecialistOptions(){
 function refreshManualTreatmentOptions(){
   const svc=document.getElementById("mbService").value;
   const sel=document.getElementById("mbTreatment");
-  sel.innerHTML = (treatments[svc]||[]).map(t=>`<option value="${t.n}">${t.n} (${t.d})</option>`).join("");
+  sel.innerHTML = (treatments[svc]||[]).map(t=>`<option value="${t.id}">${t.n} (${t.d})</option>`).join("");
   refreshManualTimeOptions();
 }
 async function refreshManualTimeOptions(){
   const dateStr=document.getElementById("mbDate").value || dateKeyStr(new Date());
-  const specialist=document.getElementById("mbSpecialist").value;
+  const specialistName=document.getElementById("mbSpecialist").value;
   const svc=document.getElementById("mbService").value;
-  const treatName=document.getElementById("mbTreatment").value;
-  const treat=(treatments[svc]||[]).find(t=>t.n===treatName);
-  const list=await loadDayBookings(dateStr);
+  const treatId=document.getElementById("mbTreatment").value;
+  const treat=(treatments[svc]||[]).find(t=>t.id===treatId);
+  const { data } = await sb.from("bookings").select("*").eq("booking_date", dateStr);
+  const list = (data||[]).map(mapBookingRow);
   const timeSel=document.getElementById("mbTime");
   timeSel.innerHTML="";
   ALL_SLOTS.forEach(t=>{
     const required=requiredSlotsFor(t, treat?treat.d:"30 min");
     const withinLead=isWithinLeadTime(dateStr, t);
-    const free = required && !withinLead && slotsFree(list, specialist, required, null);
+    // simple overlap check against this specialist's existing confirmed bookings that day
+    const overlap = list.some(b=> b.status==="confirmed" && specialistLane(b.specialist)===specialistLane(specialistName) && b.time===t);
+    const free = required && !withinLead && !overlap;
     const opt=document.createElement("option");
     opt.value=t; opt.textContent = t + (free?"":" — unavailable");
     opt.disabled = !free;
@@ -1598,11 +1488,10 @@ async function refreshManualTimeOptions(){
 }
 async function submitManualBooking(){
   const status=document.getElementById("mbStatus");
-  if(!hasPermission("manageAppointmentsAll")){ status.textContent="You don't have permission to create manual appointments."; return; }
   const svc=document.getElementById("mbService").value;
-  const treatName=document.getElementById("mbTreatment").value;
-  const treat=(treatments[svc]||[]).find(t=>t.n===treatName);
-  const specialist=document.getElementById("mbSpecialist").value;
+  const treatId=document.getElementById("mbTreatment").value;
+  const treat=(treatments[svc]||[]).find(t=>t.id===treatId);
+  const specialistName=document.getElementById("mbSpecialist").value;
   const dateStr=document.getElementById("mbDate").value;
   const time=document.getElementById("mbTime").value;
   const name=document.getElementById("mbName").value.trim();
@@ -1611,25 +1500,22 @@ async function submitManualBooking(){
   if(!name||!phone||!dateStr||!time){ status.textContent="Name, phone, date, and time are required."; return; }
 
   status.textContent="Creating...";
-  const required=requiredSlotsFor(time, treat?treat.d:"30 min");
-  const list=await loadDayBookings(dateStr);
-  if(!required || !slotsFree(list, specialist, required, null)){ status.textContent="That time is no longer available — pick another."; refreshManualTimeOptions(); return; }
-
-  const id="LM-"+Math.floor(10000+Math.random()*89999);
-  list.push({id, time, slots:required, status:"confirmed", service:svc, treatment:treat?treat.n:null,
-    specialist, name, phone, bday, deposit:false, createdAt:new Date().toISOString(), createdBy:"admin", reminderSent:false, sameDayReminderSent:false});
-  await saveDayBookings(dateStr, list);
-
-  await upsertCustomer({name, phone, bday}, {id, date:dateStr, time, service:svc, treatment:treat?treat.n:null, specialist, status:"confirmed"});
-  await pushNotification(phone, "confirmation",
-    `Your appointment for ${treat?treat.n:svc} is confirmed for ${dateStr} at ${time}.`, {id});
+  const id="APT-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);
+  const { error } = await sb.from("bookings").insert({
+    id, booking_date:dateStr, start_time:time, end_time:time, specialist_id: specialistIdByName(specialistName),
+    service_id: treatId, treatment_name: treat?treat.n:null, customer_phone:phone, customer_name:name,
+    status:"confirmed", created_by:CURRENT_USER.username,
+  });
+  if(error){ status.textContent="Could not create: "+error.message; return; }
+  await sb.from("customers").upsert({ phone, name, dob: bday||null, updated_at:new Date().toISOString() }, { onConflict:"phone" });
+  await pushNotification(phone, "confirmation", `Your appointment for ${treat?treat.n:svc} is confirmed for ${dateStr} at ${time}.`, id);
 
   status.textContent="Appointment created.";
   document.getElementById("mbName").value=""; document.getElementById("mbPhone").value=""; document.getElementById("mbBday").value="";
   refreshAll();
 }
 
-/* ---------- Block time (breaks, meetings, maintenance, private appointments) ---------- */
+/* ---------- Block time ---------- */
 (function initBlockTimeSelects(){
   const s=document.getElementById("blkStart"), e=document.getElementById("blkEnd");
   ALL_SLOTS.forEach(t=>{ s.innerHTML+=`<option value="${t}">${t}</option>`; e.innerHTML+=`<option value="${t}">${t}</option>`; });
@@ -1638,21 +1524,19 @@ async function submitManualBooking(){
 })();
 async function submitBlockTime(){
   const status=document.getElementById("blkStatus");
-  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to block time."; return; }
   const dateStr=document.getElementById("blkDate").value;
   const startT=document.getElementById("blkStart").value;
   const endT=document.getElementById("blkEnd").value;
   const reason=document.getElementById("blkReason").value.trim()||"Blocked";
   const startIdx=slotIndex(startT), endIdx=slotIndex(endT);
   if(startIdx===-1 || endIdx===-1 || endIdx<startIdx){ status.textContent="Pick a valid start/end."; return; }
-  const slots=ALL_SLOTS.slice(startIdx, endIdx+1);
 
-  const list=await loadDayBookings(dateStr);
-  const conflict = list.some(b=> (b.status==="confirmed"||b.status==="blocked") && (b.slots||[]).some(s=>slots.includes(s)));
-  if(conflict){ status.textContent="That range overlaps an existing appointment or block."; return; }
-
-  list.push({id:"BLK-"+Date.now(), time:startT, slots, status:"blocked", specialist:null, treatment:reason, createdBy:"admin", createdAt:new Date().toISOString()});
-  await saveDayBookings(dateStr, list);
+  const id="BLK-"+Date.now();
+  const { error } = await sb.from("bookings").insert({
+    id, booking_date:dateStr, start_time:startT, end_time:endT, specialist_id:null,
+    treatment_name:reason, status:"blocked", created_by:CURRENT_USER.username,
+  });
+  if(error){ status.textContent = error.code==="23P01" ? "That range overlaps an existing appointment or block." : "Could not save: "+error.message; return; }
   status.textContent="Time blocked.";
   document.getElementById("blkReason").value="";
   refreshAll();
