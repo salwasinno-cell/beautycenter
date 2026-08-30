@@ -1036,7 +1036,7 @@ function isWithinLeadTime(dateStr, time){
 async function claimSlot(d, time, bookingDetails){
   const dateStr=dateKey(d);
   const res = await callBookingApi("create_booking", {
-    service_id: bookingDetails.service,
+    service_id: bookingDetails.serviceId,
     specialist_id: specialistIdByName(bookingDetails.specialist),
     date: dateStr, time,
     name: bookingDetails.name, phone: bookingDetails.phone, email: bookingDetails.email,
@@ -1376,8 +1376,7 @@ async function nextStep(){
     const notes = document.getElementById("fNotes").value.trim();
 
     const claimed = await claimSlot(state.date, state.time, {
-      service: state.service,
-      treatment: state.treatment ? state.treatment.n : null,
+      serviceId: state.treatment ? state.treatment.id : null,
       specialist: state.specialist,
       name, phone, email, notes,
       deposit: depositOn,
