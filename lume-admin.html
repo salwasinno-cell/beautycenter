@@ -1307,12 +1307,13 @@ async function refreshBookingsAndStats(){
     calGrid.appendChild(el);
   }
 
-  if(todayAll.length){
-    document.querySelectorAll(".stat .n")[0].textContent = todayAll.filter(b=>b.status!=="blocked").length;
-    document.querySelectorAll(".stat .n")[1].textContent = todayAll.filter(b=>b.status==="confirmed").length;
-    document.querySelectorAll(".stat .n")[2].textContent = todayAll.filter(b=>b.status==="completed").length;
-    document.querySelectorAll(".stat .n")[3].textContent = todayAll.filter(b=>b.status==="cancelled"||b.status==="no-show").length;
-  }
+  // Always show the real numbers — including zero — rather than leaving
+  // the page's placeholder text in place when there happen to be no
+  // bookings today.
+  document.querySelectorAll(".stat .n")[0].textContent = todayAll.filter(b=>b.status!=="blocked").length;
+  document.querySelectorAll(".stat .n")[1].textContent = todayAll.filter(b=>b.status==="confirmed").length;
+  document.querySelectorAll(".stat .n")[2].textContent = todayAll.filter(b=>b.status==="completed").length;
+  document.querySelectorAll(".stat .n")[3].textContent = todayAll.filter(b=>b.status==="cancelled"||b.status==="no-show").length;
 }
 
 // Customers panel — real "customers" table, staff-only per RLS.
