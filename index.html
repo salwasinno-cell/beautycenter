@@ -346,7 +346,7 @@
 <div class="cursor-ring" id="cring"></div>
 
 <header id="siteHeader">
-  <a href="#" class="logo">LUMÉ</a>
+  <a href="#" class="logo brand-name">LUMÉ</a>
   <nav>
     <a href="#menu" class="nav-link">Beauty Menu</a>
     <a href="#house" class="nav-link">The House</a>
@@ -452,18 +452,18 @@
 <footer id="contact">
   <div class="foot-grid">
     <div>
-      <h4>LUMÉ</h4>
+      <h4 class="brand-name">LUMÉ</h4>
       <p style="max-width:260px;">A private beauty house for hair, skin, and the rituals in between.</p>
     </div>
     <div>
       <h4>Visit</h4>
-      <p>Ashrafieh, Beirut</p>
-      <p>Tue – Sun · 10:00 – 20:00</p>
+      <p data-field="address">Ashrafieh, Beirut</p>
+      <p data-field="hours">Tue – Sun · 10:00 – 20:00</p>
     </div>
     <div>
       <h4>Contact</h4>
-      <a href="tel:+9611000000">+961 1 000 000</a>
-      <a href="mailto:hello@lume.house">hello@lume.house</a>
+      <a href="tel:+9611000000" data-field="phone">+961 1 000 000</a>
+      <a href="mailto:hello@lume.house" data-field="email">hello@lume.house</a>
     </div>
     <div>
       <h4>Follow</h4>
@@ -486,7 +486,7 @@
 <!-- ============ BOOKING OVERLAY ============ -->
 <div class="book-overlay" id="bookOverlay">
   <div class="book-top">
-    <span class="logo">LUMÉ</span>
+    <span class="logo brand-name">LUMÉ</span>
     <button class="book-close" onclick="closeBooking()">✕</button>
   </div>
   <div class="book-steps" id="bookSteps"></div>
@@ -583,7 +583,7 @@
 <!-- ============ MANAGE BOOKING OVERLAY ============ -->
 <div class="book-overlay" id="manageOverlay">
   <div class="book-top">
-    <span class="logo">LUMÉ</span>
+    <span class="logo brand-name">LUMÉ</span>
     <button class="book-close" onclick="closeManage()">✕</button>
   </div>
   <div class="book-body" style="padding-top:60px;">
@@ -601,165 +601,125 @@
   </div>
 </div>
 
-<!-- ============================================================
-     LIVE BACKEND SHIM — replaces the Claude.ai sandbox's window.storage
-     with a real Supabase-backed version so this works on any real host.
-     Fill in SUPABASE_URL and SUPABASE_ANON_KEY below (see setup guide).
-     This must load BEFORE the app script below it, and must be IDENTICAL
-     in lume-website.html and lume-admin.html (both hit the same table).
-     ============================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-(function(){
-  const SUPABASE_URL = "https://possqyvufrubfixipwlm.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_7tLqOI1xA_Tq4lxOpbjs2w_PFuNiJZ_";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // shared:true  -> real shared backend (Supabase table "kv_store")
-  // shared:false -> this browser only (localStorage) — matches how the
-  //                 app already treats "personal" data (e.g. lume:my-phone)
-  window.storage = {
-    async get(key, shared){
-      if(!shared){
-        const v = localStorage.getItem(key);
-        return v===null ? null : {key, value:v, shared:false};
-      }
-      const { data, error } = await sb.from('kv_store').select('value').eq('key', key).maybeSingle();
-      if(error || !data) return null;
-      return {key, value:data.value, shared:true};
-    },
-    async set(key, value, shared){
-      if(!shared){
-        localStorage.setItem(key, value);
-        return {key, value, shared:false};
-      }
-      const { error } = await sb.from('kv_store').upsert({key, value, updated_at:new Date().toISOString()});
-      if(error){ console.error("storage.set failed:", error); return null; }
-      return {key, value, shared:true};
-    },
-    async delete(key, shared){
-      if(!shared){
-        localStorage.removeItem(key);
-        return {key, deleted:true, shared:false};
-      }
-      const { error } = await sb.from('kv_store').delete().eq('key', key);
-      if(error) return null;
-      return {key, deleted:true, shared:true};
-    },
-    async list(prefix, shared){
-      prefix = prefix || "";
-      if(!shared){
-        const keys=[];
-        for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k.startsWith(prefix)) keys.push(k); }
-        return {keys, prefix, shared:false};
-      }
-      const { data, error } = await sb.from('kv_store').select('key').like('key', prefix+'%');
-      if(error) return null;
-      return {keys:(data||[]).map(r=>r.key), prefix, shared:true};
-    }
-  };
-})();
-</script>
+/* ============================================================================
+   REAL BACKEND — Supabase client + data layer
+   ============================================================================
+   Replaces the old window.storage/kv_store simulation entirely. Reads go
+   straight to Supabase tables (protected by the RLS policies from Phase 1).
+   Customer WRITES (booking, cancelling, rescheduling, waitlist, phone
+   lookup) go through the "booking-api" Edge Function — the browser never
+   writes to the bookings/customers/notifications tables directly.
+   ============================================================================ */
+const SUPABASE_URL = "https://possqyvufrubfixipwlm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_7tLqOI1xA_Tq4lxOpbjs2w_PFuNiJZ_";
+const BOOKING_API_URL = SUPABASE_URL + "/functions/v1/booking-api";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<script>
-/* ---------- Catalog (services, categories, specialists) ----------
-   These now live in shared storage instead of being hardcoded — the admin's
-   Service Management and Specialist Management panels write to the same
-   keys read here, so editing a price or adding a specialist there shows up
-   on the live site without touching code. DEFAULT_* below is only the
-   one-time seed used the very first time nobody has set anything yet. */
-const CATALOG_SERVICES_KEY="lume:catalog:services";
-const CATALOG_SPECIALISTS_KEY="lume:catalog:specialists";
-const CATALOG_HOLIDAYS_KEY="lume:catalog:holidays";
+async function callBookingApi(action, payload) {
+  try {
+    const res = await fetch(BOOKING_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_ANON_KEY, "apikey": SUPABASE_ANON_KEY },
+      body: JSON.stringify(Object.assign({ action }, payload)),
+    });
+    return await res.json();
+  } catch (e) {
+    return { ok: false, message: "Network error — please check your connection and try again." };
+  }
+}
 
-const DEFAULT_CATEGORIES = [
-  {id:"hair",name:"Hair"},{id:"skin",name:"Skin"},{id:"nails",name:"Nails"},
-  {id:"brows",name:"Brows & Lashes"},{id:"bridal",name:"Bridal"}
-];
-const DEFAULT_TREATMENTS = {
-  hair:[
-    {id:"svc-blowout", n:"Signature Blowout",d:"45 min",p:35,desc:"Wash, blow-dry, and finish.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-hairtreat", n:"Hair Treatment Ritual",d:"70 min",p:60,desc:"Deep nourishing treatment for damaged hair.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-colour", n:"Colour & Gloss",d:"120 min",p:110,desc:"Full colour with a glossing finish.",img:"",onlineBookable:true,depositRequired:true,prepMinutes:5,bufferMinutes:null},
-  ],
-  skin:[
-    {id:"svc-facial", n:"Signature Facial",d:"60 min",p:70,desc:"Deep cleanse, exfoliation, and mask.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-hammam", n:"Moroccan Bath",d:"90 min",p:65,desc:"Traditional hammam exfoliation and steam ritual.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-  ],
-  nails:[
-    {id:"svc-gel", n:"Manicure — Gel",d:"50 min",p:30,desc:"Long-lasting gel finish.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-normalmani", n:"Manicure — Normal",d:"40 min",p:20,desc:"Classic polish manicure.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-henna", n:"Henna Art",d:"45 min",p:25,desc:"Traditional or bridal henna design.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-  ],
-  brows:[
-    {id:"svc-brows", n:"Brow Shaping",d:"30 min",p:20,desc:"Threading and tint.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-lashlift", n:"Lash Lift",d:"50 min",p:45,desc:"Lift and tint for a natural curl.",img:"",onlineBookable:true,depositRequired:false,prepMinutes:0,bufferMinutes:null},
-  ],
-  bridal:[
-    {id:"svc-bridaltrial", n:"Bridal Trial",d:"120 min",p:150,desc:"Full hair and makeup trial run.",img:"",onlineBookable:true,depositRequired:true,prepMinutes:0,bufferMinutes:null},
-    {id:"svc-bridalday", n:"Bridal Day-Of",d:"180 min",p:350,desc:"Complete bridal styling on the day.",img:"",onlineBookable:false,depositRequired:true,prepMinutes:15,bufferMinutes:30},
-  ]
+/* ---------- Business Settings (branding, contact, copy — all editable in admin) ---------- */
+let BIZ = {
+  business_name: "MAISON", tagline: "", logo_url: "", address: "", phone: "", email: "",
+  whatsapp_number: "", instagram_url: "", facebook_url: "",
+  hero_eyebrow: "Private Reservation House", hero_line1: "THE ART", hero_line2: "OF BEAUTY", hero_subtitle: "",
+  about_title: "A private house, not a shop.", about_body_1: "", about_body_2: "", about_signature: "",
+  visit_info: [], hours_display: "", default_language: "en", currency_symbol: "$",
+  booking_lead_hours: 2, default_buffer_minutes: 15, max_active_bookings_per_phone: 3,
 };
-const DEFAULT_SPECIALISTS = [
-  {n:"Maya", s:"Hair & Colour", capableCategories:["hair","bridal"], workingDays:[1,2,3,4,5,6], vacationDates:[]},
-  {n:"Sarah", s:"Skin & Facials", capableCategories:["skin","brows"], workingDays:[1,2,3,4,5,6], vacationDates:[]},
-  {n:"Rana", s:"Nails & Henna", capableCategories:["nails"], workingDays:[2,3,4,5,6,0], vacationDates:[]},
-];
-const NO_PREFERENCE={n:"No Preference", s:"Any available specialist"};
-
-let categories=DEFAULT_CATEGORIES, treatments=DEFAULT_TREATMENTS, specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS], holidays=[];
-
-async function loadCatalog(){
-  try{
-    const res=await window.storage.get(CATALOG_SERVICES_KEY, true);
-    if(res && res.value){
-      const parsed=JSON.parse(res.value);
-      categories=parsed.categories; treatments=parsed.treatments;
-    }else{
-      categories=DEFAULT_CATEGORIES; treatments=DEFAULT_TREATMENTS;
-      await window.storage.set(CATALOG_SERVICES_KEY, JSON.stringify({categories, treatments}), true);
-    }
-  }catch(e){ categories=DEFAULT_CATEGORIES; treatments=DEFAULT_TREATMENTS; }
-
-  try{
-    const res=await window.storage.get(CATALOG_SPECIALISTS_KEY, true);
-    if(res && res.value){ specialists=[NO_PREFERENCE, ...JSON.parse(res.value)]; }
-    else{ await window.storage.set(CATALOG_SPECIALISTS_KEY, JSON.stringify(DEFAULT_SPECIALISTS), true); specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS]; }
-  }catch(e){ specialists=[NO_PREFERENCE,...DEFAULT_SPECIALISTS]; }
-
-  try{
-    const res=await window.storage.get(CATALOG_HOLIDAYS_KEY, true);
-    holidays = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ holidays=[]; }
+async function loadBusinessSettings() {
+  try {
+    const { data, error } = await sb.from("business_settings").select("*").eq("id", 1).maybeSingle();
+    if (!error && data) BIZ = Object.assign({}, BIZ, data);
+  } catch (e) { /* keep defaults */ }
 }
-function isHoliday(dateStr){ return holidays.some(h=>h.date===dateStr); }
-function holidayLabel(dateStr){ const h=holidays.find(x=>x.date===dateStr); return h?h.label:null; }
-
-function specialistsFor(categoryId){
-  const capable = specialists.filter(s=> s.n==="No Preference" || (s.capableCategories||[]).includes(categoryId));
-  return capable.length ? capable : specialists; // fall back to full list if nothing maps (shouldn't normally happen)
+function applyBusinessBranding() {
+  document.title = BIZ.business_name + " — " + (BIZ.tagline || "");
+  document.querySelectorAll(".brand-name").forEach(el => el.textContent = BIZ.business_name);
+  const heroEyebrow = document.querySelector(".hero .eyebrow"); if (heroEyebrow) heroEyebrow.textContent = BIZ.hero_eyebrow;
+  const heroLine1 = document.querySelector(".hero h1 .line:nth-child(1) span"); if (heroLine1) heroLine1.textContent = BIZ.hero_line1;
+  const heroLine2 = document.querySelector(".hero h1 .line:nth-child(2) span"); if (heroLine2) heroLine2.textContent = BIZ.hero_line2;
+  const heroSub = document.querySelector(".hero p.sub"); if (heroSub && BIZ.hero_subtitle) heroSub.textContent = BIZ.hero_subtitle;
+  const aboutTitle = document.querySelector(".house-text h2"); if (aboutTitle) aboutTitle.textContent = BIZ.about_title;
+  const aboutPs = document.querySelectorAll(".house-text p");
+  if (aboutPs[0] && BIZ.about_body_1) aboutPs[0].textContent = BIZ.about_body_1;
+  if (aboutPs[1] && BIZ.about_body_2) aboutPs[1].textContent = BIZ.about_body_2;
+  const sig = document.querySelector(".house-sig"); if (sig && BIZ.about_signature) sig.textContent = BIZ.about_signature;
+  const footAddr = document.querySelector("[data-field='address']"); if (footAddr) footAddr.textContent = BIZ.address;
+  const footHours = document.querySelector("[data-field='hours']"); if (footHours) footHours.textContent = BIZ.hours_display;
+  const footPhone = document.querySelector("[data-field='phone']"); if (footPhone) { footPhone.textContent = BIZ.phone; footPhone.href = "tel:" + BIZ.phone; }
+  const footEmail = document.querySelector("[data-field='email']"); if (footEmail) { footEmail.textContent = BIZ.email; footEmail.href = "mailto:" + BIZ.email; }
+  if (BIZ.max_active_bookings_per_phone) MAX_ACTIVE_BOOKINGS = BIZ.max_active_bookings_per_phone;
+  if (BIZ.booking_lead_hours) BOOKING_LEAD_HOURS = BIZ.booking_lead_hours;
+  if (BIZ.default_buffer_minutes) BUFFER_MINUTES = BIZ.default_buffer_minutes;
 }
-// Is this specialist actually working (not day off / on vacation) on this date?
-function specialistWorks(specialistName, dateStr){
-  if(specialistName==="No Preference" || !specialistName) return true; // "any" isn't a single person's schedule
-  const sp=specialists.find(s=>s.n===specialistName);
-  if(!sp) return true;
-  const dow=new Date(dateStr+"T00:00:00").getDay();
-  if(sp.workingDays && !sp.workingDays.includes(dow)) return false;
-  if((sp.vacationDates||[]).includes(dateStr)) return false;
+
+/* ---------- Catalog (categories, services, specialists, holidays) ---------- */
+let categories = [], treatments = {}, specialists = [{ n: "No Preference", s: "Any available specialist" }], holidays = [];
+
+async function loadCatalog() {
+  try {
+    const { data: cats } = await sb.from("categories").select("*");
+    const { data: svcs } = await sb.from("services").select("*");
+    categories = cats || [];
+    treatments = {};
+    categories.forEach(c => treatments[c.id] = []);
+    (svcs || []).forEach(s => {
+      if (!treatments[s.category_id]) treatments[s.category_id] = [];
+      treatments[s.category_id].push({
+        id: s.id, n: s.name, d: s.duration_minutes + " min", p: s.price, desc: s.description || "",
+        img: s.image_url || "", onlineBookable: s.online_bookable, depositRequired: s.deposit_required,
+        prepMinutes: s.prep_minutes, bufferMinutes: s.buffer_minutes,
+      });
+    });
+  } catch (e) { categories = []; treatments = {}; }
+
+  try {
+    const { data: sps } = await sb.from("specialists").select("*");
+    specialists = [{ n: "No Preference", s: "Any available specialist" }].concat(
+      (sps || []).map(s => ({ id: s.id, n: s.name, s: s.title || "", capableCategories: s.capable_categories || [], workingDays: s.working_days || [], vacationDates: s.vacation_dates || [] }))
+    );
+  } catch (e) { specialists = [{ n: "No Preference", s: "Any available specialist" }]; }
+
+  try {
+    const { data: hols } = await sb.from("holidays").select("*");
+    holidays = (hols || []).map(h => ({ date: h.date, label: h.label }));
+  } catch (e) { holidays = []; }
+}
+function isHoliday(dateStr) { return holidays.some(h => h.date === dateStr); }
+function holidayLabel(dateStr) { const h = holidays.find(x => x.date === dateStr); return h ? h.label : null; }
+function specialistsFor(categoryId) {
+  const capable = specialists.filter(s => s.n === "No Preference" || (s.capableCategories || []).includes(categoryId));
+  return capable.length ? capable : specialists;
+}
+function specialistWorks(specialistName, dateStr) {
+  if (specialistName === "No Preference" || !specialistName) return true;
+  const sp = specialists.find(s => s.n === specialistName);
+  if (!sp) return true;
+  const dow = new Date(dateStr + "T00:00:00").getDay();
+  if (sp.workingDays && sp.workingDays.length && !sp.workingDays.includes(dow)) return false;
+  if ((sp.vacationDates || []).includes(dateStr)) return false;
   return true;
 }
+function specialistIdByName(name) { const sp = specialists.find(s => s.n === name); return sp && sp.id ? sp.id : null; }
+function specialistNameById(id) { if (!id) return "No Preference"; const sp = specialists.find(s => s.id === id); return sp ? sp.n : "No Preference"; }
 
-const visitInfo = [
-  {q:"Arrival",a:"Please arrive 10 minutes before your appointment to settle in and change if needed."},
-  {q:"Parking",a:"Complimentary valet parking is available at the building entrance."},
-  {q:"Preparation",a:"Arrive with clean, product-free hair or skin for treatments that require it — we'll let you know when booking."},
-  {q:"Appointment Process",a:"You'll be welcomed with tea, a short consultation, then your ritual begins."},
-  {q:"Aftercare",a:"Each treatment concludes with personalised aftercare guidance from your specialist."},
-  {q:"Cancellation Policy",a:"Cancellations within 24 hours may forfeit any deposit paid."},
-];
+let visitInfo = [];
 const testimonials = [
-  {q:"The most unhurried, considered beauty experience I've had in Beirut.",n:"Lea K."},
+  {q:"The most unhurried, considered experience I've had in the city.",n:"Lea K."},
   {q:"Booking felt like reserving a table at a favourite restaurant — effortless.",n:"Nour A."},
   {q:"Quiet luxury, exactly as promised. My hair has never looked better.",n:"Yasmine H."},
 ];
@@ -866,18 +826,21 @@ function buildRitualRail(){
   });
 }
 
-/* ---------- Your Visit accordion ---------- */
+/* ---------- Your Visit accordion (built from Business Settings, once loaded) ---------- */
 const visitWrap=document.getElementById("visitAccordion");
-visitInfo.forEach((item,i)=>{
-  const el=document.createElement("div");
-  el.className="visit-item";
-  el.innerHTML=`
-    <button class="visit-q" onclick="toggleVisit(this)">
-      <span class="num">0${i+1}</span><h3>${item.q}</h3><span class="plus"></span>
-    </button>
-    <div class="visit-a"><p>${item.a}</p></div>`;
-  visitWrap.appendChild(el);
-});
+function buildVisitAccordion(){
+  visitWrap.innerHTML="";
+  visitInfo.forEach((item,i)=>{
+    const el=document.createElement("div");
+    el.className="visit-item";
+    el.innerHTML=`
+      <button class="visit-q" onclick="toggleVisit(this)">
+        <span class="num">0${i+1}</span><h3>${item.q}</h3><span class="plus"></span>
+      </button>
+      <div class="visit-a"><p>${item.a}</p></div>`;
+    visitWrap.appendChild(el);
+  });
+}
 function toggleVisit(btn){
   const item=btn.parentElement;
   const wasOpen=item.classList.contains("open");
@@ -907,33 +870,16 @@ showTesti(0);
 setInterval(()=>showTesti((testiIndex+1)%testimonials.length),5500);
 
 /* ============ BOOKING FLOW LOGIC ============ */
-const state={service:null,treatment:null,specialist:specialists[0].n,date:null,time:null,holdToken:null,holdDate:null,holdTime:null,holdExpiresAt:null};
-
-// Small ticking countdown so the customer can see their temporary hold and
-// understands why the clock is running.
-setInterval(()=>{
-  const el=document.getElementById("holdCountdown");
-  if(!state.holdToken || !state.holdExpiresAt){ el.style.display="none"; return; }
-  const msLeft = new Date(state.holdExpiresAt).getTime() - Date.now();
-  if(msLeft<=0){ el.style.display="none"; state.holdToken=null; state.holdExpiresAt=null; renderTimes(); return; }
-  const m=Math.floor(msLeft/60000), s=Math.floor((msLeft%60000)/1000);
-  el.style.display="block";
-  el.textContent=`This time is held for you — ${m}:${s.toString().padStart(2,"0")} remaining to finish booking.`;
-},1000);
+const state={service:null,treatment:null,specialist:specialists[0].n,date:null,time:null,lastPhone:null};
 let step=0;
 const totalSteps=7;
 
-function releaseCurrentHold(){
-  if(state.holdToken){ releaseHold(state.holdDate, state.holdToken); state.holdToken=null; state.holdDate=null; state.holdTime=null; state.holdExpiresAt=null; }
-}
 function openBooking(){
-  releaseCurrentHold();
   document.getElementById("bookOverlay").classList.add("open");
   document.body.style.overflow="hidden";
   step=0; renderStep();
 }
 function closeBooking(){
-  releaseCurrentHold();
   document.getElementById("bookOverlay").classList.remove("open");
   document.body.style.overflow="";
 }
@@ -957,7 +903,7 @@ function buildServiceGrid(){
     const el=document.createElement("div");
     el.className="choice"; el.dataset.id=c.id;
     el.innerHTML=`<h3>${c.name}</h3><span>${(treatments[c.id]||[]).length} rituals</span>`;
-    el.onclick=()=>{ state.service=c.id; state.treatment=null; state.time=null; releaseCurrentHold();
+    el.onclick=()=>{ state.service=c.id; state.treatment=null; state.time=null;
       [...serviceGrid.children].forEach(x=>x.classList.remove("selected"));
       el.classList.add("selected"); updateNextEnabled(); };
     serviceGrid.appendChild(el);
@@ -975,7 +921,7 @@ function renderTreatList(){
     const row=document.createElement("div");
     row.className="treat-row";
     row.innerHTML=`<div><div class="treat-name">${t.n}</div><div class="treat-meta">${t.d} · ${t.desc}</div></div><div class="treat-price">$${t.p}</div>`;
-    row.onclick=()=>{ if(state.treatment!==t){ state.time=null; releaseCurrentHold(); } state.treatment=t;
+    row.onclick=()=>{ if(state.treatment!==t){ state.time=null; } state.treatment=t;
       [...list.children].forEach(x=>x.classList.remove("selected"));
       row.classList.add("selected"); updateNextEnabled(); };
     list.appendChild(row);
@@ -992,7 +938,7 @@ function buildSpecialistGrid(){
     const el=document.createElement("div");
     el.className="spec-card"; if(state.specialist ? state.specialist===s.n : s.n==="No Preference") el.classList.add("selected");
     el.innerHTML=`<div class="avatar"></div><h3>${s.n}</h3><span>${s.s}</span>`;
-    el.onclick=()=>{ if(state.specialist!==s.n){ state.time=null; releaseCurrentHold(); } state.specialist=s.n;
+    el.onclick=()=>{ if(state.specialist!==s.n){ state.time=null; } state.specialist=s.n;
       [...specialistGrid.children].forEach(x=>x.classList.remove("selected"));
       el.classList.add("selected"); };
     specialistGrid.appendChild(el);
@@ -1012,19 +958,16 @@ function buildSpecialistGrid(){
    - Admin-blocked time (breaks, meetings, maintenance) is stored as a
      special booking with status "blocked" and no specialist, so it blocks
      every specialist. */
+
 const ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:30","17:00","17:30"];
-const BUFFER_MINUTES=15;
-const BOOKING_LEAD_HOURS=2;       // can't book within this many hours of now
-const MAX_ACTIVE_BOOKINGS=3;      // per phone number
+let BUFFER_MINUTES=15;
+let BOOKING_LEAD_HOURS=2;       // can't book within this many hours of now
+let MAX_ACTIVE_BOOKINGS=3;      // per phone number
 
 function dateKey(d){ return d.toISOString().slice(0,10); }
-function bookingsStorageKey(dateStr){ return "lume:bookings:"+dateStr; }
 function slotIndex(time){ return ALL_SLOTS.indexOf(time); }
 function durationMinutes(label){ const m=/(\d+)/.exec(label||""); return m?parseInt(m[1],10):30; }
 
-// Returns the list of consecutive ALL_SLOTS entries a booking of this
-// duration needs starting at `time`, or null if it would run past a break
-// or off the end of the day.
 function requiredSlotsFor(time, durationLabel, bufferOverride){
   const startIdx=slotIndex(time);
   if(startIdx===-1) return null;
@@ -1035,8 +978,6 @@ function requiredSlotsFor(time, durationLabel, bufferOverride){
   for(let i=0;i<count;i++){
     const idx=startIdx+i;
     if(idx>=ALL_SLOTS.length) return null;
-    // must be contiguous 30-min ticks (a gap in ALL_SLOTS means a break —
-    // a booking can't silently span across it)
     if(i>0){
       const [ph,pm]=ALL_SLOTS[idx-1].split(":").map(Number);
       const [ch,cm]=ALL_SLOTS[idx].split(":").map(Number);
@@ -1047,34 +988,37 @@ function requiredSlotsFor(time, durationLabel, bufferOverride){
   return out;
 }
 
+// Pulls the real, live availability for one date from the database via the
+// public_availability RPC (Phase 1) — returns which time ranges are taken
+// and by which specialist lane, WITHOUT exposing any customer details.
+// Converts each taken range into the same discrete-slot shape the rest of
+// the booking UI already expects, so slotsFree() below barely changed.
 async function loadDayBookings(dateStr){
   try{
-    const res = await window.storage.get(bookingsStorageKey(dateStr), true);
-    return res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){
-    return []; // key doesn't exist yet / no bookings for this day
-  }
-}
-async function saveDayBookings(dateStr, list){
-  try{ return !!(await window.storage.set(bookingsStorageKey(dateStr), JSON.stringify(list), true)); }
-  catch(e){ return false; }
+    const { data, error } = await sb.rpc("public_availability", { p_date: dateStr, p_specialist_id: null });
+    if(error || !data) return [];
+    return data.map(row=>{
+      const slots=[];
+      let idx=slotIndex(row.start_time.slice(0,5));
+      const endIdx=slotIndex(row.end_time.slice(0,5));
+      if(idx===-1) return null;
+      if(endIdx===-1){ // end time runs past the last defined slot start — just take from idx to the end of the day
+        for(let i=idx;i<ALL_SLOTS.length;i++) slots.push(ALL_SLOTS[i]);
+      } else {
+        for(let i=idx;i<endIdx;i++) slots.push(ALL_SLOTS[i]);
+      }
+      return { specialist: specialistNameById(row.specialist_id), slots, status: row.status };
+    }).filter(Boolean);
+  }catch(e){ return []; }
 }
 
 function specialistLane(specialist){ return specialist || "No Preference"; }
-const HOLD_MINUTES=7;
 
 // Is this exact set of slots free for this specialist on this date?
-// Treats an unexpired "held" booking exactly like a confirmed one, EXCEPT
-// a hold can exclude itself via holdToken so the person who placed it can
-// still see/keep the time they're actively booking.
-function slotsFree(dayList, specialist, slots, excludeId, holdToken){
-  const now=Date.now();
+function slotsFree(dayList, specialist, slots, excludeId){
   return !dayList.some(b=>{
     if(b.id===excludeId) return false;
-    if(b.status==="held" && b.holdToken===holdToken) return false; // it's my own hold
-    if(b.status==="held" && new Date(b.expiresAt).getTime()<now) return false; // expired, ignore
-    if(b.status!=="confirmed" && b.status!=="blocked" && b.status!=="held") return false;
-    if((b.status==="confirmed"||b.status==="held") && specialistLane(b.specialist)!==specialistLane(specialist)) return false;
+    if(specialistLane(b.specialist)!==specialistLane(specialist)) return false;
     return (b.slots||[]).some(s=>slots.includes(s));
   });
 }
@@ -1084,336 +1028,65 @@ function isWithinLeadTime(dateStr, time){
   return (apptTime-new Date())/3600000 < BOOKING_LEAD_HOURS;
 }
 
-/* ---------- Temporary holds ----------
-   The instant a customer picks a time, we reserve it for HOLD_MINUTES so a
-   second customer filling in their details at the same moment can't also
-   grab it. If they pick a different time/date/specialist, or close the
-   flow, the hold is released; if they simply abandon the tab, it expires
-   on its own and other customers stop seeing it as unavailable. */
-async function placeHold(dateStr, time, specialist, durationLabel, bufferOverride){
-  if(isHoliday(dateStr) || !specialistWorks(specialist, dateStr)) return null;
-  const slots=requiredSlotsFor(time, durationLabel, bufferOverride);
-  if(!slots) return null;
-  const current=await loadDayBookings(dateStr);
-  const token="H-"+Math.random().toString(36).slice(2,10);
-  if(!slotsFree(current, specialist, slots, null, token)) return null;
-  const expiresAt=new Date(Date.now()+HOLD_MINUTES*60000).toISOString();
-  current.push({id:"HOLD-"+token, holdToken:token, time, slots, status:"held", specialist,
-    expiresAt, createdAt:new Date().toISOString()});
-  const saved=await saveDayBookings(dateStr, current);
-  return saved ? {token, dateStr, slots, expiresAt} : null;
-}
-async function releaseHold(dateStr, token){
-  if(!dateStr || !token) return;
-  try{
-    const current=await loadDayBookings(dateStr);
-    const filtered=current.filter(b=>!(b.status==="held" && b.holdToken===token));
-    if(filtered.length!==current.length) await saveDayBookings(dateStr, filtered);
-  }catch(e){}
-}
+/* ---------- Booking actions — all customer-facing writes go through the
+   booking-api Edge Function, which re-validates everything server-side and
+   relies on a real Postgres constraint to make double-booking physically
+   impossible, not just unlikely. ---------- */
 
-// Re-fetches the latest list, checks every required slot is still free for
-// this specialist, then claims all of them as one booking. If a valid hold
-// token for this exact slot is supplied, that hold is upgraded in place
-// instead of being treated as a competing booking.
-// Returns {ok, reason} — reason is "taken" | "lead-time" | "limit" on failure.
-async function claimSlot(d, time, bookingDetails, holdToken){
+async function claimSlot(d, time, bookingDetails){
   const dateStr=dateKey(d);
-  try{
-    if(isWithinLeadTime(dateStr, time)) return {ok:false, reason:"lead-time"};
-    if(isHoliday(dateStr)) return {ok:false, reason:"taken"};
-    if(!specialistWorks(bookingDetails.specialist, dateStr)) return {ok:false, reason:"taken"};
-
-    if(bookingDetails.phone){
-      const custRes = await window.storage.get(customerKey(bookingDetails.phone), true);
-      if(custRes && custRes.value){
-        const cust=JSON.parse(custRes.value);
-        const activeCount=(cust.history||[]).filter(h=>h.status==="confirmed").length;
-        if(activeCount>=MAX_ACTIVE_BOOKINGS) return {ok:false, reason:"limit"};
-      }
-    }
-
-    const slots=requiredSlotsFor(time, bookingDetails.durationLabel, bookingDetails.bufferOverride);
-    if(!slots) return {ok:false, reason:"taken"};
-    let current = await loadDayBookings(dateStr);
-    if(!slotsFree(current, bookingDetails.specialist, slots, null, holdToken)) return {ok:false, reason:"taken"};
-
-    // drop our own hold (if any) and write the real confirmed booking in the same pass
-    current = current.filter(b=>!(b.status==="held" && b.holdToken===holdToken));
-    current.push(Object.assign({time, slots, status:"confirmed", reminderSent:false, sameDayReminderSent:false, createdAt:new Date().toISOString(), createdBy:bookingDetails.createdBy||"customer"}, bookingDetails));
-    const saved = await saveDayBookings(dateStr, current);
-    return saved ? {ok:true} : {ok:false, reason:"taken"};
-  }catch(e){
-    return {ok:false, reason:"taken"};
-  }
+  const res = await callBookingApi("create_booking", {
+    service_id: bookingDetails.service,
+    specialist_id: specialistIdByName(bookingDetails.specialist),
+    date: dateStr, time,
+    name: bookingDetails.name, phone: bookingDetails.phone, email: bookingDetails.email,
+    notes: bookingDetails.notes, deposit: bookingDetails.deposit,
+  });
+  if(res.ok){ rememberMyDetails(bookingDetails); }
+  return res.ok ? {ok:true, id:res.booking_id} : {ok:false, reason:res.reason||"taken", message:res.message};
 }
 
-/* ---------- Cancellation, notifications, and the customer database ----------
-   NOTE ON NOTIFICATIONS: this is a static, single-file prototype with no real
-   backend, so there is no actual SMS/WhatsApp gateway here. "Sending a
-   notification" means writing an entry to a shared notification log that the
-   admin dashboard and this site can both read — a faithful simulation of the
-   real behavior, but a real launch needs an actual provider (e.g. Twilio or
-   the WhatsApp Business API) wired to a real server to send real texts. */
-function phoneKey(phone){ return (phone||"").replace(/\D/g,""); }
-function customerKey(phone){ return "lume:customers:"+phoneKey(phone); }
-
-async function upsertCustomer(details, historyEntry){
-  if(!details.phone) return;
-  const key = customerKey(details.phone);
-  let cust = {name:details.name||"", phone:details.phone, email:details.email||"", bday:details.bday||"", history:[]};
-  try{
-    const res = await window.storage.get(key, true);
-    if(res && res.value){
-      const existing = JSON.parse(res.value);
-      cust = Object.assign(existing, {
-        name: details.name || existing.name,
-        email: details.email || existing.email,
-        bday: details.bday || existing.bday
-      });
-      if(!Array.isArray(cust.history)) cust.history=[];
-    }
-  }catch(e){}
-  cust.history.push(historyEntry);
-  cust.updatedAt = new Date().toISOString();
-  try{ await window.storage.set(key, JSON.stringify(cust), true); }catch(e){}
-  // remember this phone on THIS device only (personal storage), so a return
-  // visit can recognize them and prefill their details
-  try{ await window.storage.set("lume:my-phone", details.phone, false); }catch(e){}
+async function cancelBookingByIds(dateStr, id, phone){
+  return await callBookingApi("cancel_booking", { booking_id:id, phone });
 }
 
-async function updateCustomerHistoryStatus(phone, id, status){
-  if(!phone) return;
-  try{
-    const res = await window.storage.get(customerKey(phone), true);
-    if(!res || !res.value) return;
-    const cust = JSON.parse(res.value);
-    const h = (cust.history||[]).find(x=>x.id===id);
-    if(h) h.status=status;
-    await window.storage.set(customerKey(phone), JSON.stringify(cust), true);
-  }catch(e){}
+async function rescheduleBookingApi(id, phone, newDateStr, newTime){
+  return await callBookingApi("reschedule_booking", { booking_id:id, phone, new_date:newDateStr, new_time:newTime });
 }
-
-async function pushNotification(phone, type, message, appt){
-  const entry={phone, type, message, at:new Date().toISOString(), apptId: appt?appt.id:null, status:"sent"};
-  try{
-    const res = await window.storage.get("lume:notifications:log", true);
-    let log = res && res.value ? JSON.parse(res.value) : [];
-    log.unshift(entry);
-    log = log.slice(0,150);
-    await window.storage.set("lume:notifications:log", JSON.stringify(log), true);
-  }catch(e){
-    try{
-      const res2 = await window.storage.get("lume:notifications:log", true);
-      let log2 = res2 && res2.value ? JSON.parse(res2.value) : [];
-      log2.unshift(Object.assign({}, entry, {status:"failed"}));
-      await window.storage.set("lume:notifications:log", JSON.stringify(log2.slice(0,150)), true);
-    }catch(e2){}
-  }
-}
-
-// Cancels a booking on a given date (found by its reservation id), whether
-// initiated by the customer or the admin, and notifies the customer's saved
-// phone number either way.
-async function cancelBookingByIds(dateStr, id, cancelledBy){
-  const key = "lume:bookings:"+dateStr;
-  let list=[];
-  try{
-    const res = await window.storage.get(key, true);
-    list = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){ list=[]; }
-  const idx = list.findIndex(b=>b.id===id);
-  if(idx===-1) return {ok:false};
-  if(list[idx].status==="cancelled") return {ok:false, already:true};
-  list[idx].status="cancelled";
-  list[idx].cancelledBy=cancelledBy;
-  list[idx].cancelledAt=new Date().toISOString();
-  list[idx].auditLog=(list[idx].auditLog||[]).concat([{action:"cancelled",by:cancelledBy,at:new Date().toISOString()}]);
-  const booking=list[idx];
-  try{
-    const saved = await window.storage.set(key, JSON.stringify(list), true);
-    if(!saved) return {ok:false};
-  }catch(e){ return {ok:false}; }
-
-  await updateCustomerHistoryStatus(booking.phone, id, "cancelled");
-  await pushNotification(booking.phone, "cancellation",
-    `Your appointment for ${booking.treatment||booking.service||"your visit"} on ${dateStr} at ${booking.time} has been cancelled${cancelledBy==="admin"?" by the house":""}.`,
-    booking);
-  await pushNotification("", "admin-alert",
-    `${cancelledBy==="admin"?"You":(booking.name||"A customer")} cancelled the ${dateStr} ${booking.time} appointment for ${booking.treatment||booking.service||"a service"}.`, booking);
-  await notifyWaitlist(dateStr, booking.specialist);
-  return {ok:true, booking};
-}
-
-// Sets a confirmed, already-happened booking's outcome (used by the admin).
-async function setBookingOutcome(dateStr, id, outcome){ // "completed" | "no-show"
-  const key="lume:bookings:"+dateStr;
-  let list=[];
-  try{ const res=await window.storage.get(key, true); list = res && res.value ? JSON.parse(res.value) : []; }catch(e){ return false; }
-  const idx=list.findIndex(b=>b.id===id);
-  if(idx===-1 || list[idx].status!=="confirmed") return false;
-  list[idx].status=outcome;
-  list[idx].auditLog=(list[idx].auditLog||[]).concat([{action:outcome,by:"admin",at:new Date().toISOString()}]);
-  const booking=list[idx];
-  try{ await window.storage.set(key, JSON.stringify(list), true); }catch(e){ return false; }
-  await updateCustomerHistoryStatus(booking.phone, id, outcome);
-  return true;
-}
-
-/* ---------- Waitlist ----------
-   Stored per date+time+specialist. When a booking that overlaps those slots
-   is cancelled, everyone waitlisted for that slot gets a notification that
-   it's open again — it does not auto-book for them. */
-function waitlistKey(dateStr, specialist){ return "lume:waitlist:"+dateStr+":"+specialistLane(specialist).replace(/\s+/g,"-"); }
 
 async function joinWaitlist(dateStr, specialist, details){
-  const key=waitlistKey(dateStr, specialist);
-  let list=[];
-  try{ const res=await window.storage.get(key, true); list = res && res.value ? JSON.parse(res.value) : []; }catch(e){}
-  list.push(Object.assign({at:new Date().toISOString()}, details));
-  try{ await window.storage.set(key, JSON.stringify(list), true); return true; }catch(e){ return false; }
-}
-
-async function notifyWaitlist(dateStr, freedSlots, specialist){
-  const key=waitlistKey(dateStr, specialist);
-  let list=[];
-  try{ const res=await window.storage.get(key, true); list = res && res.value ? JSON.parse(res.value) : []; }catch(e){ return; }
-  if(!list.length) return;
-  for(const entry of list){
-    await pushNotification(entry.phone, "waitlist",
-      `Good news — an opening just came up on ${dateStr} for ${entry.treatment||"your requested service"}. Book quickly, it's first come, first served.`, {id:null});
-  }
-  try{ await window.storage.set(key, JSON.stringify([]), true); }catch(e){}
-}
-
-/* ---------- Rescheduling (customer or admin) ----------
-   Moves an existing confirmed booking to a new date/time for the SAME
-   specialist and duration, re-checking availability first. */
-async function rescheduleBooking(oldDateStr, id, newDateObj, newTime, actor){
-  const oldKey="lume:bookings:"+oldDateStr;
-  let oldList=[];
-  try{ const res=await window.storage.get(oldKey, true); oldList = res && res.value ? JSON.parse(res.value) : []; }catch(e){ return {ok:false}; }
-  const idx=oldList.findIndex(b=>b.id===id);
-  if(idx===-1 || oldList[idx].status!=="confirmed") return {ok:false};
-  const booking=oldList[idx];
-
-  if(isWithinLeadTime(dateKey(newDateObj), newTime)) return {ok:false, reason:"lead-time"};
-  // reuse the same slot COUNT as the original booking so duration stays consistent
-  const count=(booking.slots||[booking.time]).length;
-  const computed=[];
-  const startIdx=slotIndex(newTime);
-  if(startIdx===-1) return {ok:false, reason:"taken"};
-  for(let i=0;i<count;i++){
-    const idx2=startIdx+i;
-    if(idx2>=ALL_SLOTS.length) return {ok:false, reason:"taken"};
-    if(i>0){
-      const [ph,pm]=ALL_SLOTS[idx2-1].split(":").map(Number);
-      const [ch,cm]=ALL_SLOTS[idx2].split(":").map(Number);
-      if((ch*60+cm)-(ph*60+pm)!==30) return {ok:false, reason:"taken"};
-    }
-    computed.push(ALL_SLOTS[idx2]);
-  }
-  const newDateStr=dateKey(newDateObj);
-  const sameDay=newDateStr===oldDateStr;
-  const targetListRaw = sameDay ? oldList : await loadDayBookings(newDateStr);
-
-  if(!slotsFree(targetListRaw, booking.specialist, computed, id)) return {ok:false, reason:"taken"};
-
-  // remove from old date
-  oldList.splice(idx,1);
-  await saveDayBookings(oldDateStr, oldList);
-
-  const updated=Object.assign({}, booking, {
-    date:newDateStr, time:newTime, slots:computed,
-    rescheduledAt:new Date().toISOString(), rescheduledBy:actor,
-    reminderSent:false, sameDayReminderSent:false,
-    auditLog:(booking.auditLog||[]).concat([{action:"rescheduled",by:actor,at:new Date().toISOString(),from:oldDateStr+" "+booking.time,to:newDateStr+" "+newTime}])
+  return await callBookingApi("join_waitlist", {
+    date: dateStr, specialist_id: specialistIdByName(specialist), phone: details.phone, name: details.name, treatment: details.treatment,
   });
-  const finalNewList = sameDay ? oldList.concat([updated]) : targetListRaw.concat([updated]);
-  await saveDayBookings(newDateStr, finalNewList);
-
-  try{
-    const res=await window.storage.get(customerKey(booking.phone), true);
-    if(res && res.value){
-      const cust=JSON.parse(res.value);
-      const h=(cust.history||[]).find(x=>x.id===id);
-      if(h){ h.date=newDateStr; h.time=newTime; }
-      await window.storage.set(customerKey(booking.phone), JSON.stringify(cust), true);
-    }
-  }catch(e){}
-
-  await pushNotification(booking.phone, "reschedule",
-    `Your appointment for ${booking.treatment||booking.service||"your visit"} has been moved to ${newDateStr} at ${newTime}.`, booking);
-  await pushNotification("", "admin-alert",
-    `${actor==="admin"?"You":(booking.name||"A customer")} rescheduled the ${oldDateStr} ${booking.time} appointment to ${newDateStr} ${newTime}.`, booking);
-  await notifyWaitlist(oldDateStr, booking.specialist);
-  return {ok:true, booking:updated};
 }
 
-// Best-effort 24h and same-day reminders. Runs client-side whenever this
-// site (or the admin dashboard) happens to be open, since a static
-// prototype has no server to run a real scheduled job — a production
-// version needs a real cron/scheduler hitting a real SMS/WhatsApp provider.
-async function checkReminders(){
-  const now=new Date();
-  for(let offset=0; offset<=1; offset++){
-    const d=new Date(now); d.setDate(now.getDate()+offset);
-    const ds=dateKey(d);
-    const key="lume:bookings:"+ds;
-    let list;
-    try{
-      const res=await window.storage.get(key, true);
-      list = res && res.value ? JSON.parse(res.value) : [];
-    }catch(e){ continue; }
-    let changed=false;
-    for(const b of list){
-      if(b.status!=="confirmed") continue;
-      const apptTime=new Date(ds+"T"+b.time+":00");
-      const hoursUntil=(apptTime-now)/3600000;
-      if(!b.reminderSent && hoursUntil<=24 && hoursUntil>0){
-        b.reminderSent=true; changed=true;
-        pushNotification(b.phone,"reminder",
-          `Reminder: your ${b.treatment||b.service||"appointment"} is coming up on ${ds} at ${b.time}.`, b);
-      }
-      if(!b.sameDayReminderSent && hoursUntil<=2 && hoursUntil>0){
-        b.sameDayReminderSent=true; changed=true;
-        pushNotification(b.phone,"reminder",
-          `See you soon — your ${b.treatment||b.service||"appointment"} is today at ${b.time}.`, b);
-      }
-    }
-    if(changed){ try{ await window.storage.set(key, JSON.stringify(list), true); }catch(e){} }
-  }
+async function lookupMyBookingsApi(phone){
+  return await callBookingApi("lookup_by_phone", { phone });
 }
-setInterval(checkReminders, 60000);
-checkReminders();
 
-/* Returning-customer recognition: this device/browser storage is ONLY a
-   convenience layer for prefilling the form — the phone number is always
-   the real, primary identifier. A customer on a different device gets the
-   exact same profile and history the moment they enter their phone number
-   (see "Manage Booking" and the customer lookup in claimSlot/upsertCustomer
-   below), so nothing about their account depends on this device. */
+/* ---------- Returning-visitor convenience (this device only — never a
+   substitute for the phone-based Manage Booking lookup, which works from
+   any device). Plain localStorage, no server round-trip. ---------- */
+function rememberMyDetails(d){
+  try{ localStorage.setItem("lume:my-details", JSON.stringify({name:d.name, phone:d.phone, email:d.email})); }catch(e){}
+}
 async function tryPrefillReturningCustomer(){
-  // don't clobber anything they've already started typing on this visit
-  if(document.getElementById("fName").value.trim() || document.getElementById("fPhone").value.trim()) return;
+  if(document.getElementById("fName").value.trim()) return;
   try{
-    const mine = await window.storage.get("lume:my-phone", false);
-    if(!mine || !mine.value) return;
-    const res = await window.storage.get(customerKey(mine.value), true);
-    if(!res || !res.value) return;
-    const cust = JSON.parse(res.value);
-    document.getElementById("fName").value = cust.name||"";
-    document.getElementById("fPhone").value = cust.phone||"";
-    document.getElementById("fEmail").value = cust.email||"";
-    if(cust.bday) document.getElementById("fBday").value = cust.bday;
+    const raw=localStorage.getItem("lume:my-details");
+    if(!raw) return;
+    const mine=JSON.parse(raw);
+    document.getElementById("fName").value=mine.name||"";
+    document.getElementById("fPhone").value=mine.phone||"";
+    document.getElementById("fEmail").value=mine.email||"";
     updateNextEnabled();
     const note=document.getElementById("returningNote");
-    note.textContent = "Welcome back"+(cust.name?", "+cust.name:"")+" — we've filled in your saved details. (Not on this device? You can always edit these, or look up your bookings by phone under Manage Booking.)";
+    note.textContent = "Welcome back"+(mine.name?", "+mine.name:"")+" — we've filled in your saved details. (Not on this device? You can always edit these, or look up your bookings by phone under Manage Booking.)";
     note.style.display="block";
   }catch(e){}
 }
 
-/* Manage Booking overlay */
+/* ---------- Manage Booking overlay ---------- */
 function openManage(){
   document.getElementById("manageOverlay").classList.add("open");
   document.body.style.overflow="hidden";
@@ -1427,30 +1100,20 @@ async function lookupMyBookings(){
   const results=document.getElementById("manageResults");
   if(!phone){ results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>Please enter the phone number you booked with.</p>"; return; }
   results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>Searching…</p>";
-  let cust;
-  try{
-    const res=await window.storage.get(customerKey(phone), true);
-    cust = res && res.value ? JSON.parse(res.value) : null;
-  }catch(e){ cust=null; }
-  if(!cust || !Array.isArray(cust.history) || !cust.history.length){
-    results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>No appointments found for this number.</p>";
-    return;
-  }
-  const todayStr=dateKey(new Date());
-  const upcoming=cust.history.filter(h=>h.status==="confirmed" && h.date>=todayStr).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  if(!upcoming.length){
-    results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>No upcoming appointments for this number.</p>";
+  const res = await lookupMyBookingsApi(phone);
+  if(!res.ok || !res.bookings || !res.bookings.length){
+    results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>No upcoming appointments found for this number.</p>";
     return;
   }
   results.innerHTML="";
-  upcoming.forEach(h=>{
+  res.bookings.forEach(h=>{
     const row=document.createElement("div");
     row.className="summary-box";
     row.style.marginBottom="14px";
     row.innerHTML=`
-      <div class="summary-row"><span class="k">Service</span><span class="v">${h.treatment||h.service||"—"}</span></div>
-      <div class="summary-row"><span class="k">Date</span><span class="v">${h.date}</span></div>
-      <div class="summary-row"><span class="k">Time</span><span class="v">${h.time}</span></div>
+      <div class="summary-row"><span class="k">Service</span><span class="v">${h.treatment_name||"—"}</span></div>
+      <div class="summary-row"><span class="k">Date</span><span class="v">${h.booking_date}</span></div>
+      <div class="summary-row"><span class="k">Time</span><span class="v">${h.start_time.slice(0,5)}</span></div>
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="ghost-btn cancel-btn">Cancel Appointment</button>
         <button class="ghost-btn reschedule-btn">Reschedule</button>
@@ -1464,7 +1127,7 @@ async function lookupMyBookings(){
       if(!confirm("Cancel this appointment?")) return;
       ev.target.textContent="Cancelling...";
       ev.target.disabled=true;
-      const r=await cancelBookingByIds(h.date, h.id, "customer");
+      const r=await cancelBookingByIds(h.booking_date, h.id, phone);
       if(r.ok){ row.style.opacity=.5; ev.target.textContent="Cancelled"; }
       else{ ev.target.textContent="Cancel Appointment"; ev.target.disabled=false; }
     };
@@ -1472,7 +1135,7 @@ async function lookupMyBookings(){
       const panel=row.querySelector(".reschedule-panel");
       const isOpen = panel.style.display==="block";
       panel.style.display = isOpen ? "none" : "block";
-      if(!isOpen) buildRescheduleUI(row, h);
+      if(!isOpen) buildRescheduleUI(row, h, phone);
     };
     results.appendChild(row);
   });
@@ -1480,45 +1143,41 @@ async function lookupMyBookings(){
 
 // Builds a compact date/time picker inside a Manage Booking result row so a
 // customer can reschedule without going back through the full flow.
-function buildRescheduleUI(row, h){
+function buildRescheduleUI(row, h, phone){
   const dateWrap=row.querySelector(".resched-dates");
   const timeWrap=row.querySelector(".resched-times");
   const status=row.querySelector(".resched-status");
   let chosenDate=null;
   const dowNamesLocal=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-  function paintTimes(){
+  async function paintTimes(){
     timeWrap.innerHTML="";
     if(!chosenDate) return;
     const dateStr=dateKey(chosenDate);
-    loadDayBookings(dateStr).then(bookings=>{
-      ALL_SLOTS.forEach(startTime=>{
-        const count=1; // reschedule keeps the same slot count as booked; approximate with a fresh lookup below
-        const el=document.createElement("div");
-        el.className="time-slot";
-        const withinLead=isWithinLeadTime(dateStr, startTime);
-        // approximate: block if this exact start time overlaps ANY existing confirmed booking for this specialist
-        const overlap = bookings.some(b=> b.id!==h.id && b.status==="confirmed" && specialistLane(b.specialist)===specialistLane(h.specialist) && (b.slots||[b.time]).includes(startTime));
-        const unavailable = withinLead || overlap;
-        if(unavailable) el.classList.add("unavailable");
-        el.textContent=startTime;
-        el.onclick=async ()=>{
-          if(unavailable) return;
-          status.textContent="Rescheduling...";
-          const r=await rescheduleBooking(h.date, h.id, chosenDate, startTime, "customer");
-          if(r.ok){
-            status.style.color="var(--olive-deep)";
-            status.textContent=`Moved to ${dateKey(chosenDate)} at ${startTime}. A confirmation has been sent to your phone.`;
-            h.date=dateKey(chosenDate); h.time=startTime;
-          }else{
-            status.style.color="#A3503F";
-            status.textContent = r.reason==="lead-time"
-              ? `Online rescheduling closes ${BOOKING_LEAD_HOURS} hours before an appointment.`
-              : "That time was just taken — please pick another.";
-          }
-        };
-        timeWrap.appendChild(el);
-      });
+    const bookings = await loadDayBookings(dateStr);
+    ALL_SLOTS.forEach(startTime=>{
+      const el=document.createElement("div");
+      el.className="time-slot";
+      const withinLead=isWithinLeadTime(dateStr, startTime);
+      const overlap = bookings.some(b=> specialistLane(b.specialist)===specialistLane(null) ? false : (b.slots||[]).includes(startTime));
+      const unavailable = withinLead || overlap;
+      if(unavailable) el.classList.add("unavailable");
+      el.textContent=startTime;
+      el.onclick=async ()=>{
+        if(unavailable) return;
+        status.textContent="Rescheduling...";
+        const r=await rescheduleBookingApi(h.id, phone, dateStr, startTime);
+        if(r.ok){
+          status.style.color="var(--olive-deep)";
+          status.textContent=`Moved to ${dateStr} at ${startTime}. A confirmation has been sent to your phone.`;
+        }else{
+          status.style.color="#A3503F";
+          status.textContent = r.reason==="lead-time"
+            ? `Online rescheduling closes ${BOOKING_LEAD_HOURS} hours before an appointment.`
+            : (r.message || "That time was just taken — please pick another.");
+        }
+      };
+      timeWrap.appendChild(el);
     });
   }
 
@@ -1536,11 +1195,11 @@ function buildRescheduleUI(row, h){
 }
 
 async function cancelMyJustBookedAppointment(){
-  if(!state.date || !state.time || !lastConfirmNum) return;
+  if(!state.date || !state.time || !lastConfirmNum || !state.lastPhone) return;
   if(!confirm("Cancel this appointment?")) return;
   const btn=document.getElementById("cancelMineBtn");
   btn.textContent="Cancelling...";
-  const r=await cancelBookingByIds(dateKey(state.date), lastConfirmNum, "customer");
+  const r=await cancelBookingByIds(dateKey(state.date), lastConfirmNum, state.lastPhone);
   const status=document.getElementById("cancelStatus");
   if(r.ok){
     btn.style.display="none";
@@ -1548,12 +1207,11 @@ async function cancelMyJustBookedAppointment(){
     status.textContent="This appointment has been cancelled. A confirmation has been sent to your phone.";
   }else{
     status.style.color="#A3503F";
-    status.textContent="This appointment could not be cancelled — it may already be cancelled.";
+    status.textContent=r.message||"This appointment could not be cancelled — it may already be cancelled.";
     btn.textContent="Cancel This Appointment";
   }
 }
 
-/* Build date rail (next 7 days) */
 const dateRail=document.getElementById("dateRail");
 const dowNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 function renderDates(){
@@ -1599,7 +1257,7 @@ async function renderTimes(){
   ALL_SLOTS.forEach(startTime=>{
     const required = requiredSlotsFor(startTime, durationLabel, bufferOverride);
     const withinLead = isWithinLeadTime(dateStr, startTime);
-    const unavailable = dayClosed || specialistOff || withinLead || !required || !slotsFree(bookings, state.specialist, required, null, state.holdToken);
+    const unavailable = dayClosed || specialistOff || withinLead || !required || !slotsFree(bookings, state.specialist, required, null);
     if(!unavailable && state.time===startTime) stillFree=true;
 
     const el=document.createElement("div");
@@ -1607,18 +1265,9 @@ async function renderTimes(){
     if(unavailable) el.classList.add("unavailable");
     if(state.time===startTime) el.classList.add("selected");
     el.textContent=startTime;
-    el.onclick=async ()=>{
+    el.onclick=()=>{
       if(unavailable) return;
-      el.textContent="…";
-      // release any previous hold (different time/date/specialist) before placing a new one
-      if(state.holdToken && (state.holdDate!==dateStr || state.holdTime!==startTime)){
-        await releaseHold(state.holdDate, state.holdToken);
-        state.holdToken=null;
-      }
-      let hold = state.holdToken && state.holdTime===startTime ? {token:state.holdToken, expiresAt:state.holdExpiresAt} : await placeHold(dateStr, startTime, state.specialist, durationLabel, bufferOverride);
-      if(!hold){ renderTimes(); return; } // someone grabbed it between click and hold — refresh to show it red
-      state.time=startTime; state.holdToken=hold.token; state.holdDate=dateStr; state.holdTime=startTime; state.holdExpiresAt=hold.expiresAt;
-      el.textContent=startTime;
+      state.time=startTime;
       [...grid.children].forEach(x=>x.classList.remove("selected"));
       el.classList.add("selected"); updateNextEnabled(); document.getElementById("waitlistRow").style.display="none";
     };
@@ -1634,6 +1283,8 @@ async function renderTimes(){
 
 // Poll for other customers' bookings while the date/time step is open, so slots
 // go red for everyone in near real time without needing a manual refresh.
+// (Real push updates aren't available in this environment — this is polling,
+// same honest limitation as the rest of this project's real-time features.)
 setInterval(()=>{
   if(document.getElementById("bookOverlay").classList.contains("open") && step===3){
     renderTimes();
@@ -1655,7 +1306,7 @@ function toggleDeposit(){
 /* Summary */
 function renderSummary(){
   const box=document.getElementById("summaryBox");
-  const svcName = state.service ? categories.find(c=>c.id===state.service).name : "—";
+  const svcName = state.service ? (categories.find(c=>c.id===state.service)||{}).name||"—" : "—";
   const dateStr = state.date ? state.date.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}) : "—";
   box.innerHTML=`
     <div class="summary-row"><span class="k">Service</span><span class="v">${svcName}</span></div>
@@ -1664,7 +1315,7 @@ function renderSummary(){
     <div class="summary-row"><span class="k">Date</span><span class="v">${dateStr}</span></div>
     <div class="summary-row"><span class="k">Time</span><span class="v">${state.time||"—"}</span></div>
     <div class="summary-row"><span class="k">Duration</span><span class="v">${state.treatment?state.treatment.d:"—"}</span></div>
-    <div class="summary-row"><span class="k">Price</span><span class="v">${state.treatment?"$"+state.treatment.p:"—"}</span></div>`;
+    <div class="summary-row"><span class="k">Price</span><span class="v">${state.treatment?BIZ.currency_symbol+state.treatment.p:"—"}</span></div>`;
 }
 
 /* Confirmation */
@@ -1711,30 +1362,26 @@ document.getElementById("fPhone").addEventListener("input",updateNextEnabled);
 
 async function nextStep(){
   if(step===5){
-    // Final confirm: try to claim the slot in the shared store right now, in case
-    // someone else booked it in the moments since step 4.
+    // Final confirm: the booking-api Edge Function re-validates everything
+    // (availability, lead time, booking limits) and relies on a real
+    // Postgres constraint to make double-booking physically impossible —
+    // not just a JS check-then-write.
     nextBtn.disabled=true;
     nextBtn.textContent="Confirming...";
     document.getElementById("slotError").classList.remove("show");
 
-    const num = "LM-"+Math.floor(10000+Math.random()*89999);
     const name = document.getElementById("fName").value.trim();
     const phone = document.getElementById("fPhone").value.trim();
     const email = document.getElementById("fEmail").value.trim();
-    const bday = document.getElementById("fBday").value;
     const notes = document.getElementById("fNotes").value.trim();
 
     const claimed = await claimSlot(state.date, state.time, {
-      id:num,
       service: state.service,
       treatment: state.treatment ? state.treatment.n : null,
-      durationLabel: state.treatment ? state.treatment.d : "30 min",
-      bufferOverride: state.treatment ? state.treatment.bufferMinutes : null,
       specialist: state.specialist,
       name, phone, email, notes,
       deposit: depositOn,
-      createdBy:"customer"
-    }, state.holdToken);
+    });
 
     if(!claimed.ok){
       const err=document.getElementById("slotError");
@@ -1743,31 +1390,16 @@ async function nextStep(){
       }else if(claimed.reason==="limit"){
         err.textContent=`You already have ${MAX_ACTIVE_BOOKINGS} upcoming appointments with us. Please cancel or complete one before booking another.`;
       }else{
-        err.textContent="This time was just reserved by another guest — please choose another slot.";
+        err.textContent=claimed.message || "This time was just reserved by another guest — please choose another slot.";
       }
       err.classList.add("show");
-      releaseCurrentHold();
       state.time=null;
       step=3; renderStep();
       return;
     }
-    state.holdToken=null; state.holdDate=null; state.holdTime=null; state.holdExpiresAt=null; // claimSlot already converted the hold
 
-    // Add/update this customer's profile and appointment history, and log a
-    // confirmation notification to their saved phone number.
-    const historyEntry={
-      id:num, date:dateKey(state.date), time:state.time,
-      service:state.service, treatment: state.treatment?state.treatment.n:null,
-      specialist:state.specialist, status:"confirmed"
-    };
-    await upsertCustomer({name, phone, email, bday}, historyEntry);
-    await pushNotification(phone, "confirmation",
-      `Your appointment for ${state.treatment?state.treatment.n:state.service} is confirmed for ${dateKey(state.date)} at ${state.time}.`,
-      {id:num});
-    await pushNotification("", "admin-alert",
-      `New booking: ${name||"a customer"} — ${state.treatment?state.treatment.n:state.service} on ${dateKey(state.date)} at ${state.time}.`, {id:num});
-
-    lastConfirmNum=num;
+    lastConfirmNum=claimed.id;
+    state.lastPhone=phone;
     document.getElementById("cancelStatus").textContent="";
     document.getElementById("cancelMineBtn").style.display="";
     document.getElementById("cancelMineBtn").textContent="Cancel This Appointment";
@@ -1777,7 +1409,6 @@ async function nextStep(){
   if(step<6){ step++; renderStep(); }
 }
 function prevStep(){
-  if(step===3 && state.holdToken) releaseCurrentHold(); // leaving the date/time step abandons the hold
   if(step>0){ step--; renderStep(); }
 }
 
@@ -1793,8 +1424,13 @@ async function joinCurrentWaitlist(){
   status.textContent="You're on the waitlist — we'll text this number if a spot opens on this date.";
 }
 
-/* ---------- Bootstrap: load the shared catalog, then render everything that depends on it ---------- */
+/* ---------- Bootstrap: load business settings + the shared catalog, then render everything that depends on them ---------- */
 async function initApp(){
+  await loadBusinessSettings();
+  applyBusinessBranding();
+  visitInfo = (BIZ.visit_info && BIZ.visit_info.length) ? BIZ.visit_info : visitInfo;
+  buildVisitAccordion();
+
   await loadCatalog();
   buildMenuTabs();
   buildMenuRail("all");
@@ -1803,9 +1439,13 @@ async function initApp(){
   buildSpecialistGrid();
 }
 initApp();
-// Catalog can change from the admin dashboard at any time — pick up edits
-// (new services, specialist changes, holidays) without needing a hard refresh.
+// Catalog and branding can change from the admin dashboard at any time —
+// pick up edits (new services, specialist changes, holidays, business
+// settings) without needing a hard refresh. Polling, not push — see the
+// note near the availability engine above for why.
 setInterval(async ()=>{
+  await loadBusinessSettings();
+  applyBusinessBranding();
   await loadCatalog();
   const activeCat=document.querySelector(".menu-tab.active")?.dataset.cat || "all";
   buildMenuTabs();
@@ -1816,5 +1456,6 @@ setInterval(async ()=>{
   if(!document.getElementById("bookOverlay").classList.contains("open")) buildServiceGrid();
 }, 15000);
 </script>
+
 </body>
 </html>
