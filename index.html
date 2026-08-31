@@ -503,8 +503,8 @@
 </footer>
 
 <div class="mobile-bar">
-  <span class="mb-text">Ready to begin?</span>
-  <button class="mb-btn" onclick="openBooking()">Book Now</button>
+  <span class="mb-text" data-i18n="mb_ready">Ready to begin?</span>
+  <button class="mb-btn" onclick="openBooking()" data-i18n="mb_book">Book Now</button>
 </div>
 
 <!-- ============ BOOKING OVERLAY ============ -->
@@ -713,7 +713,7 @@ const TRANSLATIONS = {
     waitlist_joined:"You're on the waitlist — we'll text this number if a spot opens on this date.",
     welcome_back:"Welcome back",
     welcome_back_msg:"— we've filled in your saved details. (Not on this device? You can always edit these, or look up your bookings by phone under Manage Booking.)",
-    btn_reserve:"Reserve", rituals_suffix:"rituals",
+    btn_reserve:"Reserve", rituals_suffix:"rituals", mb_ready:"Ready to begin?", mb_book:"Book Now",
   },
   ar: {
     nav_menu:"قائمة الجمال", nav_house:"عن المكان", nav_rituals:"الطقوس", nav_visit:"زيارتك",
@@ -770,7 +770,7 @@ const TRANSLATIONS = {
     waitlist_joined:"تم تسجيلك في قائمة الانتظار — سنرسل رسالة إلى هذا الرقم إذا فتح وقت في هذا التاريخ.",
     welcome_back:"مرحباً بعودتك",
     welcome_back_msg:"— لقد قمنا بتعبئة بياناتك المحفوظة. (لست على هذا الجهاز؟ يمكنك دائماً تعديلها، أو البحث عن مواعيدك برقم الهاتف عبر إدارة الحجز.)",
-    btn_reserve:"احجزي", rituals_suffix:"طقوس",
+    btn_reserve:"احجزي", rituals_suffix:"طقوس", mb_ready:"جاهزة للبدء؟", mb_book:"احجزي الآن",
   },
 };
 function t(key, vars) {
@@ -803,6 +803,7 @@ function applyLanguage(lang) {
     buildServiceGrid();
   }
   if (visitInfo.length) buildVisitAccordion();
+  if (typeof showTesti === "function" && typeof testiIndex !== "undefined") showTesti(testiIndex);
   if (document.getElementById("bookOverlay")?.classList.contains("open")) {
     if (step===1) renderTreatList();
     if (step===2) buildSpecialistGrid();
@@ -926,9 +927,9 @@ function specialistNameById(id) { if (!id) return "No Preference"; const sp = sp
 let visitInfo = [];
 let visitInfoAr = []; // Arabic counterparts, matched to visitInfo by index — no admin UI to edit these yet, DB-only for now
 const testimonials = [
-  {q:"The most unhurried, considered experience I've had in the city.",n:"Lea K."},
-  {q:"Booking felt like reserving a table at a favourite restaurant — effortless.",n:"Nour A."},
-  {q:"Quiet luxury, exactly as promised. My hair has never looked better.",n:"Yasmine H."},
+  {q:"The most unhurried, considered experience I've had in the city.",n:"Lea K.",q_ar:"التجربة الأكثر هدوءاً واهتماماً بالتفاصيل التي عايشتها في المدينة.",n_ar:"ليا ك."},
+  {q:"Booking felt like reserving a table at a favourite restaurant — effortless.",n:"Nour A.",q_ar:"شعرت بأن الحجز سهل تماماً، كحجز طاولة في مطعمي المفضل.",n_ar:"نور أ."},
+  {q:"Quiet luxury, exactly as promised. My hair has never looked better.",n:"Yasmine H.",q_ar:"رفاهية هادئة، تماماً كما وُعدت. شعري لم يكن بهذا الجمال من قبل.",n_ar:"ياسمين ه."},
 ];
 
 /* ---------- Loader ---------- */
@@ -1069,8 +1070,9 @@ function showTesti(i){
   testiIndex=i;
   testiText.style.opacity=0;
   setTimeout(()=>{
-    testiText.textContent="“"+testimonials[i].q+"”";
-    testiName.textContent=testimonials[i].n;
+    const item=testimonials[i];
+    testiText.textContent="“"+(currentLang==="ar"&&item.q_ar?item.q_ar:item.q)+"”";
+    testiName.textContent=currentLang==="ar"&&item.n_ar?item.n_ar:item.n;
     testiText.style.opacity=1;
     [...testiDots.children].forEach((d,j)=>d.classList.toggle("active",j===i));
   },300);
