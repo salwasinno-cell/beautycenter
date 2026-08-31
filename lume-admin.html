@@ -456,22 +456,23 @@
         <button class="btn dark" onclick="openBusinessSettingsForm()">Edit</button>
       </div>
       <div class="panel-body">
+        <div style="padding:0 26px 10px;font-size:11px;color:var(--espresso-45);">Each field below has an English version and, underneath it, an optional Arabic version — fill in both if you want the site to show Arabic when a visitor picks it.</div>
         <div class="field-grid-admin" style="padding:0;">
-          <div class="field-a"><label>Business Name</label><input type="text" id="bsName"></div>
-          <div class="field-a"><label>Tagline</label><input type="text" id="bsTagline"></div>
-          <div class="field-a"><label>Address</label><input type="text" id="bsAddress"></div>
+          <div class="field-a"><label>Business Name</label><input type="text" id="bsName"><input type="text" id="bsName_ar" dir="rtl" placeholder="الاسم بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Tagline</label><input type="text" id="bsTagline"><input type="text" id="bsTagline_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Address</label><input type="text" id="bsAddress"><input type="text" id="bsAddress_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
           <div class="field-a"><label>Phone</label><input type="text" id="bsPhone"></div>
           <div class="field-a"><label>WhatsApp Number (with country code, e.g. +9611234567)</label><input type="text" id="bsWhatsapp"></div>
           <div class="field-a"><label>Email</label><input type="text" id="bsEmail"></div>
-          <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"></div>
+          <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"><input type="text" id="bsHours_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
           <div class="field-a"><label>24h Reminder — send how many hours before</label><input type="number" id="bsReminderHours" min="1" max="72"></div>
           <div class="field-a"><label>Same-day Reminder — send how many hours before</label><input type="number" id="bsSameDayReminderHours" min="1" max="12"></div>
-          <div class="field-a"><label>Hero Line 1</label><input type="text" id="bsHeroLine1"></div>
-          <div class="field-a"><label>Hero Line 2</label><input type="text" id="bsHeroLine2"></div>
-          <div class="field-a" style="grid-column:span 2;"><label>Hero Subtitle</label><input type="text" id="bsHeroSubtitle"></div>
-          <div class="field-a" style="grid-column:span 2;"><label>About / House Title</label><input type="text" id="bsAboutTitle"></div>
-          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 1</label><input type="text" id="bsAboutBody1"></div>
-          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 2</label><input type="text" id="bsAboutBody2"></div>
+          <div class="field-a"><label>Hero Line 1</label><input type="text" id="bsHeroLine1"><input type="text" id="bsHeroLine1_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Hero Line 2</label><input type="text" id="bsHeroLine2"><input type="text" id="bsHeroLine2_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Hero Subtitle</label><input type="text" id="bsHeroSubtitle"><input type="text" id="bsHeroSubtitle_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>About / House Title</label><input type="text" id="bsAboutTitle"><input type="text" id="bsAboutTitle_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 1</label><input type="text" id="bsAboutBody1"><input type="text" id="bsAboutBody1_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 2</label><input type="text" id="bsAboutBody2"><input type="text" id="bsAboutBody2_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
         </div>
         <div style="padding:16px 26px 0;display:flex;gap:10px;align-items:center;">
           <button class="btn dark" onclick="submitBusinessSettings()">Save</button>
@@ -851,14 +852,24 @@ function openBusinessSettingsForm(){
   document.getElementById("bsWhatsapp").value = BIZ.whatsapp_number||"";
   document.getElementById("bsEmail").value = BIZ.email||"";
   document.getElementById("bsHours").value = BIZ.hours_display||"";
+  document.getElementById("bsHours_ar").value = BIZ.hours_display_ar||"";
   document.getElementById("bsReminderHours").value = BIZ.reminder_hours_before||24;
   document.getElementById("bsSameDayReminderHours").value = BIZ.same_day_reminder_hours_before||3;
   document.getElementById("bsHeroLine1").value = BIZ.hero_line1||"";
+  document.getElementById("bsHeroLine1_ar").value = BIZ.hero_line1_ar||"";
   document.getElementById("bsHeroLine2").value = BIZ.hero_line2||"";
+  document.getElementById("bsHeroLine2_ar").value = BIZ.hero_line2_ar||"";
   document.getElementById("bsHeroSubtitle").value = BIZ.hero_subtitle||"";
+  document.getElementById("bsHeroSubtitle_ar").value = BIZ.hero_subtitle_ar||"";
   document.getElementById("bsAboutTitle").value = BIZ.about_title||"";
+  document.getElementById("bsAboutTitle_ar").value = BIZ.about_title_ar||"";
   document.getElementById("bsAboutBody1").value = BIZ.about_body_1||"";
+  document.getElementById("bsAboutBody1_ar").value = BIZ.about_body_1_ar||"";
   document.getElementById("bsAboutBody2").value = BIZ.about_body_2||"";
+  document.getElementById("bsAboutBody2_ar").value = BIZ.about_body_2_ar||"";
+  document.getElementById("bsName_ar").value = BIZ.business_name_ar||"";
+  document.getElementById("bsTagline_ar").value = BIZ.tagline_ar||"";
+  document.getElementById("bsAddress_ar").value = BIZ.address_ar||"";
   document.getElementById("bsStatus").textContent="";
   document.getElementById("businessSettingsPanel").style.display="block";
 }
@@ -867,20 +878,30 @@ async function submitBusinessSettings(){
   if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to edit business settings."; return; }
   const update = {
     business_name: document.getElementById("bsName").value.trim(),
+    business_name_ar: document.getElementById("bsName_ar").value.trim(),
     tagline: document.getElementById("bsTagline").value.trim(),
+    tagline_ar: document.getElementById("bsTagline_ar").value.trim(),
     address: document.getElementById("bsAddress").value.trim(),
+    address_ar: document.getElementById("bsAddress_ar").value.trim(),
     phone: document.getElementById("bsPhone").value.trim(),
     whatsapp_number: document.getElementById("bsWhatsapp").value.trim(),
     email: document.getElementById("bsEmail").value.trim(),
     hours_display: document.getElementById("bsHours").value.trim(),
+    hours_display_ar: document.getElementById("bsHours_ar").value.trim(),
     reminder_hours_before: parseInt(document.getElementById("bsReminderHours").value, 10) || 24,
     same_day_reminder_hours_before: parseInt(document.getElementById("bsSameDayReminderHours").value, 10) || 3,
     hero_line1: document.getElementById("bsHeroLine1").value.trim(),
+    hero_line1_ar: document.getElementById("bsHeroLine1_ar").value.trim(),
     hero_line2: document.getElementById("bsHeroLine2").value.trim(),
+    hero_line2_ar: document.getElementById("bsHeroLine2_ar").value.trim(),
     hero_subtitle: document.getElementById("bsHeroSubtitle").value.trim(),
+    hero_subtitle_ar: document.getElementById("bsHeroSubtitle_ar").value.trim(),
     about_title: document.getElementById("bsAboutTitle").value.trim(),
+    about_title_ar: document.getElementById("bsAboutTitle_ar").value.trim(),
     about_body_1: document.getElementById("bsAboutBody1").value.trim(),
+    about_body_1_ar: document.getElementById("bsAboutBody1_ar").value.trim(),
     about_body_2: document.getElementById("bsAboutBody2").value.trim(),
+    about_body_2_ar: document.getElementById("bsAboutBody2_ar").value.trim(),
     updated_at: new Date().toISOString(),
   };
   const { error } = await sb.from("business_settings").update(update).eq("id",1);
