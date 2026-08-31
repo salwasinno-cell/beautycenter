@@ -94,6 +94,36 @@
   [dir="rtl"] .menu-tabs{flex-direction:row-reverse;}
   [dir="rtl"] .field-grid label,[dir="rtl"] .field label{text-align:right;display:block;}
   [dir="rtl"] input,[dir="rtl"] textarea{text-align:right;}
+
+  /* Visit accordion — a properly mirrored RTL structure, not just flipped
+     text inside an unchanged LTR skeleton: the "+" leads on the right
+     (the natural reading-start side in Arabic), the title follows it, and
+     the number moves to the far left — using explicit order values rather
+     than flex-direction:row-reverse, which behaves unpredictably once
+     combined with dir="rtl" (the two reversals can cancel out). */
+  [dir="rtl"] .visit-q{text-align:right;}
+  [dir="rtl"] .visit-q .plus{order:-1;margin-left:16px;margin-right:0;}
+  [dir="rtl"] .visit-q h3{order:0;}
+  [dir="rtl"] .visit-q .num{order:1;margin-right:0;margin-left:0;}
+  [dir="rtl"] .visit-a p{padding:0 34px 26px 4px;}
+
+  /* Same "leading icon" principle for the site's underline-on-hover nav
+     links — the highlight should grow from the right (the reading-start
+     edge) in Arabic, not the left. */
+  [dir="rtl"] .nav-link::after{left:auto;right:0;}
+
+  /* Summary rows (booking review + Manage Booking results) — label/value
+     pairs should read right-to-left, not keep their LTR left/right order. */
+  [dir="rtl"] .summary-row{flex-direction:row-reverse;}
+
+  /* Cards with a "Reserve"/link at one end — keep the link on the
+     natural RTL trailing (left) side rather than stuck on the visual
+     right from the unmirrored LTR layout. */
+  [dir="rtl"] .ritual-row{flex-direction:row-reverse;}
+
+  /* Step nav / testimonial dots / date & time grids read naturally
+     right-to-left once their parent flex direction is reversed. */
+  [dir="rtl"] .date-rail,[dir="rtl"] .testi-dots{flex-direction:row-reverse;}
   @media (max-width:900px){.nav-burger{display:flex;}}
   .mobile-nav{
     position:fixed;top:0;right:0;bottom:0;width:78vw;max-width:320px;
