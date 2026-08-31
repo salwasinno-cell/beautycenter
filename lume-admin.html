@@ -70,6 +70,7 @@
   .cal-evt{margin-top:6px;font-size:10px;padding:3px 6px;background:var(--ivory-deep,#EDE5D3);border-left:2px solid var(--olive);color:var(--espresso-70);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .cal-evt.confirmed{border-color:var(--ok);}
   .cal-evt.pending{border-color:var(--warn);}
+  .cal-evt.blocked{border-color:var(--err);background:rgba(163,80,63,.06);}
 
   /* Table */
   table{width:100%;border-collapse:collapse;}
@@ -1536,6 +1537,10 @@ async function loadPastBookings(){
 }
 
 function statusActions(b){
+  if(b.status==="blocked"){
+    if(!hasPermission("manageSettings")) return "";
+    return `<button class="btn small" data-action="unblock" data-date="${b.date}" data-id="${b.id}">Remove Block</button>`;
+  }
   if(b.status!=="confirmed") return "";
   if(!canManageBooking(b)) return "";
   const isPast = b.date < dateKeyStr(new Date());
@@ -1545,6 +1550,10 @@ function statusActions(b){
     actions += ` <button class="btn small" data-action="noshow" data-date="${b.date}" data-id="${b.id}">No-show</button>`;
   }
   return actions;
+}
+async function removeBlockedTime(id){
+  const { error } = await sb.from("bookings").delete().eq("id", id);
+  return !error;
 }
 
 async function refreshBookingsAndStats(){
@@ -1563,12 +1572,12 @@ async function refreshBookingsAndStats(){
     quickList.appendChild(el);
   });
 
-  const visibleRows = upcoming.filter(b=>b.status!=="blocked");
+  const visibleRows = upcoming; // blocked entries are shown too now — invisible blocks caused real confusion
   if(visibleRows.length){
     table.innerHTML=`<thead><tr><th>Client</th><th>Ritual</th><th>Specialist</th><th>When</th><th>Status</th><th></th></tr></thead>
     <tbody>${visibleRows.map(b=>`<tr>
-        <td class="row-name">${b.name||"Guest"}</td>
-        <td>${b.treatment||b.service||"—"}</td>
+        <td class="row-name">${b.status==="blocked" ? "— (blocked time) —" : (b.name||"Guest")}</td>
+        <td>${b.status==="blocked" ? (b.treatment||"Blocked") : (b.treatment||b.service||"—")}</td>
         <td>${b.specialist||"—"}</td>
         <td>${b.dayLabel} · ${b.time}</td>
         <td><span class="badge ${b.status==='no-show'?'cancelled':b.status}">${b.status}</span></td>
@@ -1578,11 +1587,13 @@ async function refreshBookingsAndStats(){
       btn.addEventListener("click", async ()=>{
         const {action, date, id} = btn.dataset;
         if(action==="cancel" && !confirm("Cancel this appointment? The customer will be notified and the slot will become available again.")) return;
+        if(action==="unblock" && !confirm("Remove this block? The time slot will become available for booking again.")) return;
         btn.disabled=true; btn.textContent="…";
         let ok=false;
         if(action==="cancel") ok=await adminCancelBooking(date, id);
         else if(action==="complete") ok=await setBookingOutcome(date, id, "completed");
         else if(action==="noshow") ok=await setBookingOutcome(date, id, "no-show");
+        else if(action==="unblock") ok=await removeBlockedTime(id);
         if(ok) refreshAll(); else { btn.disabled=false; }
       });
     });
@@ -1594,7 +1605,7 @@ async function refreshBookingsAndStats(){
   for(let i=0;i<7;i++){
     const d=new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
     const ds=dateKeyStr(d);
-    const dayEvts = upcoming.filter(b=>b.date===ds && b.status!=="cancelled" && b.status!=="blocked").slice(0,3);
+    const dayEvts = upcoming.filter(b=>b.date===ds && b.status!=="cancelled").slice(0,3);
     const el=document.createElement("div");
     el.className="cal-day"+(d.toDateString()===today.toDateString()?" today":"");
     let html=`<div class="dnum">${d.getDate()}</div>`;
