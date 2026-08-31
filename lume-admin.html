@@ -419,6 +419,27 @@
       </div>
     </div>
 
+    <div class="panel" id="emailTemplatesPanel">
+      <div class="panel-head">
+        <h2>Email Templates</h2>
+      </div>
+      <div class="panel-body">
+        <div style="padding:0 26px 14px;font-size:12px;color:var(--espresso-45);">
+          Editing the <b>Confirmation</b> email. Available placeholders — each gets replaced with the real appointment's details automatically:
+          <code>{{name}} {{service}} {{specialist}} {{date}} {{time}} {{price}} {{business_name}} {{address}} {{phone}}</code>
+        </div>
+        <div class="field-grid-admin" style="padding:0 26px;">
+          <div class="field-a" style="grid-column:1/-1;"><label>Subject</label><input type="text" id="etSubject"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>Body</label><textarea id="etBody" rows="10" style="font-family:inherit;font-size:13px;padding:10px;border:1px solid var(--line);"></textarea></div>
+        </div>
+        <div style="padding:16px 26px 0;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitEmailTemplate()">Save</button>
+          <button class="btn small" onclick="sendTestConfirmationEmail()">Send test to my email</button>
+          <span id="etStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="panel" id="businessSettingsPanel">
       <div class="panel-head">
         <h2>Business Settings</h2>
@@ -850,6 +871,39 @@ async function submitBusinessSettings(){
 }
 
 /* ==========================================================================
+   EMAIL TEMPLATES — real "email_templates" table (starting with Confirmation)
+   ========================================================================== */
+async function loadEmailTemplateForm(){
+  if(!hasPermission("manageSettings")) return;
+  const { data } = await sb.from("email_templates").select("*").eq("type","confirmation").maybeSingle();
+  if(data){
+    document.getElementById("etSubject").value = data.subject || "";
+    document.getElementById("etBody").value = data.body || "";
+  }
+  document.getElementById("etStatus").textContent="";
+}
+async function submitEmailTemplate(){
+  const status=document.getElementById("etStatus");
+  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to edit this."; return; }
+  const subject=document.getElementById("etSubject").value.trim();
+  const body=document.getElementById("etBody").value;
+  if(!subject || !body){ status.textContent="Subject and body are required."; return; }
+  const { error } = await sb.from("email_templates").update({ subject, body, updated_at:new Date().toISOString() }).eq("type","confirmation");
+  status.textContent = error ? ("Could not save: "+error.message) : "Saved.";
+}
+// Sends a real preview to the business's own email (from Business Settings),
+// filled in with a real recent booking's details — same rendering path a
+// real customer confirmation goes through, so what you see is what they'll see.
+async function sendTestConfirmationEmail(){
+  const status=document.getElementById("etStatus");
+  await submitEmailTemplate();
+  const { data: recent } = await sb.from("bookings").select("id").order("created_at",{ascending:false}).limit(1).maybeSingle();
+  if(!recent){ status.textContent="No bookings exist yet to preview with — make a test booking first."; return; }
+  const { error } = await sb.from("notifications").insert({ phone:null, type:"confirmation", message:"(test send)", appt_id:recent.id, status:"sent" });
+  status.textContent = error ? ("Could not send test: "+error.message) : "Test sent — check the business email set in Business Settings.";
+}
+
+/* ==========================================================================
    ACCESS CONTROL
    ==========================================================================
    Real Supabase Auth now backs every login — passwords are handled by
@@ -978,6 +1032,8 @@ function applyRoleUI(){
   document.getElementById("holidaysPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
   const bsPanel=document.getElementById("businessSettingsPanel");
   if(bsPanel) bsPanel.style.display = hasPermission("manageSettings") ? "block" : "none";
+  const etPanel=document.getElementById("emailTemplatesPanel");
+  if(etPanel) etPanel.style.display = hasPermission("manageSettings") ? "block" : "none";
 }
 /* ---------- Sidebar page navigation ---------- */
 const ADMIN_PAGE_MAP = {
@@ -1429,6 +1485,9 @@ async function refreshAll(){
     refreshServicesTable();
     refreshSpecialistsTable();
     refreshHolidaysList();
+    // Load once, not on every 5s refresh cycle — otherwise it would
+    // overwrite whatever's mid-typing in the form.
+    if(!window.__emailTemplateLoaded){ window.__emailTemplateLoaded=true; await loadEmailTemplateForm(); }
   }
 }
 tryResumeSession();
