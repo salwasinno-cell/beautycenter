@@ -461,6 +461,7 @@
           <div class="field-a"><label>Tagline</label><input type="text" id="bsTagline"></div>
           <div class="field-a"><label>Address</label><input type="text" id="bsAddress"></div>
           <div class="field-a"><label>Phone</label><input type="text" id="bsPhone"></div>
+          <div class="field-a"><label>WhatsApp Number (with country code, e.g. +9611234567)</label><input type="text" id="bsWhatsapp"></div>
           <div class="field-a"><label>Email</label><input type="text" id="bsEmail"></div>
           <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"></div>
           <div class="field-a"><label>24h Reminder — send how many hours before</label><input type="number" id="bsReminderHours" min="1" max="72"></div>
@@ -847,6 +848,7 @@ function openBusinessSettingsForm(){
   document.getElementById("bsTagline").value = BIZ.tagline||"";
   document.getElementById("bsAddress").value = BIZ.address||"";
   document.getElementById("bsPhone").value = BIZ.phone||"";
+  document.getElementById("bsWhatsapp").value = BIZ.whatsapp_number||"";
   document.getElementById("bsEmail").value = BIZ.email||"";
   document.getElementById("bsHours").value = BIZ.hours_display||"";
   document.getElementById("bsReminderHours").value = BIZ.reminder_hours_before||24;
@@ -868,6 +870,7 @@ async function submitBusinessSettings(){
     tagline: document.getElementById("bsTagline").value.trim(),
     address: document.getElementById("bsAddress").value.trim(),
     phone: document.getElementById("bsPhone").value.trim(),
+    whatsapp_number: document.getElementById("bsWhatsapp").value.trim(),
     email: document.getElementById("bsEmail").value.trim(),
     hours_display: document.getElementById("bsHours").value.trim(),
     reminder_hours_before: parseInt(document.getElementById("bsReminderHours").value, 10) || 24,
