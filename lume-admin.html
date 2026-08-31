@@ -430,6 +430,8 @@
             <option value="confirmation">Confirmation</option>
             <option value="cancellation">Cancellation</option>
             <option value="reschedule">Reschedule</option>
+            <option value="reminder">Reminder (24h before)</option>
+            <option value="reminder-same-day">Reminder (same day)</option>
           </select>
           <div style="font-size:12px;color:var(--espresso-45);margin-top:10px;">
             Available placeholders — each gets replaced with the real appointment's details automatically:
@@ -461,6 +463,8 @@
           <div class="field-a"><label>Phone</label><input type="text" id="bsPhone"></div>
           <div class="field-a"><label>Email</label><input type="text" id="bsEmail"></div>
           <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"></div>
+          <div class="field-a"><label>24h Reminder — send how many hours before</label><input type="number" id="bsReminderHours" min="1" max="72"></div>
+          <div class="field-a"><label>Same-day Reminder — send how many hours before</label><input type="number" id="bsSameDayReminderHours" min="1" max="12"></div>
           <div class="field-a"><label>Hero Line 1</label><input type="text" id="bsHeroLine1"></div>
           <div class="field-a"><label>Hero Line 2</label><input type="text" id="bsHeroLine2"></div>
           <div class="field-a" style="grid-column:span 2;"><label>Hero Subtitle</label><input type="text" id="bsHeroSubtitle"></div>
@@ -845,6 +849,8 @@ function openBusinessSettingsForm(){
   document.getElementById("bsPhone").value = BIZ.phone||"";
   document.getElementById("bsEmail").value = BIZ.email||"";
   document.getElementById("bsHours").value = BIZ.hours_display||"";
+  document.getElementById("bsReminderHours").value = BIZ.reminder_hours_before||24;
+  document.getElementById("bsSameDayReminderHours").value = BIZ.same_day_reminder_hours_before||3;
   document.getElementById("bsHeroLine1").value = BIZ.hero_line1||"";
   document.getElementById("bsHeroLine2").value = BIZ.hero_line2||"";
   document.getElementById("bsHeroSubtitle").value = BIZ.hero_subtitle||"";
@@ -864,6 +870,8 @@ async function submitBusinessSettings(){
     phone: document.getElementById("bsPhone").value.trim(),
     email: document.getElementById("bsEmail").value.trim(),
     hours_display: document.getElementById("bsHours").value.trim(),
+    reminder_hours_before: parseInt(document.getElementById("bsReminderHours").value, 10) || 24,
+    same_day_reminder_hours_before: parseInt(document.getElementById("bsSameDayReminderHours").value, 10) || 3,
     hero_line1: document.getElementById("bsHeroLine1").value.trim(),
     hero_line2: document.getElementById("bsHeroLine2").value.trim(),
     hero_subtitle: document.getElementById("bsHeroSubtitle").value.trim(),
@@ -1419,7 +1427,7 @@ document.getElementById("customerSearch").addEventListener("input", (e)=>{
     (c.name||"").toLowerCase().includes(q) || (c.phone||"").includes(q)));
 });
 
-const ACTIVITY_DOTS={confirmation:"🟢",cancellation:"🔴",reschedule:"🟡",reminder:"🔵",waitlist:"🟣","admin-alert":"🔵"};
+const ACTIVITY_DOTS={confirmation:"🟢",cancellation:"🔴",reschedule:"🟡",reminder:"🔵","reminder-same-day":"🔵",waitlist:"🟣","admin-alert":"🔵"};
 async function refreshActivityFeed(){
   const { data, error } = await sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(8);
   const feed=document.getElementById("activityFeed");
