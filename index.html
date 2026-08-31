@@ -77,6 +77,23 @@
   @media (max-width:900px){nav .nav-link{display:none;}}
   .nav-burger{display:none;flex-direction:column;gap:5px;padding:8px;}
   .nav-burger span{display:block;width:22px;height:1px;background:var(--espresso);}
+
+  .lang-toggle{font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--espresso-15);padding:6px 14px;border-radius:20px;background:transparent;color:var(--espresso-70);cursor:pointer;transition:all .3s var(--ease);}
+  .lang-toggle:hover{border-color:var(--champagne);color:var(--espresso);}
+
+  /* ---------- RTL (Arabic) layout ---------- */
+  [dir="rtl"]{direction:rtl;}
+  [dir="rtl"] .hero-inner,[dir="rtl"] .house-text,[dir="rtl"] .section-head,[dir="rtl"] .final-cta,[dir="rtl"] .foot-grid > div{text-align:right;}
+  [dir="rtl"] nav{flex-direction:row-reverse;}
+  [dir="rtl"] .mobile-nav{align-items:flex-end;text-align:right;}
+  [dir="rtl"] .foot-grid{direction:rtl;}
+  [dir="rtl"] .foot-bottom{flex-direction:row-reverse;}
+  [dir="rtl"] .confirm-actions{flex-direction:row-reverse;}
+  [dir="rtl"] .book-nav{flex-direction:row-reverse;}
+  [dir="rtl"] .hero-cta .arrow{display:inline-block;transform:scaleX(-1);}
+  [dir="rtl"] .menu-tabs{flex-direction:row-reverse;}
+  [dir="rtl"] .field-grid label,[dir="rtl"] .field label{text-align:right;display:block;}
+  [dir="rtl"] input,[dir="rtl"] textarea{text-align:right;}
   @media (max-width:900px){.nav-burger{display:flex;}}
   .mobile-nav{
     position:fixed;top:0;right:0;bottom:0;width:78vw;max-width:320px;
@@ -222,6 +239,11 @@
 
   /* Sticky mobile bar */
   .mobile-bar{position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(245,240,230,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:14px 22px;display:none;align-items:center;justify-content:space-between;}
+
+  .wa-float{position:fixed;bottom:26px;right:26px;z-index:450;width:58px;height:58px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(43,33,23,.25);transition:transform .3s var(--ease);}
+  .wa-float:hover{transform:scale(1.08);}
+  .wa-float svg{width:30px;height:30px;fill:#fff;}
+  @media (max-width:900px){ .wa-float{bottom:86px;right:18px;width:52px;height:52px;} .wa-float svg{width:26px;height:26px;} }
   @media (max-width:900px){.mobile-bar{display:flex;}}
   .mobile-bar .mb-text{font-size:12px;color:var(--espresso-70);}
   .mobile-bar .mb-btn{background:var(--espresso);color:var(--ivory);padding:12px 24px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
@@ -348,27 +370,29 @@
 <header id="siteHeader">
   <a href="#" class="logo brand-name">LUMÉ</a>
   <nav>
-    <a href="#menu" class="nav-link">Beauty Menu</a>
-    <a href="#house" class="nav-link">The House</a>
-    <a href="#rituals" class="nav-link">Rituals</a>
-    <a href="#visit" class="nav-link">Your Visit</a>
-    <a href="#contact" class="nav-link">Contact</a>
-    <a href="#" class="nav-link" onclick="openManage();return false;">Manage Booking</a>
+    <a href="#menu" class="nav-link" data-i18n="nav_menu">Beauty Menu</a>
+    <a href="#house" class="nav-link" data-i18n="nav_house">The House</a>
+    <a href="#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
+    <a href="#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
+    <a href="#contact" class="nav-link" data-i18n="nav_contact">Contact</a>
+    <a href="#" class="nav-link" onclick="openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
+    <button class="lang-toggle" id="langToggleBtn" onclick="toggleLanguage()">عربي</button>
   </nav>
-  <button class="btn-book" onclick="openBooking()"><span>Book Appointment</span></button>
+  <button class="btn-book" onclick="openBooking()"><span data-i18n="nav_book">Book Appointment</span></button>
   <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Open menu"><span></span><span></span><span></span></button>
 </header>
 
 <div class="nav-scrim" id="navScrim" onclick="closeMobileNav()"></div>
 <div class="mobile-nav" id="mobileNav">
   <span class="close-x" onclick="closeMobileNav()">&times;</span>
-  <a href="#menu" class="nav-link">Beauty Menu</a>
-  <a href="#house" class="nav-link">The House</a>
-  <a href="#rituals" class="nav-link">Rituals</a>
-  <a href="#visit" class="nav-link">Your Visit</a>
-  <a href="#contact" class="nav-link">Contact</a>
-  <a href="#" class="nav-link" onclick="closeMobileNav();openManage();return false;">Manage Booking</a>
-  <a href="#" class="nav-link" onclick="closeMobileNav();openBooking();return false;">Book Appointment</a>
+  <a href="#menu" class="nav-link" data-i18n="nav_menu">Beauty Menu</a>
+  <a href="#house" class="nav-link" data-i18n="nav_house">The House</a>
+  <a href="#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
+  <a href="#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
+  <a href="#contact" class="nav-link" data-i18n="nav_contact">Contact</a>
+  <a href="#" class="nav-link" onclick="closeMobileNav();openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
+  <a href="#" class="nav-link" onclick="closeMobileNav();openBooking();return false;" data-i18n="nav_book">Book Appointment</a>
+  <button class="lang-toggle" id="langToggleBtnMobile" onclick="toggleLanguage()" style="margin-top:20px;">عربي</button>
 </div>
 
 <section class="hero">
@@ -381,25 +405,25 @@
     </h1>
     <p class="sub">Timeless beauty, refined through exceptional care — a private house for hair, skin, and the rituals in between.</p>
     <div class="cta-wrap">
-      <a href="#" class="hero-cta" onclick="openBooking();return false;"><span>Book Your Appointment <span class="arrow">→</span></span></a>
+      <a href="#" class="hero-cta" onclick="openBooking();return false;"><span data-i18n="hero_cta">Book Your Appointment <span class="arrow">→</span></span></a>
     </div>
-    <div class="categories">Hair · Makeup · Nails · Skin · Brows · Lashes</div>
+    <div class="categories" data-i18n="hero_categories">Hair · Makeup · Nails · Skin · Brows · Lashes</div>
   </div>
   <div class="scroll-cue"><div class="stem"></div></div>
 </section>
 
 <section id="menu">
   <div class="section-head reveal">
-    <span class="eyebrow">The Menu</span>
-    <h2>Beauty Menu</h2>
+    <span class="eyebrow" data-i18n="menu_eyebrow">The Menu</span>
+    <h2 data-i18n="menu_title">Beauty Menu</h2>
   </div>
   <div class="menu-tabs reveal">
-    <button class="menu-tab active" data-cat="all">All</button>
-    <button class="menu-tab" data-cat="hair">Hair</button>
-    <button class="menu-tab" data-cat="skin">Skin</button>
-    <button class="menu-tab" data-cat="nails">Nails</button>
-    <button class="menu-tab" data-cat="brows">Brows &amp; Lashes</button>
-    <button class="menu-tab" data-cat="bridal">Bridal</button>
+    <button class="menu-tab active" data-cat="all" data-i18n="tab_all">All</button>
+    <button class="menu-tab" data-cat="hair" data-i18n="tab_hair">Hair</button>
+    <button class="menu-tab" data-cat="skin" data-i18n="tab_skin">Skin</button>
+    <button class="menu-tab" data-cat="nails" data-i18n="tab_nails">Nails</button>
+    <button class="menu-tab" data-cat="brows" data-i18n="tab_brows">Brows &amp; Lashes</button>
+    <button class="menu-tab" data-cat="bridal" data-i18n="tab_bridal">Bridal</button>
   </div>
   <div class="menu-rail reveal" id="menuRail"></div>
 </section>
@@ -419,16 +443,16 @@
 
 <section id="rituals" style="background:var(--ivory-deep);">
   <div class="section-head reveal">
-    <span class="eyebrow">Signature</span>
-    <h2>Beauty Rituals</h2>
+    <span class="eyebrow" data-i18n="rituals_eyebrow">Signature</span>
+    <h2 data-i18n="rituals_title">Beauty Rituals</h2>
   </div>
   <div class="menu-rail reveal" id="ritualRail" style="justify-content:center;"></div>
 </section>
 
 <section id="visit">
   <div class="section-head reveal">
-    <span class="eyebrow">Before You Arrive</span>
-    <h2>Your Visit</h2>
+    <span class="eyebrow" data-i18n="visit_eyebrow">Before You Arrive</span>
+    <h2 data-i18n="visit_title">Your Visit</h2>
   </div>
   <div class="visit reveal" id="visitAccordion"></div>
 </section>
@@ -443,9 +467,9 @@
 
 <section class="final-cta">
   <div class="reveal">
-    <span class="eyebrow">Reserve Your Time</span>
-    <h2>The house is ready<br>whenever you are.</h2>
-    <a href="#" class="hero-cta" onclick="openBooking();return false;"><span>Book Your Appointment <span class="arrow">→</span></span></a>
+    <span class="eyebrow" data-i18n="finalcta_eyebrow">Reserve Your Time</span>
+    <h2 data-i18n="finalcta_title">The house is ready<br>whenever you are.</h2>
+    <a href="#" class="hero-cta" onclick="openBooking();return false;"><span data-i18n="hero_cta">Book Your Appointment <span class="arrow">→</span></span></a>
   </div>
 </section>
 
@@ -456,25 +480,25 @@
       <p style="max-width:260px;">A private beauty house for hair, skin, and the rituals in between.</p>
     </div>
     <div>
-      <h4>Visit</h4>
+      <h4 data-i18n="foot_visit">Visit</h4>
       <p data-field="address">Ashrafieh, Beirut</p>
       <p data-field="hours">Tue – Sun · 10:00 – 20:00</p>
     </div>
     <div>
-      <h4>Contact</h4>
+      <h4 data-i18n="foot_contact">Contact</h4>
       <a href="tel:+9611000000" data-field="phone">+961 1 000 000</a>
       <a href="mailto:hello@lume.house" data-field="email">hello@lume.house</a>
     </div>
     <div>
-      <h4>Follow</h4>
-      <a href="#">Instagram</a>
-      <a href="#">WhatsApp</a>
-      <a href="#" onclick="openManage();return false;">Manage Booking</a>
+      <h4 data-i18n="foot_follow">Follow</h4>
+      <a href="#" data-i18n="foot_instagram">Instagram</a>
+      <a href="#" data-i18n="foot_whatsapp">WhatsApp</a>
+      <a href="#" onclick="openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
     </div>
   </div>
   <div class="foot-bottom">
     <span>© 2026 LUMÉ Beauty House</span>
-    <span>Crafted with restraint</span>
+    <span data-i18n="foot_crafted">Crafted with restraint</span>
   </div>
 </footer>
 
@@ -631,6 +655,54 @@ async function callBookingApi(action, payload) {
   }
 }
 
+/* ---------- Language / RTL switching ---------- */
+let currentLang = localStorage.getItem("lume:lang") || "en";
+const TRANSLATIONS = {
+  en: {
+    nav_menu:"Beauty Menu", nav_house:"The House", nav_rituals:"Rituals", nav_visit:"Your Visit",
+    nav_contact:"Contact", nav_manage:"Manage Booking", nav_book:'Book Appointment',
+    hero_categories:"Hair · Makeup · Nails · Skin · Brows · Lashes",
+    hero_cta:'Book Your Appointment <span class="arrow">→</span>',
+    menu_eyebrow:"The Menu", menu_title:"Beauty Menu",
+    tab_all:"All", tab_hair:"Hair", tab_skin:"Skin", tab_nails:"Nails", tab_brows:"Brows &amp; Lashes", tab_bridal:"Bridal",
+    rituals_eyebrow:"Signature", rituals_title:"Beauty Rituals",
+    visit_eyebrow:"Before You Arrive", visit_title:"Your Visit",
+    finalcta_eyebrow:"Reserve Your Time", finalcta_title:"The house is ready<br>whenever you are.",
+    foot_visit:"Visit", foot_contact:"Contact", foot_follow:"Follow",
+    foot_instagram:"Instagram", foot_whatsapp:"WhatsApp", foot_crafted:"Crafted with restraint",
+  },
+  ar: {
+    nav_menu:"قائمة الجمال", nav_house:"عن المكان", nav_rituals:"الطقوس", nav_visit:"زيارتك",
+    nav_contact:"تواصل معنا", nav_manage:"إدارة الحجز", nav_book:"احجز موعدك",
+    hero_categories:"شعر · مكياج · أظافر · بشرة · حواجب · رموش",
+    hero_cta:'احجز موعدك <span class="arrow">→</span>',
+    menu_eyebrow:"القائمة", menu_title:"قائمة الجمال",
+    tab_all:"الكل", tab_hair:"شعر", tab_skin:"بشرة", tab_nails:"أظافر", tab_brows:"حواجب ورموش", tab_bridal:"عروس",
+    rituals_eyebrow:"مميز", rituals_title:"طقوس الجمال",
+    visit_eyebrow:"قبل حضورك", visit_title:"زيارتك",
+    finalcta_eyebrow:"احجز وقتك", finalcta_title:"المكان جاهز<br>حين تكون جاهزاً.",
+    foot_visit:"الزيارة", foot_contact:"تواصل معنا", foot_follow:"تابعنا",
+    foot_instagram:"إنستغرام", foot_whatsapp:"واتساب", foot_crafted:"صُنع بعناية",
+  },
+};
+function applyLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem("lume:lang", lang);
+  document.documentElement.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+  document.documentElement.setAttribute("lang", lang);
+  const dict = TRANSLATIONS[lang];
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (dict[key]) el.innerHTML = dict[key];
+  });
+  const btn = document.getElementById("langToggleBtn"); if (btn) btn.textContent = lang === "ar" ? "English" : "عربي";
+  const btnM = document.getElementById("langToggleBtnMobile"); if (btnM) btnM.textContent = lang === "ar" ? "English" : "عربي";
+  applyBusinessBranding(); // re-render business-settings-driven content in the new language
+}
+function toggleLanguage() {
+  applyLanguage(currentLang === "ar" ? "en" : "ar");
+}
+
 /* ---------- Business Settings (branding, contact, copy — all editable in admin) ---------- */
 let BIZ = {
   business_name: "MAISON", tagline: "", logo_url: "", address: "", phone: "", email: "",
@@ -646,25 +718,43 @@ async function loadBusinessSettings() {
     if (!error && data) BIZ = Object.assign({}, BIZ, data);
   } catch (e) { /* keep defaults */ }
 }
+function pickLang(field) {
+  if (currentLang === "ar" && BIZ[field + "_ar"]) return BIZ[field + "_ar"];
+  return BIZ[field];
+}
 function applyBusinessBranding() {
   document.title = BIZ.business_name + " — " + (BIZ.tagline || "");
-  document.querySelectorAll(".brand-name").forEach(el => el.textContent = BIZ.business_name);
-  const heroEyebrow = document.querySelector(".hero .eyebrow"); if (heroEyebrow) heroEyebrow.textContent = BIZ.hero_eyebrow;
-  const heroLine1 = document.querySelector(".hero h1 .line:nth-child(1) span"); if (heroLine1) heroLine1.textContent = BIZ.hero_line1;
-  const heroLine2 = document.querySelector(".hero h1 .line:nth-child(2) span"); if (heroLine2) heroLine2.textContent = BIZ.hero_line2;
-  const heroSub = document.querySelector(".hero p.sub"); if (heroSub && BIZ.hero_subtitle) heroSub.textContent = BIZ.hero_subtitle;
-  const aboutTitle = document.querySelector(".house-text h2"); if (aboutTitle) aboutTitle.textContent = BIZ.about_title;
+  document.querySelectorAll(".brand-name").forEach(el => el.textContent = pickLang("business_name"));
+  const heroEyebrow = document.querySelector(".hero .eyebrow"); if (heroEyebrow) heroEyebrow.textContent = pickLang("hero_eyebrow");
+  const heroLine1 = document.querySelector(".hero h1 .line:nth-child(1) span"); if (heroLine1) heroLine1.textContent = pickLang("hero_line1");
+  const heroLine2 = document.querySelector(".hero h1 .line:nth-child(2) span"); if (heroLine2) heroLine2.textContent = pickLang("hero_line2");
+  const heroSub = document.querySelector(".hero p.sub"); if (heroSub && BIZ.hero_subtitle) heroSub.textContent = pickLang("hero_subtitle");
+  const aboutTitle = document.querySelector(".house-text h2"); if (aboutTitle) aboutTitle.textContent = pickLang("about_title");
   const aboutPs = document.querySelectorAll(".house-text p");
-  if (aboutPs[0] && BIZ.about_body_1) aboutPs[0].textContent = BIZ.about_body_1;
-  if (aboutPs[1] && BIZ.about_body_2) aboutPs[1].textContent = BIZ.about_body_2;
-  const sig = document.querySelector(".house-sig"); if (sig && BIZ.about_signature) sig.textContent = BIZ.about_signature;
-  const footAddr = document.querySelector("[data-field='address']"); if (footAddr) footAddr.textContent = BIZ.address;
-  const footHours = document.querySelector("[data-field='hours']"); if (footHours) footHours.textContent = BIZ.hours_display;
+  if (aboutPs[0] && BIZ.about_body_1) aboutPs[0].textContent = pickLang("about_body_1");
+  if (aboutPs[1] && BIZ.about_body_2) aboutPs[1].textContent = pickLang("about_body_2");
+  const sig = document.querySelector(".house-sig"); if (sig && BIZ.about_signature) sig.textContent = pickLang("about_signature");
+  const footAddr = document.querySelector("[data-field='address']"); if (footAddr) footAddr.textContent = pickLang("address");
+  const footHours = document.querySelector("[data-field='hours']"); if (footHours) footHours.textContent = pickLang("hours_display");
   const footPhone = document.querySelector("[data-field='phone']"); if (footPhone) { footPhone.textContent = BIZ.phone; footPhone.href = "tel:" + BIZ.phone; }
   const footEmail = document.querySelector("[data-field='email']"); if (footEmail) { footEmail.textContent = BIZ.email; footEmail.href = "mailto:" + BIZ.email; }
   if (BIZ.max_active_bookings_per_phone) MAX_ACTIVE_BOOKINGS = BIZ.max_active_bookings_per_phone;
   if (BIZ.booking_lead_hours) BOOKING_LEAD_HOURS = BIZ.booking_lead_hours;
   if (BIZ.default_buffer_minutes) BUFFER_MINUTES = BIZ.default_buffer_minutes;
+
+  // Floating WhatsApp button — visible everywhere on the site if a
+  // WhatsApp number is set, hidden entirely otherwise.
+  const waFloat = document.getElementById("waFloatBtn");
+  const waDigits = (BIZ.whatsapp_number || "").replace(/[^\d]/g, "");
+  if (waFloat) {
+    if (waDigits) {
+      const text = `Hi ${BIZ.business_name || ""}, I'd like to book an appointment.`;
+      waFloat.href = "https://wa.me/" + waDigits + "?text=" + encodeURIComponent(text);
+      waFloat.style.display = "flex";
+    } else {
+      waFloat.style.display = "none";
+    }
+  }
 }
 
 /* ---------- Catalog (categories, services, specialists, holidays) ---------- */
@@ -1435,6 +1525,7 @@ async function joinCurrentWaitlist(){
 
 /* ---------- Bootstrap: load business settings + the shared catalog, then render everything that depends on them ---------- */
 async function initApp(){
+  applyLanguage(currentLang); // apply saved/default language to static UI immediately, before data loads
   await loadBusinessSettings();
   applyBusinessBranding();
   visitInfo = (BIZ.visit_info && BIZ.visit_info.length) ? BIZ.visit_info : visitInfo;
@@ -1465,6 +1556,10 @@ setInterval(async ()=>{
   if(!document.getElementById("bookOverlay").classList.contains("open")) buildServiceGrid();
 }, 15000);
 </script>
+
+<a href="#" id="waFloatBtn" class="wa-float" target="_blank" rel="noopener" style="display:none;" aria-label="Book via WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4a7.94 7.94 0 0 0-6.9 11.87L4 20l4.24-1.11a7.9 7.9 0 0 0 3.8.97h.01a7.95 7.95 0 0 0 5.55-13.54zM12.05 18.4h-.01a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.66.67-2.44-.16-.25a6.62 6.62 0 0 1 10.4-8.05 6.58 6.58 0 0 1 1.95 4.68 6.64 6.64 0 0 1-6.75 6.46zm3.63-4.95c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.19-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.83-.3-1.58-.98-.58-.52-.98-1.16-1.09-1.36-.11-.19-.01-.3.09-.4.1-.1.22-.25.33-.38.11-.13.14-.22.22-.37.07-.15.03-.28-.04-.38-.07-.1-.53-1.27-.72-1.74-.19-.46-.39-.4-.53-.4-.13-.01-.29-.01-.44-.01-.15 0-.4.06-.61.28-.21.22-.8.79-.8 1.9s.82 2.19.93 2.34c.11.15 1.55 2.38 3.77 3.24 2.22.86 2.22.57 2.62.53.4-.04 1.28-.52 1.46-1.03.18-.5.18-.93.12-1.03-.06-.09-.2-.14-.4-.24z"/></svg>
+</a>
 
 </body>
 </html>
