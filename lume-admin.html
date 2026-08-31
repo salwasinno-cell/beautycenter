@@ -424,9 +424,17 @@
         <h2>Email Templates</h2>
       </div>
       <div class="panel-body">
-        <div style="padding:0 26px 14px;font-size:12px;color:var(--espresso-45);">
-          Editing the <b>Confirmation</b> email. Available placeholders — each gets replaced with the real appointment's details automatically:
-          <code>{{name}} {{service}} {{specialist}} {{date}} {{time}} {{price}} {{business_name}} {{address}} {{phone}}</code>
+        <div style="padding:0 26px 14px;">
+          <label style="font-size:11px;color:var(--espresso-45);">Editing</label>
+          <select id="etType" onchange="loadEmailTemplateForm()" style="display:block;margin-top:4px;padding:8px 10px;border:1px solid var(--line);font-family:inherit;">
+            <option value="confirmation">Confirmation</option>
+            <option value="cancellation">Cancellation</option>
+            <option value="reschedule">Reschedule</option>
+          </select>
+          <div style="font-size:12px;color:var(--espresso-45);margin-top:10px;">
+            Available placeholders — each gets replaced with the real appointment's details automatically:
+            <code>{{name}} {{service}} {{specialist}} {{date}} {{time}} {{price}} {{business_name}} {{address}} {{phone}}</code>
+          </div>
         </div>
         <div class="field-grid-admin" style="padding:0 26px;">
           <div class="field-a" style="grid-column:1/-1;"><label>Subject</label><input type="text" id="etSubject"></div>
@@ -875,31 +883,32 @@ async function submitBusinessSettings(){
    ========================================================================== */
 async function loadEmailTemplateForm(){
   if(!hasPermission("manageSettings")) return;
-  const { data } = await sb.from("email_templates").select("*").eq("type","confirmation").maybeSingle();
-  if(data){
-    document.getElementById("etSubject").value = data.subject || "";
-    document.getElementById("etBody").value = data.body || "";
-  }
+  const type=document.getElementById("etType").value;
+  const { data } = await sb.from("email_templates").select("*").eq("type",type).maybeSingle();
+  document.getElementById("etSubject").value = data ? (data.subject||"") : "";
+  document.getElementById("etBody").value = data ? (data.body||"") : "";
   document.getElementById("etStatus").textContent="";
 }
 async function submitEmailTemplate(){
   const status=document.getElementById("etStatus");
   if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to edit this."; return; }
+  const type=document.getElementById("etType").value;
   const subject=document.getElementById("etSubject").value.trim();
   const body=document.getElementById("etBody").value;
   if(!subject || !body){ status.textContent="Subject and body are required."; return; }
-  const { error } = await sb.from("email_templates").update({ subject, body, updated_at:new Date().toISOString() }).eq("type","confirmation");
+  const { error } = await sb.from("email_templates").update({ subject, body, updated_at:new Date().toISOString() }).eq("type",type);
   status.textContent = error ? ("Could not save: "+error.message) : "Saved.";
 }
 // Sends a real preview to the business's own email (from Business Settings),
 // filled in with a real recent booking's details — same rendering path a
-// real customer confirmation goes through, so what you see is what they'll see.
+// real customer email goes through, so what you see is what they'll see.
 async function sendTestConfirmationEmail(){
   const status=document.getElementById("etStatus");
+  const type=document.getElementById("etType").value;
   await submitEmailTemplate();
   const { data: recent } = await sb.from("bookings").select("id").order("created_at",{ascending:false}).limit(1).maybeSingle();
   if(!recent){ status.textContent="No bookings exist yet to preview with — make a test booking first."; return; }
-  const { error } = await sb.from("notifications").insert({ phone:null, type:"confirmation", message:"(test send)", appt_id:recent.id, status:"sent" });
+  const { error } = await sb.from("notifications").insert({ phone:null, type, message:"(test send)", appt_id:recent.id, status:"sent" });
   status.textContent = error ? ("Could not send test: "+error.message) : "Test sent — check the business email set in Business Settings.";
 }
 
