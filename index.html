@@ -528,6 +528,7 @@
   </div>
   <div class="foot-bottom">
     <span>© 2026 LUMÉ Beauty House</span>
+    <a href="privacy-terms.html" data-i18n="foot_privacy" style="color:inherit;">Privacy &amp; Terms</a>
     <span data-i18n="foot_crafted">Crafted with restraint</span>
   </div>
 </footer>
@@ -595,6 +596,13 @@
         <div class="field"><label data-i18n="field_email">Email</label><input type="email" id="fEmail" placeholder="you@email.com"></div>
         <div class="field"><label data-i18n="field_bday">Birthday (optional)</label><input type="date" id="fBday"></div>
         <div class="field full"><label data-i18n="field_notes">Special Requests (optional)</label><textarea id="fNotes" rows="3" placeholder="Allergies, preferences, occasion..." data-i18n-ph="ph_notes"></textarea></div>
+        <!-- Honeypot: invisible to real visitors, but a script that blindly
+             fills every field on the page will fill this one too — if it's
+             non-empty on submit, we quietly treat it as spam. -->
+        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+          <label for="fWebsite">Leave this field empty</label>
+          <input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off">
+        </div>
       </div>
     </div>
 
@@ -618,7 +626,7 @@
         <div style="font-size:12px;color:var(--espresso-45);margin-top:8px;">A confirmation has been sent to your phone number.</div>
         <div id="cancelStatus" style="font-size:12px;margin-top:10px;"></div>
         <div class="confirm-actions">
-          <a href="#" class="ghost-btn" data-i18n="btn_addcal">Add to Calendar</a>
+          <a href="#" class="ghost-btn" onclick="downloadICS();return false;" data-i18n="btn_addcal">Add to Calendar</a>
           <a href="#" class="ghost-btn" id="waConfirmBtn" target="_blank" rel="noopener" data-i18n="btn_wa_confirm">WhatsApp Confirmation</a>
           <a href="#" class="ghost-btn" id="cancelMineBtn" onclick="cancelMyJustBookedAppointment();return false;" data-i18n="btn_cancel_this">Cancel This Appointment</a>
           <a href="#" class="ghost-btn" onclick="closeBooking();return false;" data-i18n="btn_return_home">Return Home</a>
@@ -699,7 +707,7 @@ const TRANSLATIONS = {
     visit_eyebrow:"Before You Arrive", visit_title:"Your Visit",
     finalcta_eyebrow:"Reserve Your Time", finalcta_title:"The house is ready<br>whenever you are.",
     foot_visit:"Visit", foot_contact:"Contact", foot_follow:"Follow",
-    foot_instagram:"Instagram", foot_whatsapp:"WhatsApp", foot_crafted:"Crafted with restraint",
+    foot_instagram:"Instagram", foot_whatsapp:"WhatsApp", foot_crafted:"Crafted with restraint", foot_privacy:"Privacy & Terms",
     step1_label:"01 — Choose Your Service", step1_title:"What would you like to experience?",
     step2_label:"02 — Choose Your Ritual",
     step3_label:"03 — With Whom", step3_title:"Choose your specialist",
@@ -756,7 +764,7 @@ const TRANSLATIONS = {
     visit_eyebrow:"قبل حضورك", visit_title:"زيارتك",
     finalcta_eyebrow:"احجز وقتك", finalcta_title:"المكان جاهز<br>حين تكون جاهزاً.",
     foot_visit:"الزيارة", foot_contact:"تواصل معنا", foot_follow:"تابعنا",
-    foot_instagram:"إنستغرام", foot_whatsapp:"واتساب", foot_crafted:"صُنع بعناية",
+    foot_instagram:"إنستغرام", foot_whatsapp:"واتساب", foot_crafted:"صُنع بعناية", foot_privacy:"الخصوصية والشروط",
     step1_label:"٠١ — اختر الخدمة", step1_title:"ما الذي تودين تجربته؟",
     step2_label:"٠٢ — اختر الطقس",
     step3_label:"٠٣ — مع من", step3_title:"اختر المتخصص",
@@ -1565,6 +1573,44 @@ function renderSummary(){
 
 /* Confirmation */
 let lastConfirmNum="";
+// Generates a real, downloadable calendar file (.ics) for the confirmed
+// appointment — works with Apple Calendar, Google Calendar, Outlook, and
+// most other calendar apps, entirely client-side, no server involved.
+function downloadICS(){
+  if(!state.date || !state.time || !lastConfirmNum) return;
+  const dateStr=dateKey(state.date);
+  const durationMin = state.treatment ? durationMinutes(state.treatment.d) : 30;
+  const startDate=new Date(dateStr+"T"+state.time+":00");
+  const endDate=new Date(startDate.getTime()+durationMin*60000);
+
+  const pad=n=>String(n).padStart(2,"0");
+  const fmt=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"T"+pad(d.getHours())+pad(d.getMinutes())+"00";
+  const escapeICS=s=>String(s||"").replace(/[\\,;]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+
+  const summary=(state.treatment?state.treatment.n:"Appointment")+" — "+(BIZ.business_name||"");
+  const location=BIZ.address||"";
+  const description="Reservation No. "+lastConfirmNum+(BIZ.phone?"\n"+BIZ.phone:"");
+
+  const ics=[
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//"+(BIZ.business_name||"Booking")+"//Booking//EN",
+    "BEGIN:VEVENT",
+    "UID:"+lastConfirmNum+"@booking",
+    "DTSTAMP:"+fmt(new Date()),
+    "DTSTART:"+fmt(startDate),
+    "DTEND:"+fmt(endDate),
+    "SUMMARY:"+escapeICS(summary),
+    "DESCRIPTION:"+escapeICS(description),
+    "LOCATION:"+escapeICS(location),
+    "END:VEVENT","END:VCALENDAR",
+  ].join("\r\n");
+
+  const blob=new Blob([ics], {type:"text/calendar;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="appointment.ics";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 function renderConfirm(){
   document.getElementById("confirmNum").textContent=t("reservation_no")+" "+lastConfirmNum;
   const waBtn=document.getElementById("waConfirmBtn");
@@ -1617,6 +1663,10 @@ document.getElementById("fPhone").addEventListener("input",updateNextEnabled);
 
 async function nextStep(){
   if(step===5){
+    // Basic spam defense: a bot that blindly fills every field will also
+    // fill this hidden one — quietly stop here, no error shown, so it
+    // doesn't learn what tripped it.
+    if(document.getElementById("fWebsite").value.trim()){ return; }
     // Final confirm: the booking-api Edge Function re-validates everything
     // (availability, lead time, booking limits) and relies on a real
     // Postgres constraint to make double-booking physically impossible —
