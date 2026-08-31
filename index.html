@@ -565,7 +565,7 @@
         <div id="cancelStatus" style="font-size:12px;margin-top:10px;"></div>
         <div class="confirm-actions">
           <a href="#" class="ghost-btn">Add to Calendar</a>
-          <a href="#" class="ghost-btn">WhatsApp Confirmation</a>
+          <a href="#" class="ghost-btn" id="waConfirmBtn" target="_blank" rel="noopener">WhatsApp Confirmation</a>
           <a href="#" class="ghost-btn" id="cancelMineBtn" onclick="cancelMyJustBookedAppointment();return false;">Cancel This Appointment</a>
           <a href="#" class="ghost-btn" onclick="closeBooking();return false;">Return Home</a>
         </div>
@@ -1322,6 +1322,16 @@ function renderSummary(){
 let lastConfirmNum="";
 function renderConfirm(){
   document.getElementById("confirmNum").textContent="Reservation No. "+lastConfirmNum;
+  const waBtn=document.getElementById("waConfirmBtn");
+  const waDigits=(BIZ.whatsapp_number||"").replace(/[^\d]/g,"");
+  if(waDigits){
+    const dateStr = state.date ? state.date.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}) : "";
+    const text = `Hi ${BIZ.business_name||""}, I'd like to confirm my reservation ${lastConfirmNum} — ${state.treatment?state.treatment.n:""} on ${dateStr} at ${state.time||""}.`;
+    waBtn.href = "https://wa.me/"+waDigits+"?text="+encodeURIComponent(text);
+    waBtn.style.display="";
+  } else {
+    waBtn.style.display="none"; // no WhatsApp number set in Business Settings yet
+  }
 }
 
 /* Panel navigation */
