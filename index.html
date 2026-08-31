@@ -517,26 +517,26 @@
   <div class="book-body">
 
     <div class="book-panel active" data-step="0">
-      <span class="eyebrow step-label">01 — Choose Your Service</span>
-      <h2>What would you like to experience?</h2>
+      <span class="eyebrow step-label" data-i18n="step1_label">01 — Choose Your Service</span>
+      <h2 data-i18n="step1_title">What would you like to experience?</h2>
       <div class="choice-grid" id="serviceGrid"></div>
     </div>
 
     <div class="book-panel" data-step="1">
-      <span class="eyebrow step-label">02 — Choose Your Ritual</span>
+      <span class="eyebrow step-label" data-i18n="step2_label">02 — Choose Your Ritual</span>
       <h2 id="treatHeading">Select a treatment</h2>
       <div class="treat-list" id="treatList"></div>
     </div>
 
     <div class="book-panel" data-step="2">
-      <span class="eyebrow step-label">03 — With Whom</span>
-      <h2>Choose your specialist</h2>
+      <span class="eyebrow step-label" data-i18n="step3_label">03 — With Whom</span>
+      <h2 data-i18n="step3_title">Choose your specialist</h2>
       <div class="specialist-grid" id="specialistGrid"></div>
     </div>
 
     <div class="book-panel" data-step="3">
-      <span class="eyebrow step-label">04 — Date &amp; Time</span>
-      <h2>When would you like to visit us?</h2>
+      <span class="eyebrow step-label" data-i18n="step4_label">04 — Date &amp; Time</span>
+      <h2 data-i18n="step4_title">When would you like to visit us?</h2>
       <div class="date-rail" id="dateRail"></div>
       <div class="sync-row"><span class="sync-dot"></span><span>Live availability — synced for every visitor</span></div>
       <div id="holdCountdown" style="display:none;font-size:12px;color:var(--olive-deep);margin-bottom:14px;"></div>
@@ -546,7 +546,7 @@
         <div style="margin-bottom:10px;">No time here works? Leave your phone number and we'll text you the moment a spot opens on this date.</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <input type="tel" id="waitlistPhone" placeholder="Phone number" style="flex:1;min-width:160px;border:none;border-bottom:1px solid var(--espresso-15);background:transparent;padding:8px 2px;font-family:'Inter',sans-serif;font-size:14px;color:var(--espresso);">
-          <button class="ghost-btn" onclick="joinCurrentWaitlist()">Join Waitlist</button>
+          <button class="ghost-btn" onclick="joinCurrentWaitlist()" data-i18n="btn_join_waitlist">Join Waitlist</button>
         </div>
         <div id="waitlistStatus" style="margin-top:8px;color:var(--olive-deep);"></div>
       </div>
@@ -556,22 +556,22 @@
     </div>
 
     <div class="book-panel" data-step="4">
-      <span class="eyebrow step-label">05 — Your Details</span>
-      <h2>Just a few details</h2>
+      <span class="eyebrow step-label" data-i18n="step5_label">05 — Your Details</span>
+      <h2 data-i18n="step5_title">Just a few details</h2>
       <div id="returningNote" style="display:none;font-size:12px;color:var(--olive-deep);background:rgba(107,110,76,.08);border:1px solid rgba(107,110,76,.2);padding:12px 16px;margin-bottom:22px;"></div>
       <div class="field-grid">
-        <div class="field"><label>Full Name</label><input type="text" id="fName" placeholder="Enter your name"></div>
-        <div class="field"><label>Phone</label><input type="tel" id="fPhone" placeholder="+961 ..."></div>
-        <div class="field"><label>Email</label><input type="email" id="fEmail" placeholder="you@email.com"></div>
-        <div class="field"><label>Birthday (optional)</label><input type="date" id="fBday"></div>
-        <div class="field full"><label>Special Requests (optional)</label><textarea id="fNotes" rows="3" placeholder="Allergies, preferences, occasion..."></textarea></div>
+        <div class="field"><label data-i18n="field_fullname">Full Name</label><input type="text" id="fName" placeholder="Enter your name" data-i18n-ph="ph_fullname"></div>
+        <div class="field"><label data-i18n="field_phone">Phone</label><input type="tel" id="fPhone" placeholder="+961 ..."></div>
+        <div class="field"><label data-i18n="field_email">Email</label><input type="email" id="fEmail" placeholder="you@email.com"></div>
+        <div class="field"><label data-i18n="field_bday">Birthday (optional)</label><input type="date" id="fBday"></div>
+        <div class="field full"><label data-i18n="field_notes">Special Requests (optional)</label><textarea id="fNotes" rows="3" placeholder="Allergies, preferences, occasion..." data-i18n-ph="ph_notes"></textarea></div>
       </div>
     </div>
 
     <div class="book-panel" data-step="5">
-      <span class="eyebrow step-label">06 — Review</span>
-      <h2>Your reservation</h2>
-      <div class="slot-error" id="slotError">This time was just reserved by another guest — please choose another slot.</div>
+      <span class="eyebrow step-label" data-i18n="step6_label">06 — Review</span>
+      <h2 data-i18n="step6_title">Your reservation</h2>
+      <div class="slot-error" id="slotError" data-i18n="err_slot_taken">This time was just reserved by another guest — please choose another slot.</div>
       <div class="summary-box" id="summaryBox"></div>
       <div class="deposit-toggle">
         <div class="switch" id="depositSwitch" onclick="toggleDeposit()"></div>
@@ -583,15 +583,15 @@
       <div class="confirm-wrap">
         <div class="confirm-ring">✓</div>
         <span class="eyebrow">Reservation Confirmed</span>
-        <h2>We look forward<br>to your visit.</h2>
+        <h2 data-i18n="confirm_title">We look forward<br>to your visit.</h2>
         <div class="confirm-num" id="confirmNum"></div>
         <div style="font-size:12px;color:var(--espresso-45);margin-top:8px;">A confirmation has been sent to your phone number.</div>
         <div id="cancelStatus" style="font-size:12px;margin-top:10px;"></div>
         <div class="confirm-actions">
-          <a href="#" class="ghost-btn">Add to Calendar</a>
-          <a href="#" class="ghost-btn" id="waConfirmBtn" target="_blank" rel="noopener">WhatsApp Confirmation</a>
-          <a href="#" class="ghost-btn" id="cancelMineBtn" onclick="cancelMyJustBookedAppointment();return false;">Cancel This Appointment</a>
-          <a href="#" class="ghost-btn" onclick="closeBooking();return false;">Return Home</a>
+          <a href="#" class="ghost-btn" data-i18n="btn_addcal">Add to Calendar</a>
+          <a href="#" class="ghost-btn" id="waConfirmBtn" target="_blank" rel="noopener" data-i18n="btn_wa_confirm">WhatsApp Confirmation</a>
+          <a href="#" class="ghost-btn" id="cancelMineBtn" onclick="cancelMyJustBookedAppointment();return false;" data-i18n="btn_cancel_this">Cancel This Appointment</a>
+          <a href="#" class="ghost-btn" onclick="closeBooking();return false;" data-i18n="btn_return_home">Return Home</a>
         </div>
       </div>
     </div>
@@ -599,8 +599,8 @@
   </div>
 
   <div class="book-nav" id="bookNav">
-    <a href="#" class="back" id="backBtn" onclick="prevStep();return false;">← Back</a>
-    <button class="nav-next" id="nextBtn" onclick="nextStep()">Continue</button>
+    <a href="#" class="back" id="backBtn" onclick="prevStep();return false;" data-i18n="btn_back">← Back</a>
+    <button class="nav-next" id="nextBtn" onclick="nextStep()" data-i18n="btn_continue">Continue</button>
   </div>
 </div>
 
@@ -612,14 +612,14 @@
   </div>
   <div class="book-body" style="padding-top:60px;">
     <div style="max-width:560px;margin:0 auto;">
-      <span class="eyebrow">Manage Your Booking</span>
-      <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:clamp(24px,3vw,32px);margin:14px 0 30px;">Find your reservation</h2>
-      <p style="font-size:13px;color:var(--espresso-70);margin:-16px 0 26px;">Your appointment history is always tied to your phone number, not this device — so it works here even if you're on a new phone or browser.</p>
+      <span class="eyebrow" data-i18n="manage_eyebrow">Manage Your Booking</span>
+      <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:clamp(24px,3vw,32px);margin:14px 0 30px;" data-i18n="manage_title">Find your reservation</h2>
+      <p style="font-size:13px;color:var(--espresso-70);margin:-16px 0 26px;" data-i18n="manage_desc">Your appointment history is always tied to your phone number, not this device — so it works here even if you're on a new phone or browser.</p>
       <div class="field" style="margin-bottom:20px;">
-        <label>Phone Number</label>
+        <label data-i18n="manage_phone_label">Phone Number</label>
         <input type="tel" id="managePhone" placeholder="Enter the phone number you booked with">
       </div>
-      <button class="nav-next" onclick="lookupMyBookings()" style="margin-bottom:34px;">Find My Appointments</button>
+      <button class="nav-next" onclick="lookupMyBookings()" style="margin-bottom:34px;" data-i18n="btn_find_appts">Find My Appointments</button>
       <div id="manageResults"></div>
     </div>
   </div>
@@ -670,6 +670,50 @@ const TRANSLATIONS = {
     finalcta_eyebrow:"Reserve Your Time", finalcta_title:"The house is ready<br>whenever you are.",
     foot_visit:"Visit", foot_contact:"Contact", foot_follow:"Follow",
     foot_instagram:"Instagram", foot_whatsapp:"WhatsApp", foot_crafted:"Crafted with restraint",
+    step1_label:"01 — Choose Your Service", step1_title:"What would you like to experience?",
+    step2_label:"02 — Choose Your Ritual",
+    step3_label:"03 — With Whom", step3_title:"Choose your specialist",
+    step4_label:"04 — Date &amp; Time", step4_title:"When would you like to visit us?",
+    btn_join_waitlist:"Join Waitlist",
+    step5_label:"05 — Your Details", step5_title:"Just a few details",
+    field_fullname:"Full Name", ph_fullname:"Enter your name",
+    field_phone:"Phone", field_email:"Email", field_bday:"Birthday (optional)",
+    field_notes:"Special Requests (optional)", ph_notes:"Allergies, preferences, occasion...",
+    step6_label:"06 — Review", step6_title:"Your reservation",
+    confirm_title:"We look forward<br>to your visit.",
+    btn_addcal:"Add to Calendar", btn_wa_confirm:"WhatsApp Confirmation",
+    btn_cancel_this:"Cancel This Appointment", btn_return_home:"Return Home",
+    btn_back:"← Back", btn_continue:"Continue", btn_confirm_reservation:"Confirm Reservation",
+    manage_eyebrow:"Manage Your Booking", manage_title:"Find your reservation",
+    manage_desc:"Your appointment history is always tied to your phone number, not this device — so it works here even if you're on a new phone or browser.",
+    manage_phone_label:"Phone Number", btn_find_appts:"Find My Appointments",
+    err_slot_taken:"This time was just reserved by another guest — please choose another slot.",
+    select_treatment_default:"Select a treatment", select_treatment_prefix:"Select a", select_treatment_suffix:"ritual",
+    summary_service:"Service", summary_ritual:"Ritual", summary_specialist:"Specialist", summary_date:"Date",
+    summary_time:"Time", summary_duration:"Duration", summary_price:"Price",
+    reservation_no:"Reservation No.",
+    confirming:"Confirming...", cancelling:"Cancelling...", cancelled:"Cancelled",
+    rescheduling:"Rescheduling...",
+    no_preference:"No Preference",
+    dow_sun:"Sun", dow_mon:"Mon", dow_tue:"Tue", dow_wed:"Wed", dow_thu:"Thu", dow_fri:"Fri", dow_sat:"Sat",
+    err_lead_time:"Online booking closes {h} hours before an appointment — please choose a later time or call us directly for last-minute slots.",
+    err_limit:"You already have {n} upcoming appointments with us. Please cancel or complete one before booking another.",
+    err_generic_taken:"This time was just reserved by another guest — please choose another slot.",
+    cancel_confirm_dialog:"Cancel this appointment?",
+    appt_cancelled_msg:"This appointment has been cancelled. A confirmation has been sent to your phone.",
+    appt_cancel_failed:"This appointment could not be cancelled — it may already be cancelled.",
+    resched_lead_closed:"Online rescheduling closes {h} hours before an appointment.",
+    resched_taken:"That time was just taken — please pick another.",
+    resched_moved:"Moved to {date} at {time}. A confirmation has been sent to your phone.",
+    manage_enter_phone:"Please enter the phone number you booked with.",
+    manage_searching:"Searching…",
+    manage_no_appts:"No upcoming appointments found for this number.",
+    btn_cancel_appt:"Cancel Appointment", btn_reschedule:"Reschedule",
+    waitlist_enter_phone:"Please enter a phone number.",
+    waitlist_joined:"You're on the waitlist — we'll text this number if a spot opens on this date.",
+    welcome_back:"Welcome back",
+    welcome_back_msg:"— we've filled in your saved details. (Not on this device? You can always edit these, or look up your bookings by phone under Manage Booking.)",
+    btn_reserve:"Reserve", rituals_suffix:"rituals",
   },
   ar: {
     nav_menu:"قائمة الجمال", nav_house:"عن المكان", nav_rituals:"الطقوس", nav_visit:"زيارتك",
@@ -683,8 +727,57 @@ const TRANSLATIONS = {
     finalcta_eyebrow:"احجز وقتك", finalcta_title:"المكان جاهز<br>حين تكون جاهزاً.",
     foot_visit:"الزيارة", foot_contact:"تواصل معنا", foot_follow:"تابعنا",
     foot_instagram:"إنستغرام", foot_whatsapp:"واتساب", foot_crafted:"صُنع بعناية",
+    step1_label:"٠١ — اختر الخدمة", step1_title:"ما الذي تودين تجربته؟",
+    step2_label:"٠٢ — اختر الطقس",
+    step3_label:"٠٣ — مع من", step3_title:"اختر المتخصص",
+    step4_label:"٠٤ — التاريخ والوقت", step4_title:"متى تودين زيارتنا؟",
+    btn_join_waitlist:"انضم لقائمة الانتظار",
+    step5_label:"٠٥ — بياناتك", step5_title:"بعض التفاصيل",
+    field_fullname:"الاسم الكامل", ph_fullname:"أدخل اسمك",
+    field_phone:"رقم الهاتف", field_email:"البريد الإلكتروني", field_bday:"تاريخ الميلاد (اختياري)",
+    field_notes:"طلبات خاصة (اختياري)", ph_notes:"حساسية، تفضيلات، مناسبة...",
+    step6_label:"٠٦ — المراجعة", step6_title:"حجزك",
+    confirm_title:"نتطلع لزيارتك<br>قريباً.",
+    btn_addcal:"أضف إلى التقويم", btn_wa_confirm:"تأكيد عبر واتساب",
+    btn_cancel_this:"إلغاء هذا الموعد", btn_return_home:"العودة للرئيسية",
+    btn_back:"→ رجوع", btn_continue:"استمرار", btn_confirm_reservation:"تأكيد الحجز",
+    manage_eyebrow:"إدارة حجزك", manage_title:"البحث عن حجزك",
+    manage_desc:"سجل مواعيدك مرتبط برقم هاتفك دائماً، وليس بهذا الجهاز — فهو يعمل حتى لو كنت على هاتف أو متصفح جديد.",
+    manage_phone_label:"رقم الهاتف", btn_find_appts:"البحث عن مواعيدي",
+    err_slot_taken:"تم حجز هذا الوقت للتو من ضيف آخر — يرجى اختيار وقت آخر.",
+    select_treatment_default:"اختر خدمة", select_treatment_prefix:"اختر طقس", select_treatment_suffix:"",
+    summary_service:"الخدمة", summary_ritual:"الطقس", summary_specialist:"المتخصص", summary_date:"التاريخ",
+    summary_time:"الوقت", summary_duration:"المدة", summary_price:"السعر",
+    reservation_no:"رقم الحجز",
+    confirming:"جارٍ التأكيد...", cancelling:"جارٍ الإلغاء...", cancelled:"تم الإلغاء",
+    rescheduling:"جارٍ تعديل الموعد...",
+    no_preference:"دون تفضيل",
+    dow_sun:"أحد", dow_mon:"إثنين", dow_tue:"ثلاثاء", dow_wed:"أربعاء", dow_thu:"خميس", dow_fri:"جمعة", dow_sat:"سبت",
+    err_lead_time:"يُغلق الحجز عبر الإنترنت قبل {h} ساعة من الموعد — يرجى اختيار وقت لاحق أو الاتصال بنا مباشرة للمواعيد العاجلة.",
+    err_limit:"لديك بالفعل {n} مواعيد قادمة معنا. يرجى إلغاء أو إنهاء أحدها قبل حجز موعد آخر.",
+    err_generic_taken:"تم حجز هذا الوقت للتو من ضيف آخر — يرجى اختيار وقت آخر.",
+    cancel_confirm_dialog:"إلغاء هذا الموعد؟",
+    appt_cancelled_msg:"تم إلغاء هذا الموعد. تم إرسال تأكيد إلى هاتفك.",
+    appt_cancel_failed:"تعذر إلغاء هذا الموعد — قد يكون ملغى بالفعل.",
+    resched_lead_closed:"يُغلق تعديل الموعد عبر الإنترنت قبل {h} ساعة من الموعد.",
+    resched_taken:"تم حجز هذا الوقت للتو — يرجى اختيار وقت آخر.",
+    resched_moved:"تم نقل الموعد إلى {date} في {time}. تم إرسال تأكيد إلى هاتفك.",
+    manage_enter_phone:"يرجى إدخال رقم الهاتف الذي حجزت به.",
+    manage_searching:"جارٍ البحث…",
+    manage_no_appts:"لم يتم العثور على مواعيد قادمة لهذا الرقم.",
+    btn_cancel_appt:"إلغاء الموعد", btn_reschedule:"تعديل الموعد",
+    waitlist_enter_phone:"يرجى إدخال رقم الهاتف.",
+    waitlist_joined:"تم تسجيلك في قائمة الانتظار — سنرسل رسالة إلى هذا الرقم إذا فتح وقت في هذا التاريخ.",
+    welcome_back:"مرحباً بعودتك",
+    welcome_back_msg:"— لقد قمنا بتعبئة بياناتك المحفوظة. (لست على هذا الجهاز؟ يمكنك دائماً تعديلها، أو البحث عن مواعيدك برقم الهاتف عبر إدارة الحجز.)",
+    btn_reserve:"احجزي", rituals_suffix:"طقوس",
   },
 };
+function t(key, vars) {
+  let s = (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS.en[key] || key;
+  if (vars) for (const k in vars) s = s.replace("{" + k + "}", vars[k]);
+  return s;
+}
 function applyLanguage(lang) {
   currentLang = lang;
   localStorage.setItem("lume:lang", lang);
@@ -698,6 +791,23 @@ function applyLanguage(lang) {
   const btn = document.getElementById("langToggleBtn"); if (btn) btn.textContent = lang === "ar" ? "English" : "عربي";
   const btnM = document.getElementById("langToggleBtnMobile"); if (btnM) btnM.textContent = lang === "ar" ? "English" : "عربي";
   applyBusinessBranding(); // re-render business-settings-driven content in the new language
+  // Re-render anything already on screen that shows catalog data or booking-flow
+  // state, so switching language mid-browse (or mid-booking) updates immediately.
+  if (typeof buildMenuTabs === "function" && categories.length) {
+    const activeCat = document.querySelector(".menu-tab.active")?.dataset.cat || "all";
+    buildMenuTabs();
+    const reactivate = document.querySelector(`.menu-tab[data-cat="${activeCat}"]`);
+    if (reactivate) { document.querySelectorAll(".menu-tab").forEach(x=>x.classList.remove("active")); reactivate.classList.add("active"); }
+    buildMenuRail(activeCat);
+    buildRitualRail();
+    buildServiceGrid();
+  }
+  if (document.getElementById("bookOverlay")?.classList.contains("open")) {
+    if (step===1) renderTreatList();
+    if (step===2) buildSpecialistGrid();
+    if (step===5) renderSummary();
+    if (step===6) renderConfirm();
+  }
 }
 function toggleLanguage() {
   applyLanguage(currentLang === "ar" ? "en" : "ar");
@@ -770,7 +880,8 @@ async function loadCatalog() {
     (svcs || []).forEach(s => {
       if (!treatments[s.category_id]) treatments[s.category_id] = [];
       treatments[s.category_id].push({
-        id: s.id, n: s.name, d: s.duration_minutes + " min", p: s.price, desc: s.description || "",
+        id: s.id, n: s.name, n_ar: s.name_ar || "", d: s.duration_minutes + " min", p: s.price,
+        desc: s.description || "", desc_ar: s.description_ar || "",
         img: s.image_url || "", onlineBookable: s.online_bookable, depositRequired: s.deposit_required,
         prepMinutes: s.prep_minutes, bufferMinutes: s.buffer_minutes,
       });
@@ -780,17 +891,20 @@ async function loadCatalog() {
   try {
     const { data: sps } = await sb.from("specialists").select("*");
     specialists = [{ n: "No Preference", s: "Any available specialist" }].concat(
-      (sps || []).map(s => ({ id: s.id, n: s.name, s: s.title || "", capableCategories: s.capable_categories || [], workingDays: s.working_days || [], vacationDates: s.vacation_dates || [] }))
+      (sps || []).map(s => ({ id: s.id, n: s.name, n_ar: s.name_ar || "", s: s.title || "", s_ar: s.title_ar || "", capableCategories: s.capable_categories || [], workingDays: s.working_days || [], vacationDates: s.vacation_dates || [] }))
     );
   } catch (e) { specialists = [{ n: "No Preference", s: "Any available specialist" }]; }
 
   try {
     const { data: hols } = await sb.from("holidays").select("*");
-    holidays = (hols || []).map(h => ({ date: h.date, label: h.label }));
+    holidays = (hols || []).map(h => ({ date: h.date, label: h.label, label_ar: h.label_ar || "" }));
   } catch (e) { holidays = []; }
 }
 function isHoliday(dateStr) { return holidays.some(h => h.date === dateStr); }
-function holidayLabel(dateStr) { const h = holidays.find(x => x.date === dateStr); return h ? h.label : null; }
+function holidayLabel(dateStr) { const h = holidays.find(x => x.date === dateStr); if(!h) return null; return (currentLang==="ar" && h.label_ar) ? h.label_ar : h.label; }
+function dn(obj){ return (obj && currentLang==="ar" && obj.n_ar) ? obj.n_ar : (obj ? obj.n : ""); } // display name, language-aware
+function dt(obj){ return (obj && currentLang==="ar" && obj.s_ar) ? obj.s_ar : (obj ? obj.s : ""); } // display title/subtitle, language-aware
+function dd(obj){ return (obj && currentLang==="ar" && obj.desc_ar) ? obj.desc_ar : (obj ? obj.desc : ""); } // display description, language-aware
 function specialistsFor(categoryId) {
   const capable = specialists.filter(s => s.n === "No Preference" || (s.capableCategories || []).includes(categoryId));
   return capable.length ? capable : specialists;
@@ -872,17 +986,17 @@ function buildMenuRail(cat){
   const rail=document.getElementById("menuRail");
   rail.innerHTML="";
   const list = cat==="all" ? Object.values(treatments).flat().slice(0,6) : (treatments[cat]||[]);
-  list.forEach(t=>{
+  list.forEach(svc=>{
     const card=document.createElement("div");
     card.className="ritual-card";
     card.innerHTML=`
-      <div class="ritual-img" data-label="${t.n}"></div>
+      <div class="ritual-img" data-label="${dn(svc)}"></div>
       <div class="ritual-body">
-        <h3>${t.n}</h3>
-        <div class="ritual-meta">${t.desc}</div>
+        <h3>${dn(svc)}</h3>
+        <div class="ritual-meta">${dd(svc)}</div>
         <div class="ritual-row">
-          <span class="ritual-price">$${t.p}</span>
-          <a href="#" class="reserve-link" onclick="openBooking();return false;">Reserve</a>
+          <span class="ritual-price">$${svc.p}</span>
+          <a href="#" class="reserve-link" onclick="openBooking();return false;">${t("btn_reserve")}</a>
         </div>
       </div>`;
     rail.appendChild(card);
@@ -890,8 +1004,8 @@ function buildMenuRail(cat){
 }
 function buildMenuTabs(){
   const wrap=document.querySelector(".menu-tabs");
-  wrap.innerHTML = `<button class="menu-tab active" data-cat="all">All</button>` +
-    categories.map(c=>`<button class="menu-tab" data-cat="${c.id}">${c.name}</button>`).join("");
+  wrap.innerHTML = `<button class="menu-tab active" data-cat="all">${t("tab_all")}</button>` +
+    categories.map(c=>`<button class="menu-tab" data-cat="${c.id}">${dn(c)}</button>`).join("");
   wrap.querySelectorAll(".menu-tab").forEach(tab=>{
     tab.addEventListener("click",()=>{
       wrap.querySelectorAll(".menu-tab").forEach(t=>t.classList.remove("active"));
@@ -906,12 +1020,12 @@ const ritualRail=document.getElementById("ritualRail");
 function buildRitualRail(){
   ritualRail.innerHTML="";
   const picks=[treatments.skin&&treatments.skin[1], treatments.hair&&treatments.hair[1], treatments.nails&&treatments.nails[2]].filter(Boolean);
-  picks.forEach(t=>{
+  picks.forEach(svc=>{
     const card=document.createElement("div");
     card.className="ritual-card";
-    card.innerHTML=`<div class="ritual-img" data-label="${t.n}"></div>
-      <div class="ritual-body"><h3>${t.n}</h3><div class="ritual-meta">${t.desc}</div>
-      <div class="ritual-row"><span class="ritual-price">$${t.p}</span><a href="#" class="reserve-link" onclick="openBooking();return false;">Reserve</a></div></div>`;
+    card.innerHTML=`<div class="ritual-img" data-label="${dn(svc)}"></div>
+      <div class="ritual-body"><h3>${dn(svc)}</h3><div class="ritual-meta">${dd(svc)}</div>
+      <div class="ritual-row"><span class="ritual-price">$${svc.p}</span><a href="#" class="reserve-link" onclick="openBooking();return false;">${t("btn_reserve")}</a></div></div>`;
     ritualRail.appendChild(card);
   });
 }
@@ -992,7 +1106,7 @@ function buildServiceGrid(){
   categories.forEach(c=>{
     const el=document.createElement("div");
     el.className="choice"; el.dataset.id=c.id;
-    el.innerHTML=`<h3>${c.name}</h3><span>${(treatments[c.id]||[]).length} rituals</span>`;
+    el.innerHTML=`<h3>${dn(c)}</h3><span>${(treatments[c.id]||[]).length} ${t("rituals_suffix")}</span>`;
     el.onclick=()=>{ state.service=c.id; state.treatment=null; state.time=null;
       [...serviceGrid.children].forEach(x=>x.classList.remove("selected"));
       el.classList.add("selected"); updateNextEnabled(); };
@@ -1003,15 +1117,18 @@ function buildServiceGrid(){
 /* Build treatment list (depends on service) */
 function renderTreatList(){
   const list=document.getElementById("treatList");
+  const cat = state.service ? categories.find(c=>c.id===state.service) : null;
+  const catName = cat ? (currentLang==="ar" && cat.name_ar ? cat.name_ar : cat.name) : "";
   document.getElementById("treatHeading").textContent = state.service
-    ? "Select a "+categories.find(c=>c.id===state.service).name.toLowerCase()+" ritual" : "Select a treatment";
+    ? (currentLang==="ar" ? (t("select_treatment_prefix")+" "+catName) : (t("select_treatment_prefix")+" "+catName.toLowerCase()+" "+t("select_treatment_suffix")))
+    : t("select_treatment_default");
   list.innerHTML="";
   const items = state.service ? treatments[state.service] : [];
-  items.forEach(t=>{
+  items.forEach(svc=>{
     const row=document.createElement("div");
     row.className="treat-row";
-    row.innerHTML=`<div><div class="treat-name">${t.n}</div><div class="treat-meta">${t.d} · ${t.desc}</div></div><div class="treat-price">$${t.p}</div>`;
-    row.onclick=()=>{ if(state.treatment!==t){ state.time=null; } state.treatment=t;
+    row.innerHTML=`<div><div class="treat-name">${dn(svc)}</div><div class="treat-meta">${svc.d} · ${dd(svc)}</div></div><div class="treat-price">$${svc.p}</div>`;
+    row.onclick=()=>{ if(state.treatment!==svc){ state.time=null; } state.treatment=svc;
       [...list.children].forEach(x=>x.classList.remove("selected"));
       row.classList.add("selected"); updateNextEnabled(); };
     list.appendChild(row);
@@ -1027,7 +1144,7 @@ function buildSpecialistGrid(){
   list.forEach(s=>{
     const el=document.createElement("div");
     el.className="spec-card"; if(state.specialist ? state.specialist===s.n : s.n==="No Preference") el.classList.add("selected");
-    el.innerHTML=`<div class="avatar"></div><h3>${s.n}</h3><span>${s.s}</span>`;
+    el.innerHTML=`<div class="avatar"></div><h3>${s.n==="No Preference"?t("no_preference"):dn(s)}</h3><span>${s.n==="No Preference"?"":dt(s)}</span>`;
     el.onclick=()=>{ if(state.specialist!==s.n){ state.time=null; } state.specialist=s.n;
       [...specialistGrid.children].forEach(x=>x.classList.remove("selected"));
       el.classList.add("selected"); };
@@ -1171,7 +1288,7 @@ async function tryPrefillReturningCustomer(){
     document.getElementById("fEmail").value=mine.email||"";
     updateNextEnabled();
     const note=document.getElementById("returningNote");
-    note.textContent = "Welcome back"+(mine.name?", "+mine.name:"")+" — we've filled in your saved details. (Not on this device? You can always edit these, or look up your bookings by phone under Manage Booking.)";
+    note.textContent = t("welcome_back")+(mine.name?", "+mine.name:"")+" "+t("welcome_back_msg");
     note.style.display="block";
   }catch(e){}
 }
@@ -1188,11 +1305,11 @@ function closeManage(){
 async function lookupMyBookings(){
   const phone=document.getElementById("managePhone").value.trim();
   const results=document.getElementById("manageResults");
-  if(!phone){ results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>Please enter the phone number you booked with.</p>"; return; }
-  results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>Searching…</p>";
+  if(!phone){ results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>"+t("manage_enter_phone")+"</p>"; return; }
+  results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>"+t("manage_searching")+"</p>";
   const res = await lookupMyBookingsApi(phone);
   if(!res.ok || !res.bookings || !res.bookings.length){
-    results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>No upcoming appointments found for this number.</p>";
+    results.innerHTML="<p style='color:var(--espresso-45);font-size:13px;'>"+t("manage_no_appts")+"</p>";
     return;
   }
   results.innerHTML="";
@@ -1201,12 +1318,12 @@ async function lookupMyBookings(){
     row.className="summary-box";
     row.style.marginBottom="14px";
     row.innerHTML=`
-      <div class="summary-row"><span class="k">Service</span><span class="v">${h.treatment_name||"—"}</span></div>
-      <div class="summary-row"><span class="k">Date</span><span class="v">${h.booking_date}</span></div>
-      <div class="summary-row"><span class="k">Time</span><span class="v">${h.start_time.slice(0,5)}</span></div>
+      <div class="summary-row"><span class="k">${t("summary_service")}</span><span class="v">${h.treatment_name||"—"}</span></div>
+      <div class="summary-row"><span class="k">${t("summary_date")}</span><span class="v">${h.booking_date}</span></div>
+      <div class="summary-row"><span class="k">${t("summary_time")}</span><span class="v">${h.start_time.slice(0,5)}</span></div>
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="ghost-btn cancel-btn">Cancel Appointment</button>
-        <button class="ghost-btn reschedule-btn">Reschedule</button>
+        <button class="ghost-btn cancel-btn">${t("btn_cancel_appt")}</button>
+        <button class="ghost-btn reschedule-btn">${t("btn_reschedule")}</button>
       </div>
       <div class="reschedule-panel" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--line);">
         <div class="date-rail resched-dates" style="margin-bottom:14px;"></div>
@@ -1214,12 +1331,12 @@ async function lookupMyBookings(){
         <div class="resched-status" style="margin-top:10px;font-size:12px;color:var(--olive-deep);"></div>
       </div>`;
     row.querySelector(".cancel-btn").onclick=async (ev)=>{
-      if(!confirm("Cancel this appointment?")) return;
-      ev.target.textContent="Cancelling...";
+      if(!confirm(t("cancel_confirm_dialog"))) return;
+      ev.target.textContent=t("cancelling");
       ev.target.disabled=true;
       const r=await cancelBookingByIds(h.booking_date, h.id, phone);
-      if(r.ok){ row.style.opacity=.5; ev.target.textContent="Cancelled"; }
-      else{ ev.target.textContent="Cancel Appointment"; ev.target.disabled=false; }
+      if(r.ok){ row.style.opacity=.5; ev.target.textContent=t("cancelled"); }
+      else{ ev.target.textContent=t("btn_cancel_appt"); ev.target.disabled=false; }
     };
     row.querySelector(".reschedule-btn").onclick=()=>{
       const panel=row.querySelector(".reschedule-panel");
@@ -1238,7 +1355,7 @@ function buildRescheduleUI(row, h, phone){
   const timeWrap=row.querySelector(".resched-times");
   const status=row.querySelector(".resched-status");
   let chosenDate=null;
-  const dowNamesLocal=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const dowNamesLocal=[t("dow_sun"),t("dow_mon"),t("dow_tue"),t("dow_wed"),t("dow_thu"),t("dow_fri"),t("dow_sat")];
 
   async function paintTimes(){
     timeWrap.innerHTML="";
@@ -1255,16 +1372,16 @@ function buildRescheduleUI(row, h, phone){
       el.textContent=startTime;
       el.onclick=async ()=>{
         if(unavailable) return;
-        status.textContent="Rescheduling...";
+        status.textContent=t("rescheduling");
         const r=await rescheduleBookingApi(h.id, phone, dateStr, startTime);
         if(r.ok){
           status.style.color="var(--olive-deep)";
-          status.textContent=`Moved to ${dateStr} at ${startTime}. A confirmation has been sent to your phone.`;
+          status.textContent=t("resched_moved",{date:dateStr,time:startTime});
         }else{
           status.style.color="#A3503F";
           status.textContent = r.reason==="lead-time"
-            ? `Online rescheduling closes ${BOOKING_LEAD_HOURS} hours before an appointment.`
-            : (r.message || "That time was just taken — please pick another.");
+            ? t("resched_lead_closed",{h:BOOKING_LEAD_HOURS})
+            : (r.message || t("resched_taken"));
         }
       };
       timeWrap.appendChild(el);
@@ -1286,24 +1403,24 @@ function buildRescheduleUI(row, h, phone){
 
 async function cancelMyJustBookedAppointment(){
   if(!state.date || !state.time || !lastConfirmNum || !state.lastPhone) return;
-  if(!confirm("Cancel this appointment?")) return;
+  if(!confirm(t("cancel_confirm_dialog"))) return;
   const btn=document.getElementById("cancelMineBtn");
-  btn.textContent="Cancelling...";
+  btn.textContent=t("cancelling");
   const r=await cancelBookingByIds(dateKey(state.date), lastConfirmNum, state.lastPhone);
   const status=document.getElementById("cancelStatus");
   if(r.ok){
     btn.style.display="none";
     status.style.color="#A3503F";
-    status.textContent="This appointment has been cancelled. A confirmation has been sent to your phone.";
+    status.textContent=t("appt_cancelled_msg");
   }else{
     status.style.color="#A3503F";
-    status.textContent=r.message||"This appointment could not be cancelled — it may already be cancelled.";
-    btn.textContent="Cancel This Appointment";
+    status.textContent=r.message||t("appt_cancel_failed");
+    btn.textContent=t("btn_cancel_this");
   }
 }
 
 const dateRail=document.getElementById("dateRail");
-const dowNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const dowNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; // ALL_SLOTS-adjacent calendar labels — kept short/Latin for date-grid legibility in both languages
 function renderDates(){
   dateRail.innerHTML="";
   const today=new Date();
@@ -1399,19 +1516,19 @@ function renderSummary(){
   const svcName = state.service ? (categories.find(c=>c.id===state.service)||{}).name||"—" : "—";
   const dateStr = state.date ? state.date.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}) : "—";
   box.innerHTML=`
-    <div class="summary-row"><span class="k">Service</span><span class="v">${svcName}</span></div>
-    <div class="summary-row"><span class="k">Ritual</span><span class="v">${state.treatment?state.treatment.n:"—"}</span></div>
-    <div class="summary-row"><span class="k">Specialist</span><span class="v">${state.specialist}</span></div>
-    <div class="summary-row"><span class="k">Date</span><span class="v">${dateStr}</span></div>
-    <div class="summary-row"><span class="k">Time</span><span class="v">${state.time||"—"}</span></div>
-    <div class="summary-row"><span class="k">Duration</span><span class="v">${state.treatment?state.treatment.d:"—"}</span></div>
-    <div class="summary-row"><span class="k">Price</span><span class="v">${state.treatment?BIZ.currency_symbol+state.treatment.p:"—"}</span></div>`;
+    <div class="summary-row"><span class="k">${t("summary_service")}</span><span class="v">${svcName}</span></div>
+    <div class="summary-row"><span class="k">${t("summary_ritual")}</span><span class="v">${state.treatment?state.treatment.n:"—"}</span></div>
+    <div class="summary-row"><span class="k">${t("summary_specialist")}</span><span class="v">${state.specialist==="No Preference"?t("no_preference"):state.specialist}</span></div>
+    <div class="summary-row"><span class="k">${t("summary_date")}</span><span class="v">${dateStr}</span></div>
+    <div class="summary-row"><span class="k">${t("summary_time")}</span><span class="v">${state.time||"—"}</span></div>
+    <div class="summary-row"><span class="k">${t("summary_duration")}</span><span class="v">${state.treatment?state.treatment.d:"—"}</span></div>
+    <div class="summary-row"><span class="k">${t("summary_price")}</span><span class="v">${state.treatment?BIZ.currency_symbol+state.treatment.p:"—"}</span></div>`;
 }
 
 /* Confirmation */
 let lastConfirmNum="";
 function renderConfirm(){
-  document.getElementById("confirmNum").textContent="Reservation No. "+lastConfirmNum;
+  document.getElementById("confirmNum").textContent=t("reservation_no")+" "+lastConfirmNum;
   const waBtn=document.getElementById("waConfirmBtn");
   const waDigits=(BIZ.whatsapp_number||"").replace(/[^\d]/g,"");
   if(waDigits){
@@ -1446,7 +1563,7 @@ function renderStep(){
   if(step===6) renderConfirm();
 
   updateNextEnabled();
-  nextBtn.textContent = step===5 ? "Confirm Reservation" : "Continue";
+  nextBtn.textContent = step===5 ? t("btn_confirm_reservation") : t("btn_continue");
   document.querySelector(".book-body").scrollTop=0;
 }
 function updateNextEnabled(){
@@ -1467,7 +1584,7 @@ async function nextStep(){
     // Postgres constraint to make double-booking physically impossible —
     // not just a JS check-then-write.
     nextBtn.disabled=true;
-    nextBtn.textContent="Confirming...";
+    nextBtn.textContent=t("confirming");
     document.getElementById("slotError").classList.remove("show");
 
     const name = document.getElementById("fName").value.trim();
@@ -1485,11 +1602,11 @@ async function nextStep(){
     if(!claimed.ok){
       const err=document.getElementById("slotError");
       if(claimed.reason==="lead-time"){
-        err.textContent=`Online booking closes ${BOOKING_LEAD_HOURS} hours before an appointment — please choose a later time or call us directly for last-minute slots.`;
+        err.textContent=t("err_lead_time",{h:BOOKING_LEAD_HOURS});
       }else if(claimed.reason==="limit"){
-        err.textContent=`You already have ${MAX_ACTIVE_BOOKINGS} upcoming appointments with us. Please cancel or complete one before booking another.`;
+        err.textContent=t("err_limit",{n:MAX_ACTIVE_BOOKINGS});
       }else{
-        err.textContent=claimed.message || "This time was just reserved by another guest — please choose another slot.";
+        err.textContent=claimed.message || t("err_generic_taken");
       }
       err.classList.add("show");
       state.time=null;
@@ -1501,7 +1618,7 @@ async function nextStep(){
     state.lastPhone=phone;
     document.getElementById("cancelStatus").textContent="";
     document.getElementById("cancelMineBtn").style.display="";
-    document.getElementById("cancelMineBtn").textContent="Cancel This Appointment";
+    document.getElementById("cancelMineBtn").textContent=t("btn_cancel_this");
     step=6; renderStep();
     return;
   }
@@ -1516,11 +1633,11 @@ async function joinCurrentWaitlist(){
   if(!state.date){ return; }
   const phone=document.getElementById("waitlistPhone").value.trim();
   const status=document.getElementById("waitlistStatus");
-  if(!phone){ status.textContent="Please enter a phone number."; return; }
+  if(!phone){ status.textContent=t("waitlist_enter_phone"); return; }
   await joinWaitlist(dateKey(state.date), state.specialist, {
     phone, treatment: state.treatment?state.treatment.n:state.service
   });
-  status.textContent="You're on the waitlist — we'll text this number if a spot opens on this date.";
+  status.textContent=t("waitlist_joined");
 }
 
 /* ---------- Bootstrap: load business settings + the shared catalog, then render everything that depends on them ---------- */
