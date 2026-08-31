@@ -356,7 +356,7 @@
             <select id="svcCategorySelect"></select>
           </div>
           <div class="field-a"><label>Or New Category Name</label><input type="text" id="svcNewCategoryName" placeholder="Leave blank to use selection above"></div>
-          <div class="field-a"><label>Service Name</label><input type="text" id="svcName"><input type="text" id="svcName_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Service Name</label><input type="text" id="svcName"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="svcName_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('svcName','svcName_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
           <div class="field-a"><label>Price ($)</label><input type="number" id="svcPrice" min="0"></div>
           <div class="field-a"><label>Duration (minutes)</label><input type="number" id="svcDuration" min="5" step="5"></div>
           <div class="field-a"><label>Prep Time (minutes)</label><input type="number" id="svcPrep" min="0" step="5" value="0"></div>
@@ -368,7 +368,7 @@
           <div class="field-a"><label>Deposit Required?</label>
             <select id="svcDeposit"><option value="false">No</option><option value="true">Yes</option></select>
           </div>
-          <div class="field-a" style="grid-column:1/-1;"><label>Description</label><input type="text" id="svcDesc"><input type="text" id="svcDesc_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>Description</label><input type="text" id="svcDesc"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="svcDesc_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('svcDesc','svcDesc_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
         </div>
         <div style="padding:0 26px 22px;display:flex;gap:10px;align-items:center;">
           <button class="btn dark" onclick="submitService()">Save Service</button>
@@ -387,8 +387,8 @@
       </div>
       <div class="panel-body" id="specialistFormPanel" style="display:none;border-bottom:1px solid var(--line);">
         <div class="field-grid-admin">
-          <div class="field-a"><label>Name</label><input type="text" id="spName"><input type="text" id="spName_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a"><label>Specialty (display text)</label><input type="text" id="spTitle" placeholder="e.g. Hair & Colour"><input type="text" id="spTitle_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Name</label><input type="text" id="spName"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="spName_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('spName','spName_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a"><label>Specialty (display text)</label><input type="text" id="spTitle" placeholder="e.g. Hair & Colour"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="spTitle_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('spTitle','spTitle_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
           <div class="field-a" style="grid-column:span 2;"><label>Capable Categories</label>
             <div id="spCategories" style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px;"></div>
           </div>
@@ -416,7 +416,7 @@
       <div class="panel-body">
         <div class="field-grid-admin" style="padding:0 0 18px;">
           <div class="field-a"><label>Date</label><input type="date" id="holDate"></div>
-          <div class="field-a" style="grid-column:span 2;"><label>Label</label><input type="text" id="holLabel" placeholder="e.g. Eid Al-Fitr, Center Closure"><input type="text" id="holLabel_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Label</label><input type="text" id="holLabel" placeholder="e.g. Eid Al-Fitr, Center Closure"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="holLabel_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('holLabel','holLabel_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
           <div class="field-a"><label>&nbsp;</label><button class="btn dark" onclick="submitHoliday()">Add</button></div>
         </div>
         <div id="holidaysList" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -477,21 +477,23 @@
       <div class="panel-body">
         <div style="padding:0 26px 10px;font-size:11px;color:var(--espresso-45);">Each field below has an English version and, underneath it, an optional Arabic version — fill in both if you want the site to show Arabic when a visitor picks it.</div>
         <div class="field-grid-admin" style="padding:0;">
-          <div class="field-a"><label>Business Name</label><input type="text" id="bsName"><input type="text" id="bsName_ar" dir="rtl" placeholder="الاسم بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a"><label>Tagline</label><input type="text" id="bsTagline"><input type="text" id="bsTagline_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a"><label>Address</label><input type="text" id="bsAddress"><input type="text" id="bsAddress_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Business Name</label><input type="text" id="bsName"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsName_ar" dir="rtl" placeholder="الاسم بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsName','bsName_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a"><label>Tagline</label><input type="text" id="bsTagline"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsTagline_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsTagline','bsTagline_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a"><label>Address</label><input type="text" id="bsAddress"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsAddress_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsAddress','bsAddress_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
           <div class="field-a"><label>Phone</label><input type="text" id="bsPhone"></div>
           <div class="field-a"><label>WhatsApp Number (with country code, e.g. +9611234567)</label><input type="text" id="bsWhatsapp"></div>
           <div class="field-a"><label>Email</label><input type="text" id="bsEmail"></div>
-          <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"><input type="text" id="bsHours_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHours_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHours','bsHours_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
           <div class="field-a"><label>24h Reminder — send how many hours before</label><input type="number" id="bsReminderHours" min="1" max="72"></div>
           <div class="field-a"><label>Same-day Reminder — send how many hours before</label><input type="number" id="bsSameDayReminderHours" min="1" max="12"></div>
-          <div class="field-a"><label>Hero Line 1</label><input type="text" id="bsHeroLine1"><input type="text" id="bsHeroLine1_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a"><label>Hero Line 2</label><input type="text" id="bsHeroLine2"><input type="text" id="bsHeroLine2_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a" style="grid-column:span 2;"><label>Hero Subtitle</label><input type="text" id="bsHeroSubtitle"><input type="text" id="bsHeroSubtitle_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a" style="grid-column:span 2;"><label>About / House Title</label><input type="text" id="bsAboutTitle"><input type="text" id="bsAboutTitle_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 1</label><input type="text" id="bsAboutBody1"><input type="text" id="bsAboutBody1_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
-          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 2</label><input type="text" id="bsAboutBody2"><input type="text" id="bsAboutBody2_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Hero Eyebrow (small label above the headline)</label><input type="text" id="bsHeroEyebrow"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHeroEyebrow_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHeroEyebrow','bsHeroEyebrow_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a"><label>Hero Line 1</label><input type="text" id="bsHeroLine1"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHeroLine1_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHeroLine1','bsHeroLine1_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a"><label>Hero Line 2</label><input type="text" id="bsHeroLine2"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHeroLine2_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHeroLine2','bsHeroLine2_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Hero Subtitle</label><input type="text" id="bsHeroSubtitle"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHeroSubtitle_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHeroSubtitle','bsHeroSubtitle_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a" style="grid-column:span 2;"><label>About / House Title</label><input type="text" id="bsAboutTitle"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsAboutTitle_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsAboutTitle','bsAboutTitle_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 1</label><input type="text" id="bsAboutBody1"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsAboutBody1_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsAboutBody1','bsAboutBody1_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Paragraph 2</label><input type="text" id="bsAboutBody2"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsAboutBody2_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsAboutBody2','bsAboutBody2_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>About Signature (the closing line, e.g. "— The House of...")</label><input type="text" id="bsAboutSig"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsAboutSig_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsAboutSig','bsAboutSig_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
         </div>
         <div style="padding:16px 26px 0;display:flex;gap:10px;align-items:center;">
           <button class="btn dark" onclick="submitBusinessSettings()">Save</button>
@@ -534,6 +536,36 @@ const SUPABASE_URL = "https://possqyvufrubfixipwlm.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7tLqOI1xA_Tq4lxOpbjs2w_PFuNiJZ_";
 const TEAM_API_URL = SUPABASE_URL + "/functions/v1/team-api";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ---------- Auto-translate (English → Arabic draft) ----------
+   Uses MyMemory's free translation API — no signup, no key, CORS-enabled,
+   so it can be called straight from here. Gives a solid first-pass Arabic
+   draft; always review it, since machine translation of marketing copy
+   can miss tone or nuance a human would catch. Free tier caps around
+   5,000 characters/day, so heavy use may occasionally hit that limit. */
+async function autoTranslateField(srcId, dstId){
+  const srcEl=document.getElementById(srcId), dstEl=document.getElementById(dstId);
+  if(!srcEl || !dstEl) return;
+  const text=srcEl.value.trim();
+  if(!text){ alert("Type the English text first, then translate it."); return; }
+  const btn=[...document.querySelectorAll(`button[onclick="autoTranslateField('${srcId}','${dstId}')"]`)][0];
+  const originalLabel = btn ? btn.textContent : null;
+  if(btn){ btn.textContent="…"; btn.disabled=true; }
+  try{
+    const params=new URLSearchParams({ q:text.slice(0,500), langpair:"en|ar" });
+    const res=await fetch("https://api.mymemory.translated.net/get?"+params.toString());
+    const data=await res.json();
+    if(data.responseStatus===200 && data.responseData && data.responseData.translatedText){
+      dstEl.value=data.responseData.translatedText;
+    }else{
+      alert("Translation didn't come through — you can type the Arabic manually instead.");
+    }
+  }catch(e){
+    alert("Couldn't reach the translation service — you can type the Arabic manually instead.");
+  }finally{
+    if(btn){ btn.textContent=originalLabel; btn.disabled=false; }
+  }
+}
 
 async function callTeamApi(action, payload){
   try{
@@ -938,6 +970,8 @@ function openBusinessSettingsForm(){
   document.getElementById("bsHours_ar").value = BIZ.hours_display_ar||"";
   document.getElementById("bsReminderHours").value = BIZ.reminder_hours_before||24;
   document.getElementById("bsSameDayReminderHours").value = BIZ.same_day_reminder_hours_before||3;
+  document.getElementById("bsHeroEyebrow").value = BIZ.hero_eyebrow||"";
+  document.getElementById("bsHeroEyebrow_ar").value = BIZ.hero_eyebrow_ar||"";
   document.getElementById("bsHeroLine1").value = BIZ.hero_line1||"";
   document.getElementById("bsHeroLine1_ar").value = BIZ.hero_line1_ar||"";
   document.getElementById("bsHeroLine2").value = BIZ.hero_line2||"";
@@ -950,6 +984,8 @@ function openBusinessSettingsForm(){
   document.getElementById("bsAboutBody1_ar").value = BIZ.about_body_1_ar||"";
   document.getElementById("bsAboutBody2").value = BIZ.about_body_2||"";
   document.getElementById("bsAboutBody2_ar").value = BIZ.about_body_2_ar||"";
+  document.getElementById("bsAboutSig").value = BIZ.about_signature||"";
+  document.getElementById("bsAboutSig_ar").value = BIZ.about_signature_ar||"";
   document.getElementById("bsName_ar").value = BIZ.business_name_ar||"";
   document.getElementById("bsTagline_ar").value = BIZ.tagline_ar||"";
   document.getElementById("bsAddress_ar").value = BIZ.address_ar||"";
@@ -973,6 +1009,8 @@ async function submitBusinessSettings(){
     hours_display_ar: document.getElementById("bsHours_ar").value.trim(),
     reminder_hours_before: parseInt(document.getElementById("bsReminderHours").value, 10) || 24,
     same_day_reminder_hours_before: parseInt(document.getElementById("bsSameDayReminderHours").value, 10) || 3,
+    hero_eyebrow: document.getElementById("bsHeroEyebrow").value.trim(),
+    hero_eyebrow_ar: document.getElementById("bsHeroEyebrow_ar").value.trim(),
     hero_line1: document.getElementById("bsHeroLine1").value.trim(),
     hero_line1_ar: document.getElementById("bsHeroLine1_ar").value.trim(),
     hero_line2: document.getElementById("bsHeroLine2").value.trim(),
@@ -985,6 +1023,8 @@ async function submitBusinessSettings(){
     about_body_1_ar: document.getElementById("bsAboutBody1_ar").value.trim(),
     about_body_2: document.getElementById("bsAboutBody2").value.trim(),
     about_body_2_ar: document.getElementById("bsAboutBody2_ar").value.trim(),
+    about_signature: document.getElementById("bsAboutSig").value.trim(),
+    about_signature_ar: document.getElementById("bsAboutSig_ar").value.trim(),
     updated_at: new Date().toISOString(),
   };
   const { error } = await sb.from("business_settings").update(update).eq("id",1);
@@ -1000,12 +1040,37 @@ function visitInfoRowHtml(q,a,qAr,aAr){
   return `<div class="vi-row" style="border:1px solid var(--line);padding:14px;margin-bottom:12px;">
     <div class="field-grid-admin" style="padding:0;">
       <div class="field-a"><label>Question (English)</label><input type="text" class="vi-q" value="${(q||"").replace(/"/g,"&quot;")}"></div>
-      <div class="field-a"><label>Question (Arabic)</label><input type="text" class="vi-q-ar" dir="rtl" value="${(qAr||"").replace(/"/g,"&quot;")}"></div>
+      <div class="field-a"><label>Question (Arabic)</label><div style="display:flex;gap:6px;"><input type="text" class="vi-q-ar" dir="rtl" value="${(qAr||"").replace(/"/g,"&quot;")}" style="flex:1;"><button type="button" class="btn small" onclick="autoTranslateRowField(this,'.vi-q','.vi-q-ar')" title="Auto-translate from English">↻ AR</button></div></div>
       <div class="field-a" style="grid-column:1/-1;"><label>Answer (English)</label><input type="text" class="vi-a" value="${(a||"").replace(/"/g,"&quot;")}"></div>
-      <div class="field-a" style="grid-column:1/-1;"><label>Answer (Arabic)</label><input type="text" class="vi-a-ar" dir="rtl" value="${(aAr||"").replace(/"/g,"&quot;")}"></div>
+      <div class="field-a" style="grid-column:1/-1;"><label>Answer (Arabic)</label><div style="display:flex;gap:6px;"><input type="text" class="vi-a-ar" dir="rtl" value="${(aAr||"").replace(/"/g,"&quot;")}" style="flex:1;"><button type="button" class="btn small" onclick="autoTranslateRowField(this,'.vi-a','.vi-a-ar')" title="Auto-translate from English">↻ AR</button></div></div>
     </div>
     <button class="btn small" onclick="this.closest('.vi-row').remove()" style="margin-top:8px;">Remove</button>
   </div>`;
+}
+// Same idea as autoTranslateField(), but for a row-based repeating list
+// (Visit Info) where fields are identified by class within the row, not
+// by a unique page-wide id.
+async function autoTranslateRowField(btn, srcSelector, dstSelector){
+  const row=btn.closest(".vi-row");
+  const srcEl=row.querySelector(srcSelector), dstEl=row.querySelector(dstSelector);
+  const text=srcEl.value.trim();
+  if(!text){ alert("Type the English text first, then translate it."); return; }
+  const original=btn.textContent;
+  btn.textContent="…"; btn.disabled=true;
+  try{
+    const params=new URLSearchParams({ q:text.slice(0,500), langpair:"en|ar" });
+    const res=await fetch("https://api.mymemory.translated.net/get?"+params.toString());
+    const data=await res.json();
+    if(data.responseStatus===200 && data.responseData && data.responseData.translatedText){
+      dstEl.value=data.responseData.translatedText;
+    }else{
+      alert("Translation didn't come through — you can type the Arabic manually instead.");
+    }
+  }catch(e){
+    alert("Couldn't reach the translation service — you can type the Arabic manually instead.");
+  }finally{
+    btn.textContent=original; btn.disabled=false;
+  }
 }
 function addVisitInfoRow(q,a,qAr,aAr){
   document.getElementById("visitInfoList").insertAdjacentHTML("beforeend", visitInfoRowHtml(q,a,qAr,aAr));
