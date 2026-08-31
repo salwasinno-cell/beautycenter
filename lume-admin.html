@@ -352,7 +352,7 @@
             <select id="svcCategorySelect"></select>
           </div>
           <div class="field-a"><label>Or New Category Name</label><input type="text" id="svcNewCategoryName" placeholder="Leave blank to use selection above"></div>
-          <div class="field-a"><label>Service Name</label><input type="text" id="svcName"></div>
+          <div class="field-a"><label>Service Name</label><input type="text" id="svcName"><input type="text" id="svcName_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
           <div class="field-a"><label>Price ($)</label><input type="number" id="svcPrice" min="0"></div>
           <div class="field-a"><label>Duration (minutes)</label><input type="number" id="svcDuration" min="5" step="5"></div>
           <div class="field-a"><label>Prep Time (minutes)</label><input type="number" id="svcPrep" min="0" step="5" value="0"></div>
@@ -364,7 +364,7 @@
           <div class="field-a"><label>Deposit Required?</label>
             <select id="svcDeposit"><option value="false">No</option><option value="true">Yes</option></select>
           </div>
-          <div class="field-a" style="grid-column:1/-1;"><label>Description</label><input type="text" id="svcDesc"></div>
+          <div class="field-a" style="grid-column:1/-1;"><label>Description</label><input type="text" id="svcDesc"><input type="text" id="svcDesc_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
         </div>
         <div style="padding:0 26px 22px;display:flex;gap:10px;align-items:center;">
           <button class="btn dark" onclick="submitService()">Save Service</button>
@@ -383,8 +383,8 @@
       </div>
       <div class="panel-body" id="specialistFormPanel" style="display:none;border-bottom:1px solid var(--line);">
         <div class="field-grid-admin">
-          <div class="field-a"><label>Name</label><input type="text" id="spName"></div>
-          <div class="field-a"><label>Specialty (display text)</label><input type="text" id="spTitle" placeholder="e.g. Hair & Colour"></div>
+          <div class="field-a"><label>Name</label><input type="text" id="spName"><input type="text" id="spName_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
+          <div class="field-a"><label>Specialty (display text)</label><input type="text" id="spTitle" placeholder="e.g. Hair & Colour"><input type="text" id="spTitle_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
           <div class="field-a" style="grid-column:span 2;"><label>Capable Categories</label>
             <div id="spCategories" style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px;"></div>
           </div>
@@ -412,10 +412,25 @@
       <div class="panel-body">
         <div class="field-grid-admin" style="padding:0 0 18px;">
           <div class="field-a"><label>Date</label><input type="date" id="holDate"></div>
-          <div class="field-a" style="grid-column:span 2;"><label>Label</label><input type="text" id="holLabel" placeholder="e.g. Eid Al-Fitr, Center Closure"></div>
+          <div class="field-a" style="grid-column:span 2;"><label>Label</label><input type="text" id="holLabel" placeholder="e.g. Eid Al-Fitr, Center Closure"><input type="text" id="holLabel_ar" dir="rtl" placeholder="بالعربية" style="margin-top:6px;border-color:var(--olive);"></div>
           <div class="field-a"><label>&nbsp;</label><button class="btn dark" onclick="submitHoliday()">Add</button></div>
         </div>
         <div id="holidaysList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="visitInfoPanel">
+      <div class="panel-head"><h2>Your Visit Info</h2></div>
+      <div class="panel-body">
+        <div style="padding:0 26px 14px;font-size:11px;color:var(--espresso-45);">These are the accordion items shown in the "Your Visit" section of the site (Arrival, Parking, Preparation, etc). Add as many as you like — each can have an Arabic version too.</div>
+        <div id="visitInfoList" style="padding:0 26px;"></div>
+        <div style="padding:10px 26px;">
+          <button class="btn small" onclick="addVisitInfoRow('','','','')">+ Add Item</button>
+        </div>
+        <div style="padding:16px 26px 0;display:flex;gap:10px;align-items:center;">
+          <button class="btn dark" onclick="submitVisitInfo()">Save</button>
+          <span id="viStatus" style="font-size:12px;color:var(--espresso-45);"></span>
+        </div>
       </div>
     </div>
 
@@ -567,13 +582,13 @@ async function loadCatalog(){
   try{
     const { data: sps } = await sb.from("specialists").select("*");
     specialists = [{n:"No Preference", s:"Any available specialist"}].concat(
-      (sps||[]).map(s=>({id:s.id, n:s.name, s:s.title||"", capableCategories:s.capable_categories||[], workingDays:s.working_days||[], vacationDates:s.vacation_dates||[]}))
+      (sps||[]).map(s=>({id:s.id, n:s.name, n_ar:s.name_ar||"", s:s.title||"", s_ar:s.title_ar||"", capableCategories:s.capable_categories||[], workingDays:s.working_days||[], vacationDates:s.vacation_dates||[]}))
     );
   }catch(e){ specialists=[{n:"No Preference", s:"Any available specialist"}]; }
 
   try{
     const { data: hols } = await sb.from("holidays").select("*");
-    holidays = (hols||[]).map(h=>({date:h.date, label:h.label}));
+    holidays = (hols||[]).map(h=>({date:h.date, label:h.label, label_ar:h.label_ar||""}));
   }catch(e){ holidays=[]; }
 }
 function isHoliday(dateStr){ return holidays.some(h=>h.date===dateStr); }
@@ -645,9 +660,9 @@ function toggleServiceForm(){
   if(!open){
     document.getElementById("svcCategorySelect").innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
     document.getElementById("svcNewCategoryName").value="";
-    document.getElementById("svcName").value=""; document.getElementById("svcPrice").value="";
+    document.getElementById("svcName").value=""; document.getElementById("svcName_ar").value=""; document.getElementById("svcPrice").value="";
     document.getElementById("svcDuration").value=""; document.getElementById("svcPrep").value="0";
-    document.getElementById("svcBuffer").value=""; document.getElementById("svcImg").value=""; document.getElementById("svcDesc").value="";
+    document.getElementById("svcBuffer").value=""; document.getElementById("svcImg").value=""; document.getElementById("svcDesc").value=""; document.getElementById("svcDesc_ar").value="";
     document.getElementById("svcStatus").textContent="";
   }
 }
@@ -657,6 +672,7 @@ async function submitService(){
   const newCatName=document.getElementById("svcNewCategoryName").value.trim();
   let categoryId=document.getElementById("svcCategorySelect").value;
   const name=document.getElementById("svcName").value.trim();
+  const nameAr=document.getElementById("svcName_ar").value.trim();
   const price=parseFloat(document.getElementById("svcPrice").value);
   const duration=parseInt(document.getElementById("svcDuration").value,10);
   if(!name || isNaN(price) || isNaN(duration)){ status.textContent="Name, price, and duration are required."; return; }
@@ -673,12 +689,13 @@ async function submitService(){
   const buffer = bufferRaw==="" ? null : parseInt(bufferRaw,10);
   const img=document.getElementById("svcImg").value.trim();
   const desc=document.getElementById("svcDesc").value.trim();
+  const descAr=document.getElementById("svcDesc_ar").value.trim();
   const onlineBookable=document.getElementById("svcOnlineBookable").value==="true";
   const depositRequired=document.getElementById("svcDeposit").value==="true";
 
   const { error } = await sb.from("services").insert({
-    id: slugify(name), category_id: categoryId, name, price, duration_minutes: duration,
-    description: desc, image_url: img, online_bookable: onlineBookable, deposit_required: depositRequired,
+    id: slugify(name), category_id: categoryId, name, name_ar: nameAr, price, duration_minutes: duration,
+    description: desc, description_ar: descAr, image_url: img, online_bookable: onlineBookable, deposit_required: depositRequired,
     prep_minutes: prep, buffer_minutes: buffer,
   });
   if(error){ status.textContent="Could not save: "+error.message; return; }
@@ -729,7 +746,9 @@ function toggleSpecialistForm(){
 function openSpecialistForm(existing){
   editingSpecialistId = existing ? existing.id : null;
   document.getElementById("spName").value = existing ? existing.n : "";
+  document.getElementById("spName_ar").value = existing ? (existing.n_ar||"") : "";
   document.getElementById("spTitle").value = existing ? existing.s : "";
+  document.getElementById("spTitle_ar").value = existing ? (existing.s_ar||"") : "";
   document.getElementById("spCategories").innerHTML = categories.map(c=>
     `<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="${c.id}" ${existing&&(existing.capableCategories||[]).includes(c.id)?"checked":""}> ${c.name}</label>`).join("");
   document.getElementById("spWorkingDays").innerHTML = DOW_LABELS.map((d,i)=>
@@ -756,11 +775,13 @@ async function submitSpecialist(){
   const status=document.getElementById("spStatus");
   if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to manage specialists."; return; }
   const name=document.getElementById("spName").value.trim();
+  const nameAr=document.getElementById("spName_ar").value.trim();
   const title=document.getElementById("spTitle").value.trim();
+  const titleAr=document.getElementById("spTitle_ar").value.trim();
   if(!name){ status.textContent="Name is required."; return; }
   const capableCategories=[...document.querySelectorAll('#spCategories input:checked')].map(el=>el.value);
   const workingDays=[...document.querySelectorAll('#spWorkingDays input:checked')].map(el=>parseInt(el.value,10));
-  const record={ name, title, capable_categories:capableCategories, working_days:workingDays, vacation_dates:currentVacationDates.slice() };
+  const record={ name, name_ar:nameAr, title, title_ar:titleAr, capable_categories:capableCategories, working_days:workingDays, vacation_dates:currentVacationDates.slice() };
 
   let error;
   if(editingSpecialistId){
@@ -816,10 +837,11 @@ async function submitHoliday(){
   if(!hasPermission("manageSettings")) return;
   const date=document.getElementById("holDate").value;
   const label=document.getElementById("holLabel").value.trim();
+  const labelAr=document.getElementById("holLabel_ar").value.trim();
   if(!date || !label) return;
-  const { error } = await sb.from("holidays").insert({ date, label });
+  const { error } = await sb.from("holidays").insert({ date, label, label_ar: labelAr });
   if(error){ alert(error.code==="23505" ? "A holiday is already set for that date." : "Could not save: "+error.message); return; }
-  document.getElementById("holLabel").value="";
+  document.getElementById("holLabel").value=""; document.getElementById("holLabel_ar").value="";
   await loadCatalog();
   refreshHolidaysList();
 }
@@ -905,6 +927,55 @@ async function submitBusinessSettings(){
     updated_at: new Date().toISOString(),
   };
   const { error } = await sb.from("business_settings").update(update).eq("id",1);
+  if(error){ status.textContent="Could not save: "+error.message; return; }
+  status.textContent="Saved — changes are live on the customer site within its next refresh.";
+  await loadBusinessSettings();
+}
+
+/* ==========================================================================
+   YOUR VISIT INFO — business_settings.visit_info / visit_info_ar (jsonb arrays)
+   ========================================================================== */
+function visitInfoRowHtml(q,a,qAr,aAr){
+  return `<div class="vi-row" style="border:1px solid var(--line);padding:14px;margin-bottom:12px;">
+    <div class="field-grid-admin" style="padding:0;">
+      <div class="field-a"><label>Question (English)</label><input type="text" class="vi-q" value="${(q||"").replace(/"/g,"&quot;")}"></div>
+      <div class="field-a"><label>Question (Arabic)</label><input type="text" class="vi-q-ar" dir="rtl" value="${(qAr||"").replace(/"/g,"&quot;")}"></div>
+      <div class="field-a" style="grid-column:1/-1;"><label>Answer (English)</label><input type="text" class="vi-a" value="${(a||"").replace(/"/g,"&quot;")}"></div>
+      <div class="field-a" style="grid-column:1/-1;"><label>Answer (Arabic)</label><input type="text" class="vi-a-ar" dir="rtl" value="${(aAr||"").replace(/"/g,"&quot;")}"></div>
+    </div>
+    <button class="btn small" onclick="this.closest('.vi-row').remove()" style="margin-top:8px;">Remove</button>
+  </div>`;
+}
+function addVisitInfoRow(q,a,qAr,aAr){
+  document.getElementById("visitInfoList").insertAdjacentHTML("beforeend", visitInfoRowHtml(q,a,qAr,aAr));
+}
+async function loadVisitInfoForm(){
+  if(!hasPermission("manageSettings")) return;
+  const list=document.getElementById("visitInfoList");
+  list.innerHTML="";
+  const info = BIZ.visit_info||[];
+  const infoAr = BIZ.visit_info_ar||[];
+  info.forEach((item,i)=>{
+    const arItem = infoAr[i]||{};
+    addVisitInfoRow(item.q, item.a, arItem.q, arItem.a);
+  });
+  document.getElementById("viStatus").textContent="";
+}
+async function submitVisitInfo(){
+  const status=document.getElementById("viStatus");
+  if(!hasPermission("manageSettings")){ status.textContent="You don't have permission to edit this."; return; }
+  const rows=[...document.querySelectorAll("#visitInfoList .vi-row")];
+  const visitInfo=[], visitInfoAr=[];
+  rows.forEach(row=>{
+    const q=row.querySelector(".vi-q").value.trim();
+    const a=row.querySelector(".vi-a").value.trim();
+    const qAr=row.querySelector(".vi-q-ar").value.trim();
+    const aAr=row.querySelector(".vi-a-ar").value.trim();
+    if(!q && !a) return; // skip fully-empty rows
+    visitInfo.push({q,a});
+    visitInfoAr.push({q:qAr,a:aAr});
+  });
+  const { error } = await sb.from("business_settings").update({ visit_info: visitInfo, visit_info_ar: visitInfoAr, updated_at:new Date().toISOString() }).eq("id",1);
   if(error){ status.textContent="Could not save: "+error.message; return; }
   status.textContent="Saved — changes are live on the customer site within its next refresh.";
   await loadBusinessSettings();
@@ -1071,6 +1142,8 @@ function applyRoleUI(){
   document.getElementById("servicesPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
   document.getElementById("specialistsPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
   document.getElementById("holidaysPanel").style.display = hasPermission("manageSettings") ? "block" : "none";
+  const viPanel=document.getElementById("visitInfoPanel");
+  if(viPanel) viPanel.style.display = hasPermission("manageSettings") ? "block" : "none";
   const bsPanel=document.getElementById("businessSettingsPanel");
   if(bsPanel) bsPanel.style.display = hasPermission("manageSettings") ? "block" : "none";
   const etPanel=document.getElementById("emailTemplatesPanel");
@@ -1529,6 +1602,7 @@ async function refreshAll(){
     // Load once, not on every 5s refresh cycle — otherwise it would
     // overwrite whatever's mid-typing in the form.
     if(!window.__emailTemplateLoaded){ window.__emailTemplateLoaded=true; await loadEmailTemplateForm(); }
+    if(!window.__visitInfoLoaded){ window.__visitInfoLoaded=true; await loadVisitInfoForm(); }
   }
 }
 tryResumeSession();
