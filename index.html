@@ -802,6 +802,7 @@ function applyLanguage(lang) {
     buildRitualRail();
     buildServiceGrid();
   }
+  if (visitInfo.length) buildVisitAccordion();
   if (document.getElementById("bookOverlay")?.classList.contains("open")) {
     if (step===1) renderTreatList();
     if (step===2) buildSpecialistGrid();
@@ -905,6 +906,7 @@ function holidayLabel(dateStr) { const h = holidays.find(x => x.date === dateStr
 function dn(obj){ return (obj && currentLang==="ar" && obj.n_ar) ? obj.n_ar : (obj ? obj.n : ""); } // display name, language-aware
 function dt(obj){ return (obj && currentLang==="ar" && obj.s_ar) ? obj.s_ar : (obj ? obj.s : ""); } // display title/subtitle, language-aware
 function dd(obj){ return (obj && currentLang==="ar" && obj.desc_ar) ? obj.desc_ar : (obj ? obj.desc : ""); } // display description, language-aware
+function dcat(c){ return (c && currentLang==="ar" && c.name_ar) ? c.name_ar : (c ? c.name : ""); } // category display name, language-aware (categories use .name/.name_ar, not .n/.n_ar)
 function specialistsFor(categoryId) {
   const capable = specialists.filter(s => s.n === "No Preference" || (s.capableCategories || []).includes(categoryId));
   return capable.length ? capable : specialists;
@@ -922,6 +924,7 @@ function specialistIdByName(name) { const sp = specialists.find(s => s.n === nam
 function specialistNameById(id) { if (!id) return "No Preference"; const sp = specialists.find(s => s.id === id); return sp ? sp.n : "No Preference"; }
 
 let visitInfo = [];
+let visitInfoAr = []; // Arabic counterparts, matched to visitInfo by index — no admin UI to edit these yet, DB-only for now
 const testimonials = [
   {q:"The most unhurried, considered experience I've had in the city.",n:"Lea K."},
   {q:"Booking felt like reserving a table at a favourite restaurant — effortless.",n:"Nour A."},
@@ -1005,7 +1008,7 @@ function buildMenuRail(cat){
 function buildMenuTabs(){
   const wrap=document.querySelector(".menu-tabs");
   wrap.innerHTML = `<button class="menu-tab active" data-cat="all">${t("tab_all")}</button>` +
-    categories.map(c=>`<button class="menu-tab" data-cat="${c.id}">${dn(c)}</button>`).join("");
+    categories.map(c=>`<button class="menu-tab" data-cat="${c.id}">${dcat(c)}</button>`).join("");
   wrap.querySelectorAll(".menu-tab").forEach(tab=>{
     tab.addEventListener("click",()=>{
       wrap.querySelectorAll(".menu-tab").forEach(t=>t.classList.remove("active"));
@@ -1035,13 +1038,16 @@ const visitWrap=document.getElementById("visitAccordion");
 function buildVisitAccordion(){
   visitWrap.innerHTML="";
   visitInfo.forEach((item,i)=>{
+    const arItem = (currentLang==="ar" && visitInfoAr[i]) ? visitInfoAr[i] : null;
+    const q = arItem && arItem.q ? arItem.q : item.q;
+    const a = arItem && arItem.a ? arItem.a : item.a;
     const el=document.createElement("div");
     el.className="visit-item";
     el.innerHTML=`
       <button class="visit-q" onclick="toggleVisit(this)">
-        <span class="num">0${i+1}</span><h3>${item.q}</h3><span class="plus"></span>
+        <span class="num">0${i+1}</span><h3>${q}</h3><span class="plus"></span>
       </button>
-      <div class="visit-a"><p>${item.a}</p></div>`;
+      <div class="visit-a"><p>${a}</p></div>`;
     visitWrap.appendChild(el);
   });
 }
@@ -1106,7 +1112,7 @@ function buildServiceGrid(){
   categories.forEach(c=>{
     const el=document.createElement("div");
     el.className="choice"; el.dataset.id=c.id;
-    el.innerHTML=`<h3>${dn(c)}</h3><span>${(treatments[c.id]||[]).length} ${t("rituals_suffix")}</span>`;
+    el.innerHTML=`<h3>${dcat(c)}</h3><span>${(treatments[c.id]||[]).length} ${t("rituals_suffix")}</span>`;
     el.onclick=()=>{ state.service=c.id; state.treatment=null; state.time=null;
       [...serviceGrid.children].forEach(x=>x.classList.remove("selected"));
       el.classList.add("selected"); updateNextEnabled(); };
@@ -1646,6 +1652,7 @@ async function initApp(){
   await loadBusinessSettings();
   applyBusinessBranding();
   visitInfo = (BIZ.visit_info && BIZ.visit_info.length) ? BIZ.visit_info : visitInfo;
+  visitInfoAr = (BIZ.visit_info_ar && BIZ.visit_info_ar.length) ? BIZ.visit_info_ar : [];
   buildVisitAccordion();
 
   await loadCatalog();
