@@ -725,6 +725,7 @@ async function submitService(){
     if(!categories.some(c=>c.id===categoryId)){
       const { error: catErr } = await sb.from("categories").insert({ id:categoryId, name:newCatName });
       if(catErr){ status.textContent="Could not create category: "+catErr.message; return; }
+      window.__categoriesLoaded=false; // a new category was created — let the list pick it up next refresh
     }
   }
   const prep=parseInt(document.getElementById("svcPrep").value,10)||0;
@@ -765,7 +766,6 @@ function refreshServicesTable(){
   categories.forEach(c=>{
     (treatments[c.id]||[]).forEach(t=>{ rows.push({cat:c.name, catId:c.id, t}); });
   });
-  refreshCategoriesList();
   if(!rows.length){ table.innerHTML=`<tbody><tr><td class="cust-empty">No services yet.</td></tr></tbody>`; return; }
   table.innerHTML=`<thead><tr><th>Category</th><th>Service</th><th>Price</th><th>Duration</th><th>Online</th><th>Deposit</th><th></th></tr></thead>
   <tbody>${rows.map(r=>`<tr>
@@ -1664,6 +1664,7 @@ async function refreshAll(){
     // overwrite whatever's mid-typing in the form.
     if(!window.__emailTemplateLoaded){ window.__emailTemplateLoaded=true; await loadEmailTemplateForm(); }
     if(!window.__visitInfoLoaded){ window.__visitInfoLoaded=true; await loadVisitInfoForm(); }
+    if(!window.__categoriesLoaded){ window.__categoriesLoaded=true; refreshCategoriesList(); }
   }
 }
 tryResumeSession();
