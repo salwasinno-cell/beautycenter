@@ -485,6 +485,13 @@
           <div class="field-a"><label>WhatsApp Number (with country code, e.g. +9611234567)</label><input type="text" id="bsWhatsapp"></div>
           <div class="field-a"><label>Email</label><input type="text" id="bsEmail"></div>
           <div class="field-a"><label>Hours (display text)</label><input type="text" id="bsHours"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHours_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHours','bsHours_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
+          <div class="field-a" style="grid-column:span 2;">
+            <label><input type="checkbox" id="bsBreakEnabled" style="width:auto;margin-right:8px;">Daily break (e.g. lunch) — blocks online bookings during this window</label>
+            <div style="display:flex;gap:14px;margin-top:10px;align-items:center;">
+              <div><label style="font-size:11px;color:var(--espresso-45);">Starts at</label><input type="time" id="bsBreakStart" step="1800"></div>
+              <div><label style="font-size:11px;color:var(--espresso-45);">Duration (minutes)</label><input type="number" id="bsBreakDuration" min="15" step="15"></div>
+            </div>
+          </div>
           <div class="field-a"><label>24h Reminder — send how many hours before</label><input type="number" id="bsReminderHours" min="1" max="72"></div>
           <div class="field-a"><label>Same-day Reminder — send how many hours before</label><input type="number" id="bsSameDayReminderHours" min="1" max="12"></div>
           <div class="field-a"><label>Hero Eyebrow (small label above the headline)</label><input type="text" id="bsHeroEyebrow"><div style="display:flex;gap:6px;margin-top:6px;"><input type="text" id="bsHeroEyebrow_ar" dir="rtl" placeholder="بالعربية" style="border-color:var(--olive);flex:1;"><button type="button" class="btn small" onclick="autoTranslateField('bsHeroEyebrow','bsHeroEyebrow_ar')" title="Auto-translate from English" style="white-space:nowrap;">↻ AR</button></div></div>
@@ -646,7 +653,19 @@ function specialistsFor(categoryId){
   return capable.length ? capable : specialists;
 }
 
-const ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:30","17:00","17:30"];
+let ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
+function computeAllSlots(){
+  const base=["09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
+  if(!BIZ.break_enabled || !BIZ.break_start) return base;
+  const [bh,bm]=BIZ.break_start.split(":").map(Number);
+  const breakStartMin=bh*60+bm;
+  const breakEndMin=breakStartMin+(BIZ.break_duration_minutes||60);
+  return base.filter(t=>{
+    const [h,m]=t.split(":").map(Number);
+    const mins=h*60+m;
+    return !(mins>=breakStartMin && mins<breakEndMin);
+  });
+}
 let BUFFER_MINUTES=15;
 let BOOKING_LEAD_HOURS=2;
 
@@ -968,6 +987,9 @@ function openBusinessSettingsForm(){
   document.getElementById("bsWhatsapp").value = BIZ.whatsapp_number||"";
   document.getElementById("bsEmail").value = BIZ.email||"";
   document.getElementById("bsHours").value = BIZ.hours_display||"";
+  document.getElementById("bsBreakEnabled").checked = !!BIZ.break_enabled;
+  document.getElementById("bsBreakStart").value = BIZ.break_start ? BIZ.break_start.slice(0,5) : "13:00";
+  document.getElementById("bsBreakDuration").value = BIZ.break_duration_minutes || 60;
   document.getElementById("bsHours_ar").value = BIZ.hours_display_ar||"";
   document.getElementById("bsReminderHours").value = BIZ.reminder_hours_before||24;
   document.getElementById("bsSameDayReminderHours").value = BIZ.same_day_reminder_hours_before||3;
@@ -1007,6 +1029,9 @@ async function submitBusinessSettings(){
     whatsapp_number: document.getElementById("bsWhatsapp").value.trim(),
     email: document.getElementById("bsEmail").value.trim(),
     hours_display: document.getElementById("bsHours").value.trim(),
+    break_enabled: document.getElementById("bsBreakEnabled").checked,
+    break_start: document.getElementById("bsBreakStart").value || "13:00",
+    break_duration_minutes: parseInt(document.getElementById("bsBreakDuration").value, 10) || 60,
     hours_display_ar: document.getElementById("bsHours_ar").value.trim(),
     reminder_hours_before: parseInt(document.getElementById("bsReminderHours").value, 10) || 24,
     same_day_reminder_hours_before: parseInt(document.getElementById("bsSameDayReminderHours").value, 10) || 3,
@@ -1032,6 +1057,7 @@ async function submitBusinessSettings(){
   if(error){ status.textContent="Could not save: "+error.message; return; }
   status.textContent="Saved — changes are live on the customer site within its next refresh.";
   await loadBusinessSettings();
+  ALL_SLOTS = computeAllSlots();
 }
 
 /* ==========================================================================
@@ -1725,6 +1751,7 @@ async function refreshAll(){
   await resyncCurrentUser();
   if(!CURRENT_USER) return;
   await loadBusinessSettings();
+  ALL_SLOTS = computeAllSlots();
   await loadCatalog();
   await refreshBookingsAndStats();
   if(hasPermission("manageCustomers")) await refreshCustomers();
