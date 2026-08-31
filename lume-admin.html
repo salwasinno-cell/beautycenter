@@ -1526,13 +1526,6 @@ async function setBookingOutcome(dateStr, id, outcome){
   return !error;
 }
 
-const FALLBACK_QUICK=[
-  {time:"10:00",who:"Lea Karam",svc:"Signature Blowout"},
-  {time:"10:45",who:"Nour Assaf",svc:"Manicure — Gel"},
-  {time:"11:30",who:"Yasmine Haddad",svc:"Moroccan Bath"},
-  {time:"13:00",who:"Rana Fares",svc:"Bridal Trial"},
-];
-
 const quickList=document.getElementById("quickList");
 const table=document.getElementById("bookingTable");
 const customerTable=document.getElementById("customerTable");
@@ -1588,10 +1581,11 @@ async function refreshBookingsAndStats(){
   const todayAll = upcoming.filter(b=>b.date===todayStr);
   const todayReal = todayAll.filter(b=>b.status!=="cancelled" && b.status!=="blocked");
 
-  const quickSource = todayReal.length
-    ? todayReal.map(b=>({time:b.time, who:b.name||"Guest", svc:b.treatment||b.service||""}))
-    : FALLBACK_QUICK;
+  const quickSource = todayReal.map(b=>({time:b.time, who:b.name||"Guest", svc:b.treatment||b.service||""}));
   quickList.innerHTML="";
+  if(!quickSource.length){
+    quickList.innerHTML = `<div class="cust-empty">No appointments today.</div>`;
+  }
   quickSource.forEach(q=>{
     const el=document.createElement("div"); el.className="quick-item";
     el.innerHTML=`<span class="time">${q.time}</span><div style="flex:1;text-align:left;margin-left:16px;"><div class="who">${q.who}</div><div class="svc">${q.svc}</div></div>`;
