@@ -346,6 +346,10 @@
         <h2>Service Management</h2>
         <button class="btn dark" onclick="toggleServiceForm()">+ New Service</button>
       </div>
+      <div class="panel-body" style="border-bottom:1px solid var(--line);">
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Categories (edit English/Arabic names here)</div>
+        <div id="categoriesList"></div>
+      </div>
       <div class="panel-body" id="serviceFormPanel" style="display:none;border-bottom:1px solid var(--line);">
         <div class="field-grid-admin">
           <div class="field-a"><label>Category</label>
@@ -649,22 +653,61 @@ function slotsFree(dayList, specialist, slots, excludeId){
 }
 
 /* ==========================================================================
+   CATEGORY MANAGEMENT — real "categories" table (name + Arabic name)
+   ========================================================================== */
+function refreshCategoriesList(){
+  const wrap=document.getElementById("categoriesList");
+  if(!wrap) return;
+  wrap.innerHTML = categories.map(c=>`
+    <div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);">
+      <input type="text" class="cat-name" data-id="${c.id}" value="${(c.name||"").replace(/"/g,"&quot;")}" style="flex:1;">
+      <input type="text" class="cat-name-ar" data-id="${c.id}" dir="rtl" placeholder="بالعربية" value="${(c.name_ar||"").replace(/"/g,"&quot;")}" style="flex:1;border-color:var(--olive);">
+      <button class="btn small" data-savecat="${c.id}">Save</button>
+    </div>`).join("");
+  wrap.querySelectorAll("button[data-savecat]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const id=btn.dataset.savecat;
+      const name=wrap.querySelector(`.cat-name[data-id="${id}"]`).value.trim();
+      const nameAr=wrap.querySelector(`.cat-name-ar[data-id="${id}"]`).value.trim();
+      if(!name) return;
+      btn.textContent="Saving...";
+      const { error } = await sb.from("categories").update({ name, name_ar: nameAr }).eq("id", id);
+      btn.textContent = error ? "Error" : "Saved";
+      if(!error){ await loadCatalog(); refreshServicesTable(); setTimeout(()=>{ btn.textContent="Save"; },1500); }
+    });
+  });
+}
+
+/* ==========================================================================
    SERVICE MANAGEMENT — real "services" table
    ========================================================================== */
 function slugify(str){ return "svc-"+str.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")+"-"+Date.now().toString(36).slice(-4); }
+let editingServiceId=null;
 
 function toggleServiceForm(){
   const panel=document.getElementById("serviceFormPanel");
   const open=panel.style.display==="block";
   panel.style.display= open?"none":"block";
-  if(!open){
-    document.getElementById("svcCategorySelect").innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
-    document.getElementById("svcNewCategoryName").value="";
-    document.getElementById("svcName").value=""; document.getElementById("svcName_ar").value=""; document.getElementById("svcPrice").value="";
-    document.getElementById("svcDuration").value=""; document.getElementById("svcPrep").value="0";
-    document.getElementById("svcBuffer").value=""; document.getElementById("svcImg").value=""; document.getElementById("svcDesc").value=""; document.getElementById("svcDesc_ar").value="";
-    document.getElementById("svcStatus").textContent="";
-  }
+  if(!open) openServiceForm(null);
+}
+function openServiceForm(existing){
+  editingServiceId = existing ? existing.id : null;
+  document.getElementById("serviceFormPanel").style.display="block";
+  document.getElementById("svcCategorySelect").innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+  document.getElementById("svcNewCategoryName").value="";
+  document.getElementById("svcName").value = existing ? existing.t.n : "";
+  document.getElementById("svcName_ar").value = existing ? (existing.t.n_ar||"") : "";
+  document.getElementById("svcPrice").value = existing ? existing.t.p : "";
+  document.getElementById("svcDuration").value = existing ? parseInt(existing.t.d,10) : "";
+  document.getElementById("svcPrep").value = existing ? (existing.t.prepMinutes||0) : "0";
+  document.getElementById("svcBuffer").value = existing && existing.t.bufferMinutes!=null ? existing.t.bufferMinutes : "";
+  document.getElementById("svcImg").value = existing ? (existing.t.img||"") : "";
+  document.getElementById("svcDesc").value = existing ? (existing.t.desc||"") : "";
+  document.getElementById("svcDesc_ar").value = existing ? (existing.t.desc_ar||"") : "";
+  document.getElementById("svcOnlineBookable").value = existing ? String(!!existing.t.onlineBookable) : "true";
+  document.getElementById("svcDeposit").value = existing ? String(!!existing.t.depositRequired) : "false";
+  if(existing) document.getElementById("svcCategorySelect").value = existing.catId;
+  document.getElementById("svcStatus").textContent="";
 }
 async function submitService(){
   const status=document.getElementById("svcStatus");
@@ -692,12 +735,18 @@ async function submitService(){
   const descAr=document.getElementById("svcDesc_ar").value.trim();
   const onlineBookable=document.getElementById("svcOnlineBookable").value==="true";
   const depositRequired=document.getElementById("svcDeposit").value==="true";
-
-  const { error } = await sb.from("services").insert({
-    id: slugify(name), category_id: categoryId, name, name_ar: nameAr, price, duration_minutes: duration,
+  const record = {
+    category_id: categoryId, name, name_ar: nameAr, price, duration_minutes: duration,
     description: desc, description_ar: descAr, image_url: img, online_bookable: onlineBookable, deposit_required: depositRequired,
     prep_minutes: prep, buffer_minutes: buffer,
-  });
+  };
+
+  let error;
+  if(editingServiceId){
+    ({ error } = await sb.from("services").update(record).eq("id", editingServiceId));
+  }else{
+    ({ error } = await sb.from("services").insert(Object.assign({ id: slugify(name) }, record)));
+  }
   if(error){ status.textContent="Could not save: "+error.message; return; }
   status.textContent="Service saved.";
   await loadCatalog();
@@ -716,6 +765,7 @@ function refreshServicesTable(){
   categories.forEach(c=>{
     (treatments[c.id]||[]).forEach(t=>{ rows.push({cat:c.name, catId:c.id, t}); });
   });
+  refreshCategoriesList();
   if(!rows.length){ table.innerHTML=`<tbody><tr><td class="cust-empty">No services yet.</td></tr></tbody>`; return; }
   table.innerHTML=`<thead><tr><th>Category</th><th>Service</th><th>Price</th><th>Duration</th><th>Online</th><th>Deposit</th><th></th></tr></thead>
   <tbody>${rows.map(r=>`<tr>
@@ -725,10 +775,21 @@ function refreshServicesTable(){
     <td>${r.t.d}${r.t.bufferMinutes!=null?` (+${r.t.bufferMinutes}m buffer)`:""}</td>
     <td>${r.t.onlineBookable? "Yes":"No"}</td>
     <td>${r.t.depositRequired? "Yes":"No"}</td>
-    <td><button class="btn small" data-cat="${r.catId}" data-id="${r.t.id}">Delete</button></td>
+    <td style="white-space:nowrap;">
+      <button class="btn small" data-edit-cat="${r.catId}" data-edit-id="${r.t.id}">Edit</button>
+      <button class="btn small" data-cat="${r.catId}" data-id="${r.t.id}">Delete</button>
+    </td>
   </tr>`).join("")}</tbody>`;
   table.querySelectorAll("button[data-id]").forEach(btn=>{
     btn.addEventListener("click", ()=>deleteService(btn.dataset.cat, btn.dataset.id));
+  });
+  table.querySelectorAll("button[data-edit-id]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const catId=btn.dataset.editCat, svcId=btn.dataset.editId;
+      const t=(treatments[catId]||[]).find(x=>x.id===svcId);
+      if(t) openServiceForm({ id:svcId, catId, t });
+      document.getElementById("serviceFormPanel").scrollIntoView({behavior:"smooth"});
+    });
   });
 }
 
