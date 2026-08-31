@@ -1212,7 +1212,22 @@ function buildSpecialistGrid(){
      special booking with status "blocked" and no specialist, so it blocks
      every specialist. */
 
-const ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:30","17:00","17:30"];
+let ALL_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
+// Rebuilds the bookable slot grid from Business Settings' configurable daily
+// break (if one is turned on) — replaces the old hardcoded gaps that had no
+// admin control. Called once Business Settings has loaded.
+function computeAllSlots(){
+  const base=["09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
+  if(!BIZ.break_enabled || !BIZ.break_start) return base;
+  const [bh,bm]=BIZ.break_start.split(":").map(Number);
+  const breakStartMin=bh*60+bm;
+  const breakEndMin=breakStartMin+(BIZ.break_duration_minutes||60);
+  return base.filter(t=>{
+    const [h,m]=t.split(":").map(Number);
+    const mins=h*60+m;
+    return !(mins>=breakStartMin && mins<breakEndMin);
+  });
+}
 let BUFFER_MINUTES=15;
 let BOOKING_LEAD_HOURS=2;       // can't book within this many hours of now
 let MAX_ACTIVE_BOOKINGS=3;      // per phone number
@@ -1732,6 +1747,7 @@ async function joinCurrentWaitlist(){
 async function initApp(){
   applyLanguage(currentLang); // apply saved/default language to static UI immediately, before data loads
   await loadBusinessSettings();
+  ALL_SLOTS = computeAllSlots();
   applyBusinessBranding();
   visitInfo = (BIZ.visit_info && BIZ.visit_info.length) ? BIZ.visit_info : visitInfo;
   visitInfoAr = (BIZ.visit_info_ar && BIZ.visit_info_ar.length) ? BIZ.visit_info_ar : [];
@@ -1751,6 +1767,7 @@ initApp();
 // note near the availability engine above for why.
 setInterval(async ()=>{
   await loadBusinessSettings();
+  ALL_SLOTS = computeAllSlots();
   applyBusinessBranding();
   await loadCatalog();
   const activeCat=document.querySelector(".menu-tab.active")?.dataset.cat || "all";
