@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LUMÉ — The Art of Beauty</title>
+<title>Contact — LUMÉ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -17,14 +17,14 @@
 <div class="cursor-ring" id="cring"></div>
 
 <header id="siteHeader">
-  <a href="#" class="logo brand-name">LUMÉ</a>
+  <a href="index.html" class="logo brand-name">LUMÉ</a>
   <nav>
-    <a href="#home" class="nav-link" data-i18n="nav_home">Home</a>
+    <a href="index.html#home" class="nav-link" data-i18n="nav_home">Home</a>
     <a href="menu.html" class="nav-link" data-i18n="nav_menu">Beauty Menu</a>
-    <a href="#house" class="nav-link" data-i18n="nav_house">The House</a>
-    <a href="#gallery" class="nav-link">Gallery</a>
-    <a href="#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
-    <a href="#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
+    <a href="index.html#house" class="nav-link" data-i18n="nav_house">The House</a>
+    <a href="index.html#gallery" class="nav-link">Gallery</a>
+    <a href="index.html#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
+    <a href="index.html#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
     <a href="contact.html" class="nav-link" data-i18n="nav_contact">Contact</a>
     <a href="#" class="nav-link" onclick="openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
   </nav>
@@ -35,110 +35,48 @@
 <div class="nav-scrim" id="navScrim" onclick="closeMobileNav()"></div>
 <div class="mobile-nav" id="mobileNav">
   <span class="close-x" onclick="closeMobileNav()">&times;</span>
-  <a href="#home" class="nav-link" data-i18n="nav_home">Home</a>
+  <a href="index.html#home" class="nav-link" data-i18n="nav_home">Home</a>
   <a href="menu.html" class="nav-link" data-i18n="nav_menu">Beauty Menu</a>
-  <a href="#house" class="nav-link" data-i18n="nav_house">The House</a>
-  <a href="#gallery" class="nav-link">Gallery</a>
-  <a href="#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
-  <a href="#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
+  <a href="index.html#house" class="nav-link" data-i18n="nav_house">The House</a>
+  <a href="index.html#gallery" class="nav-link">Gallery</a>
+  <a href="index.html#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
+  <a href="index.html#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
   <a href="contact.html" class="nav-link" data-i18n="nav_contact">Contact</a>
   <a href="#" class="nav-link" onclick="closeMobileNav();openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
   <a href="#" class="nav-link" onclick="closeMobileNav();openBooking();return false;" data-i18n="nav_book">Book Appointment</a>
 </div>
 
-<section class="hero" id="home">
-  <img class="hero-photo" src="images/hero-salon-lounge.jpg" alt="Sunlit salon lounge with arched mirrors and brass styling chairs" loading="eager">
-  <div class="hero-scrim"></div>
-  <div class="grain"></div>
-  <div class="hero-inner">
-    <span class="eyebrow">Private Beauty House · Est. Beirut</span>
-    <h1>
-      <span class="line"><span>THE ART</span></span>
-      <span class="line"><span>of Beauty</span></span>
-    </h1>
-    <p class="sub">Timeless beauty, refined through exceptional care — a private house for hair, skin, and the rituals in between.</p>
-    <div class="cta-wrap">
-      <a href="#" class="hero-cta" onclick="openBooking();return false;"><span data-i18n="hero_cta">Book Your Appointment <span class="arrow">→</span></span></a>
-    </div>
-    <div class="categories" data-i18n="hero_categories">Hair · Makeup · Nails · Skin · Brows · Lashes</div>
-  </div>
-  <div class="scroll-cue"><div class="stem"></div></div>
+<section class="page-hero reveal">
+  <span class="eyebrow">Get In Touch</span>
+  <h1>Contact</h1>
+  <p>Questions before you book, a special request, or just want to say hello — we'd love to hear from you.</p>
 </section>
 
-<section id="house">
-  <div class="house">
-    <div class="house-img reveal">
-      <img src="images/house-spa-details.jpg" alt="Stacked stones, salts, and botanical oils arranged in the treatment room" loading="lazy">
-      <div class="frame"></div>
-    </div>
-    <div class="house-text reveal">
-      <span class="eyebrow">The House</span>
-      <h2>A private house, not a salon.</h2>
-      <p>LUMÉ was founded on a simple conviction: that beauty care deserves the same attention as a well-kept home. Every ritual is unhurried, every specialist trained to listen before they begin.</p>
-      <p>Our rooms are quiet by design. Natural light, considered materials, and a philosophy that restraint is its own form of luxury — this is the standard we hold ourselves to, appointment after appointment.</p>
-      <div class="house-sig">— The House of LUMÉ</div>
+<div class="contact-grid">
+  <div class="contact-card reveal">
+    <h3>Visit</h3>
+    <p data-field="address">Ashrafieh, Beirut</p>
+    <p data-field="hours">Tue – Sun · 10:00 – 20:00</p>
+    <div class="contact-actions">
+      <a href="#" class="ghost-btn" id="directionsBtn" target="_blank" rel="noopener">Get Directions</a>
     </div>
   </div>
-</section>
 
-<section id="gallery">
-  <div class="section-head reveal">
-    <span class="eyebrow">A Closer Look</span>
-    <h2>The details we obsess over.</h2>
-  </div>
-  <div class="gallery-grid reveal">
-    <div class="gallery-item">
-      <img src="images/gallery-hair-color.jpg" alt="Precision hair colour application, brush in hand" loading="lazy">
-      <div class="gallery-cap">Colour</div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/gallery-lash-detail.jpg" alt="Artful close-up of a full, voluminous lash set" loading="lazy">
-      <div class="gallery-cap">Lashes</div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/gallery-henna-bridal.jpg" alt="Bridal henna detail paired with a soft pink manicure" loading="lazy">
-      <div class="gallery-cap">Bridal</div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/gallery-nail-art.jpg" alt="Glossy nail art finished with a delicate blue tip" loading="lazy">
-      <div class="gallery-cap">Nail Art</div>
+  <div class="contact-card reveal">
+    <h3>Reach Us</h3>
+    <a href="tel:+9611000000" data-field="phone">+961 1 000 000</a>
+    <a href="mailto:hello@lume.house" data-field="email">hello@lume.house</a>
+    <div class="contact-actions">
+      <a href="#" class="ghost-btn wa-inline-cta" target="_blank" rel="noopener" style="display:none;">WhatsApp Us</a>
+      <a href="#" class="ghost-btn" onclick="closeMobileNav();openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
     </div>
   </div>
-</section>
+</div>
 
-<section id="rituals" style="background:var(--ivory-deep);">
-  <div class="section-head reveal">
-    <span class="eyebrow" data-i18n="rituals_eyebrow">Signature</span>
-    <h2 data-i18n="rituals_title">Beauty Rituals</h2>
-  </div>
-  <div class="menu-rail reveal" id="ritualRail" style="justify-content:center;"></div>
-  <div class="reveal" style="text-align:center;margin-top:10px;">
-    <a href="menu.html" class="ghost-btn">View Full Beauty Menu →</a>
-  </div>
-</section>
-
-<section id="visit">
-  <div class="section-head reveal">
-    <span class="eyebrow" data-i18n="visit_eyebrow">Before You Arrive</span>
-    <h2 data-i18n="visit_title">Your Visit</h2>
-  </div>
-  <div class="visit reveal" id="visitAccordion"></div>
-</section>
-
-<section style="background:var(--ivory-deep);">
-  <div class="testi-wrap reveal" id="testiWrap">
-    <p class="testi-quote" id="testiText"></p>
-    <div class="testi-name" id="testiName"></div>
-    <div class="testi-dots" id="testiDots"></div>
-  </div>
-</section>
-
-<section class="final-cta">
-  <div class="reveal">
-    <span class="eyebrow" data-i18n="finalcta_eyebrow">Reserve Your Time</span>
-    <h2 data-i18n="finalcta_title">The house is ready<br>whenever you are.</h2>
-    <a href="#" class="hero-cta" onclick="openBooking();return false;"><span data-i18n="hero_cta">Book Your Appointment <span class="arrow">→</span></span></a>
-  </div>
+<section class="final-cta reveal">
+  <span class="eyebrow">Ready When You Are</span>
+  <h2>Reserve your visit to the House.</h2>
+  <a href="#" class="hero-cta" onclick="openBooking();return false;"><span>Book Your Appointment <span class="arrow">→</span></span></a>
 </section>
 
 <footer id="contact">

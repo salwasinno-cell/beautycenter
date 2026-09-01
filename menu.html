@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beauty Menu — LUMÉ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="loader"><div style="text-align:center;"><div class="rule"></div><div class="mark">LUM&Eacute;</div></div></div>
+
+<div class="cursor-dot" id="cdot"></div>
+<div class="cursor-ring" id="cring"></div>
+
+<header id="siteHeader">
+  <a href="index.html" class="logo brand-name">LUMÉ</a>
+  <nav>
+    <a href="index.html#home" class="nav-link" data-i18n="nav_home">Home</a>
+    <a href="menu.html" class="nav-link" data-i18n="nav_menu">Beauty Menu</a>
+    <a href="index.html#house" class="nav-link" data-i18n="nav_house">The House</a>
+    <a href="index.html#gallery" class="nav-link">Gallery</a>
+    <a href="index.html#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
+    <a href="index.html#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
+    <a href="contact.html" class="nav-link" data-i18n="nav_contact">Contact</a>
+    <a href="#" class="nav-link" onclick="openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
+  </nav>
+  <button class="btn-book" onclick="openBooking()"><span data-i18n="nav_book">Book Appointment</span></button>
+  <button class="nav-burger" onclick="toggleMobileNav()" aria-label="Open menu"><span></span><span></span><span></span></button>
+</header>
+
+<div class="nav-scrim" id="navScrim" onclick="closeMobileNav()"></div>
+<div class="mobile-nav" id="mobileNav">
+  <span class="close-x" onclick="closeMobileNav()">&times;</span>
+  <a href="index.html#home" class="nav-link" data-i18n="nav_home">Home</a>
+  <a href="menu.html" class="nav-link" data-i18n="nav_menu">Beauty Menu</a>
+  <a href="index.html#house" class="nav-link" data-i18n="nav_house">The House</a>
+  <a href="index.html#gallery" class="nav-link">Gallery</a>
+  <a href="index.html#rituals" class="nav-link" data-i18n="nav_rituals">Rituals</a>
+  <a href="index.html#visit" class="nav-link" data-i18n="nav_visit">Your Visit</a>
+  <a href="contact.html" class="nav-link" data-i18n="nav_contact">Contact</a>
+  <a href="#" class="nav-link" onclick="closeMobileNav();openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
+  <a href="#" class="nav-link" onclick="closeMobileNav();openBooking();return false;" data-i18n="nav_book">Book Appointment</a>
+</div>
+
+<section class="page-hero reveal">
+  <span class="eyebrow">The Full List</span>
+  <h1>Beauty Menu</h1>
+  <p>Every ritual we offer, organized by category. Reserve directly, or ask us to build a visit around a few together.</p>
+  <div class="menu-note">Prices and durations below are random placeholders, not real rates — share your actual price list whenever you're ready and they'll be swapped in.</div>
+</section>
+
+<section class="category-block reveal">
+  <div class="category-media">
+    <img src="images/ritual-hair-treatment.jpg" alt="Hair treatment being applied at LUMÉ" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">01 — Hair</span>
+    <h2>Hair</h2>
+    <p>Color, texture, and everyday styling, cared for with the same attention as your skin.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Hair Color</div>
+          <div class="sub-meta">20 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$40</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Hair Styling</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$65</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Hair Straightening</div>
+          <div class="sub-meta">30 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$60</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Hair Spa</div>
+          <div class="sub-meta">90 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$40</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Hair Fall Treatments</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$35</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Keratin Treatments</div>
+          <div class="sub-meta">20 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$30</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Braids</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$35</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Blow Dry</div>
+          <div class="sub-meta">90 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$60</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Shampoo &amp; Conditioning</div>
+          <div class="sub-meta">20 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$120</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Brazilian Blowout</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$110</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Hair Care &amp; Services</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$110</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-block reveal reverse">
+  <div class="category-media">
+    <img src="images/ritual-makeup-treatment.jpg" alt="Glitter eye makeup close-up" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">02 — Makeup</span>
+    <h2>Makeup</h2>
+    <p>From soft daytime looks to full glam, tailored to the occasion.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Make-Up Services</div>
+          <div class="sub-meta">75 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$75</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-block reveal">
+  <div class="category-media">
+    <img src="images/ritual-skin-treatment.jpg" alt="Skincare cream swatches" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">03 — Skin</span>
+    <h2>Skin</h2>
+    <p>Cleansing, resurfacing, and smoothing rituals for skin that glows on its own.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Skin Care</div>
+          <div class="sub-meta">20 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$70</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Facial Treatments</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$55</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Waxing</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$80</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Brazilian Waxing</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$50</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Body Waxing</div>
+          <div class="sub-meta">30 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$80</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Waxing &amp; Bleach</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$40</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-block reveal reverse">
+  <div class="category-media">
+    <img src="images/ritual-nails-treatment.jpg" alt="Manicured hand with a white rose" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">04 — Nails</span>
+    <h2>Nails</h2>
+    <p>Manicures, pedicures, and finishing touches, done with a steady hand.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Manicure</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$20</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Pedicure</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$40</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Manicure &amp; Pedicure</div>
+          <div class="sub-meta">75 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$15</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Nail Extensions</div>
+          <div class="sub-meta">30 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$55</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Plastic Nails</div>
+          <div class="sub-meta">30 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$45</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Gel Polish</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$55</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-block reveal">
+  <div class="category-media">
+    <img src="images/house-spa-details.jpg" alt="Spa stones, salts, and oils" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">05 — Spa</span>
+    <h2>Spa</h2>
+    <p>Slow, restorative rituals — the House at its most unhurried.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Moroccan Bath</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$130</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Spa Therapy</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$125</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Steam Bath</div>
+          <div class="sub-meta">20 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$45</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Paraffin Wax</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$70</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Massage</div>
+          <div class="sub-meta">45 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$45</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Body Massage</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$50</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Body Scrubs</div>
+          <div class="sub-meta">75 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$75</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-block reveal reverse">
+  <div class="category-media">
+    <img src="images/ritual-bridal-treatment.jpg" alt="Bride's hand in lace sleeve" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">06 — Bridal</span>
+    <h2>Bridal</h2>
+    <p>For the day itself, and every appointment leading up to it.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Henna Design</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$70</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-block reveal">
+  <div class="category-media">
+    <img src="images/gallery-lash-detail.jpg" alt="Mascara wand lash detail" loading="lazy">
+  </div>
+  <div class="category-info">
+    <span class="eyebrow">07 — Brows &amp; Lashes</span>
+    <h2>Brows &amp; Lashes</h2>
+    <p>Shape and definition that frames the whole face.</p>
+    <div class="sub-list">
+      <div class="sub-row">
+        <div>
+          <div class="sub-name">Eyebrow Threading</div>
+          <div class="sub-meta">60 min</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-price">$15</div>
+          <a href="#" class="sub-reserve" onclick="openBooking();return false;">Reserve</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<footer id="contact">
+  <div class="foot-grid">
+    <div>
+      <h4 class="brand-name">LUMÉ</h4>
+      <p style="max-width:260px;">A private beauty house for hair, skin, and the rituals in between.</p>
+    </div>
+    <div>
+      <h4 data-i18n="foot_visit">Visit</h4>
+      <p data-field="address">Ashrafieh, Beirut</p>
+      <p data-field="hours">Tue – Sun · 10:00 – 20:00</p>
+    </div>
+    <div>
+      <h4 data-i18n="foot_contact">Contact</h4>
+      <a href="tel:+9611000000" data-field="phone">+961 1 000 000</a>
+      <a href="mailto:hello@lume.house" data-field="email">hello@lume.house</a>
+    </div>
+    <div>
+      <h4 data-i18n="foot_follow">Follow</h4>
+      <a href="#" data-i18n="foot_instagram">Instagram</a>
+      <a href="#" data-i18n="foot_whatsapp">WhatsApp</a>
+      <a href="#" onclick="openManage();return false;" data-i18n="nav_manage">Manage Booking</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 LUMÉ Beauty House</span>
+    <a href="privacy-terms.html" data-i18n="foot_privacy" style="color:inherit;">Privacy &amp; Terms</a>
+    <span data-i18n="foot_crafted">Crafted with restraint</span>
+  </div>
+</footer>
+
+<div class="mobile-bar">
+  <span class="mb-text" data-i18n="mb_ready">Ready to begin?</span>
+  <button class="mb-btn" onclick="openBooking()" data-i18n="mb_book">Book Now</button>
+</div>
+
+<!-- ============ BOOKING OVERLAY ============ -->
+<div class="book-overlay" id="bookOverlay">
+  <div class="book-top">
+    <span class="logo brand-name">LUMÉ</span>
+    <button class="book-close" onclick="closeBooking()">✕</button>
+  </div>
+  <div class="book-steps" id="bookSteps"></div>
+  <div class="book-body">
+
+    <div class="book-panel active" data-step="0">
+      <span class="eyebrow step-label" data-i18n="step1_label">01 — Choose Your Service</span>
+      <h2 data-i18n="step1_title">What would you like to experience?</h2>
+      <div class="choice-grid" id="serviceGrid"></div>
+    </div>
+
+    <div class="book-panel" data-step="1">
+      <span class="eyebrow step-label" data-i18n="step2_label">02 — Choose Your Ritual</span>
+      <h2 id="treatHeading">Select a treatment</h2>
+      <div class="treat-list" id="treatList"></div>
+    </div>
+
+    <div class="book-panel" data-step="2">
+      <span class="eyebrow step-label" data-i18n="step3_label">03 — With Whom</span>
+      <h2 data-i18n="step3_title">Choose your specialist</h2>
+      <div class="specialist-grid" id="specialistGrid"></div>
+    </div>
+
+    <div class="book-panel" data-step="3">
+      <span class="eyebrow step-label" data-i18n="step4_label">04 — Date &amp; Time</span>
+      <h2 data-i18n="step4_title">When would you like to visit us?</h2>
+      <div class="date-rail" id="dateRail"></div>
+      <div class="sync-row"><span class="sync-dot"></span><span>Live availability — synced for every visitor</span></div>
+      <div id="holdCountdown" style="display:none;font-size:12px;color:var(--olive-deep);margin-bottom:14px;"></div>
+      <div id="dayClosedNote" style="display:none;font-size:12px;color:#A3503F;background:rgba(163,80,63,.08);border:1px solid rgba(163,80,63,.25);padding:12px 16px;margin-bottom:14px;"></div>
+      <div class="time-grid" id="timeGrid"></div>
+      <div id="waitlistRow" style="display:none;margin-top:18px;font-size:12px;color:var(--espresso-70);background:rgba(107,110,76,.08);border:1px solid rgba(107,110,76,.2);padding:14px 16px;">
+        <div style="margin-bottom:10px;">No time here works? Leave your phone number and we'll text you the moment a spot opens on this date.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="tel" id="waitlistPhone" placeholder="Phone number" style="flex:1;min-width:160px;border:none;border-bottom:1px solid var(--espresso-15);background:transparent;padding:8px 2px;font-family:'Inter',sans-serif;font-size:14px;color:var(--espresso);">
+          <button class="ghost-btn" onclick="joinCurrentWaitlist()" data-i18n="btn_join_waitlist">Join Waitlist</button>
+        </div>
+        <div id="waitlistStatus" style="margin-top:8px;color:var(--olive-deep);"></div>
+      </div>
+      <div style="margin-top:14px;text-align:center;">
+        <a href="#" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--espresso-45);text-decoration:underline;" onclick="document.getElementById('waitlistRow').style.display='block';return false;">Don't see a time that works? Join the waitlist for this date</a>
+      </div>
+    </div>
+
+    <div class="book-panel" data-step="4">
+      <span class="eyebrow step-label" data-i18n="step5_label">05 — Your Details</span>
+      <h2 data-i18n="step5_title">Just a few details</h2>
+      <div id="returningNote" style="display:none;font-size:12px;color:var(--olive-deep);background:rgba(107,110,76,.08);border:1px solid rgba(107,110,76,.2);padding:12px 16px;margin-bottom:22px;"></div>
+      <div class="field-grid">
+        <div class="field"><label data-i18n="field_fullname">Full Name</label><input type="text" id="fName" placeholder="Enter your name" data-i18n-ph="ph_fullname"></div>
+        <div class="field"><label data-i18n="field_phone">Phone</label><input type="tel" id="fPhone" placeholder="+961 ..."></div>
+        <div class="field"><label data-i18n="field_email">Email</label><input type="email" id="fEmail" placeholder="you@email.com"></div>
+        <div class="field"><label data-i18n="field_bday">Birthday (optional)</label><input type="date" id="fBday"></div>
+        <div class="field full"><label data-i18n="field_notes">Special Requests (optional)</label><textarea id="fNotes" rows="3" placeholder="Allergies, preferences, occasion..." data-i18n-ph="ph_notes"></textarea></div>
+        <!-- Honeypot: invisible to real visitors, but a script that blindly
+             fills every field on the page will fill this one too — if it's
+             non-empty on submit, we quietly treat it as spam. -->
+        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+          <label for="fWebsite">Leave this field empty</label>
+          <input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <div class="book-panel" data-step="5">
+      <span class="eyebrow step-label" data-i18n="step6_label">06 — Review</span>
+      <h2 data-i18n="step6_title">Your reservation</h2>
+      <div class="slot-error" id="slotError" data-i18n="err_slot_taken">This time was just reserved by another guest — please choose another slot.</div>
+      <div class="summary-box" id="summaryBox"></div>
+      <div class="deposit-toggle">
+        <div class="switch" id="depositSwitch" onclick="toggleDeposit()"></div>
+        <span style="font-size:13px;color:var(--espresso-70);">Secure with a 25% deposit (refundable up to 24h before)</span>
+      </div>
+    </div>
+
+    <div class="book-panel" data-step="6">
+      <div class="confirm-wrap">
+        <div class="confirm-ring">✓</div>
+        <span class="eyebrow">Reservation Confirmed</span>
+        <h2 data-i18n="confirm_title">We look forward<br>to your visit.</h2>
+        <div class="confirm-num" id="confirmNum"></div>
+        <div style="font-size:12px;color:var(--espresso-45);margin-top:8px;">A confirmation has been sent to your phone number.</div>
+        <div id="cancelStatus" style="font-size:12px;margin-top:10px;"></div>
+        <div class="confirm-actions">
+          <a href="#" class="ghost-btn" onclick="downloadICS();return false;" data-i18n="btn_addcal">Add to Calendar</a>
+          <a href="#" class="ghost-btn" id="waConfirmBtn" target="_blank" rel="noopener" data-i18n="btn_wa_confirm">WhatsApp Confirmation</a>
+          <a href="#" class="ghost-btn" id="cancelMineBtn" onclick="cancelMyJustBookedAppointment();return false;" data-i18n="btn_cancel_this">Cancel This Appointment</a>
+          <a href="#" class="ghost-btn" onclick="closeBooking();return false;" data-i18n="btn_return_home">Return Home</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="book-nav" id="bookNav">
+    <a href="#" class="back" id="backBtn" onclick="prevStep();return false;" data-i18n="btn_back">← Back</a>
+    <button class="nav-next" id="nextBtn" onclick="nextStep()" data-i18n="btn_continue">Continue</button>
+  </div>
+</div>
+
+<!-- ============ MANAGE BOOKING OVERLAY ============ -->
+<div class="book-overlay" id="manageOverlay">
+  <div class="book-top">
+    <span class="logo brand-name">LUMÉ</span>
+    <button class="book-close" onclick="closeManage()">✕</button>
+  </div>
+  <div class="book-body" style="padding-top:60px;">
+    <div style="max-width:560px;margin:0 auto;">
+      <span class="eyebrow" data-i18n="manage_eyebrow">Manage Your Booking</span>
+      <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:clamp(24px,3vw,32px);margin:14px 0 30px;" data-i18n="manage_title">Find your reservation</h2>
+      <p style="font-size:13px;color:var(--espresso-70);margin:-16px 0 26px;" data-i18n="manage_desc">Your appointment history is always tied to your phone number, not this device — so it works here even if you're on a new phone or browser.</p>
+      <div class="field" style="margin-bottom:20px;">
+        <label data-i18n="manage_phone_label">Phone Number</label>
+        <input type="tel" id="managePhone" placeholder="Enter the phone number you booked with">
+      </div>
+      <button class="nav-next" onclick="lookupMyBookings()" style="margin-bottom:34px;" data-i18n="btn_find_appts">Find My Appointments</button>
+      <div id="manageResults"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+<a href="#" id="waFloatBtn" class="wa-float" target="_blank" rel="noopener" style="display:none;" aria-label="Book via WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.05 4a7.94 7.94 0 0 0-6.9 11.87L4 20l4.24-1.11a7.9 7.9 0 0 0 3.8.97h.01a7.95 7.95 0 0 0 5.55-13.54zM12.05 18.4h-.01a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.66.67-2.44-.16-.25a6.62 6.62 0 0 1 10.4-8.05 6.58 6.58 0 0 1 1.95 4.68 6.64 6.64 0 0 1-6.75 6.46zm3.63-4.95c-.2-.1-1.17-.58-1.35-.64-.18-.07-.31-.1-.44.1-.13.19-.5.64-.62.77-.11.13-.23.14-.42.05-.2-.1-.83-.3-1.58-.98-.58-.52-.98-1.16-1.09-1.36-.11-.19-.01-.3.09-.4.1-.1.22-.25.33-.38.11-.13.14-.22.22-.37.07-.15.03-.28-.04-.38-.07-.1-.53-1.27-.72-1.74-.19-.46-.39-.4-.53-.4-.13-.01-.29-.01-.44-.01-.15 0-.4.06-.61.28-.21.22-.8.79-.8 1.9s.82 2.19.93 2.34c.11.15 1.55 2.38 3.77 3.24 2.22.86 2.22.57 2.62.53.4-.04 1.28-.52 1.46-1.03.18-.5.18-.93.12-1.03-.06-.09-.2-.14-.4-.24z"/></svg>
+</a>
+
+</body>
+</html>
